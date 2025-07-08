@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
+  m_Name: Card4
+  m_EditorClassIdentifier: 
+  name: SPELL
+  hp: 5
+  at: 1
+  cost: 1
+  icon: {fileID: 546334584, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  ability: 0
+  spell: 1
