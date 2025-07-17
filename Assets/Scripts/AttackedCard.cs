@@ -16,13 +16,16 @@ public class AttackedCard : MonoBehaviour, IDropHandler
         {
             return;
         }
-        //　シールドカード以外は攻撃できない
-        CardController[] enemyFieldCards = GameManager.instance.GetEnemyFieldCards(attacker.model.isPlayerCard);
-        if (Array.Exists(enemyFieldCards, card => card.model.ability == ABILITY.SHIELD) && defender.model.ability != ABILITY.SHIELD)
+        if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
         {
-            return;
+            
+            //　シールドカード以外は攻撃できない
+            CardController[] enemyFieldCards = GameManager.instance.GetEnemyFieldCards(attacker.model.isPlayerCard);
+            if (Array.Exists(enemyFieldCards, card => card.model.abilities.HasFlag(ABILITIES.SHIELD)) && !defender.model.abilities.HasFlag(ABILITIES.SHIELD))
+            {
+                return;
+            }
         }
-
         if (attacker.model.canAttack)
         {
             GameManager.instance.CardsBattle(attacker, defender);

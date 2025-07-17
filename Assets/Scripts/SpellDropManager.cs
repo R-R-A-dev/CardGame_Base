@@ -8,11 +8,12 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
     {
         CardController spellCard = eventData.pointerDrag.GetComponent<CardController>();
         CardController target = GetComponent<CardController>();
+        
         if (spellCard == null)
         {
             return;
         }
-        if (spellCard.CanUseSpell())
+        if (spellCard.CanUseSpells())//CanUseSpell()
         {
             spellCard.UseSpellTo(target);
         }

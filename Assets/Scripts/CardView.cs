@@ -20,7 +20,7 @@ public class CardView : MonoBehaviour
         atText.text = cardModel.at.ToString();
         costText.text = cardModel.cost.ToString();
         iconImage.sprite = cardModel.icon;
-        maskPanel.SetActive(!cardModel.isPlayerCard);
+        //maskPanel.SetActive(!cardModel.isPlayerCard);
 
         if (cardModel.isPlayerCard)
         {
@@ -28,9 +28,9 @@ public class CardView : MonoBehaviour
         }
         else
         {
-            maskPanel.SetActive(true);
+            //maskPanel.SetActive(true);
         }
-        if (cardModel.ability == ABILITY.SHIELD)
+        if (cardModel.abilities.HasFlag(ABILITIES.SHIELD))
         {
             shieldPanel.SetActive(true);
         }
@@ -38,7 +38,7 @@ public class CardView : MonoBehaviour
         {
             shieldPanel.SetActive(false);
         }
-        if (cardModel.spell != SPELL.NONE)
+        if (cardModel.spells != SPELLS.NONE)
         {
             hpText.gameObject.SetActive(false);
             atText.gameObject.SetActive(false);
@@ -54,6 +54,7 @@ public class CardView : MonoBehaviour
     {
         hpText.text = cardModel.hp.ToString();
         atText.text = cardModel.at.ToString();
+        costText.text = cardModel.cost.ToString();
     }
 
     public void SetActiveSelectablePanel(bool flag)

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,10 +20,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] CardController cardPrefab;
 
+    public bool isEffectSelectPhase;
     public bool isPlayerTurn;
     public Transform playerHero;
     public Transform enemyHero;
 
+    [SerializeField] Button TurnEndButton;
 
     // 時間管理
     int timeCount;
@@ -45,8 +48,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 1, 2, 4, 3 });
-        enemy.Init(new List<int>() { 4, 3, 3, 2, 1 });
+        player.Init(new List<int>() { 4, 3, 4, 3, 1, 1, 1, 1 });
+        enemy.Init(new List<int>() { 4, 3, 3, 2, 1, 1, 1, 1, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -92,9 +95,33 @@ public class GameManager : MonoBehaviour
 
         // デッキを生成
         player.deck = new List<int>() { 3, 1, 2, 2, 3 };
-        enemy.deck = new List<int>() { 3, 1, 3, 1, 3 };
+        enemy.deck = new List<int>() { 3, 1, 2, 1, 3 };
 
         StartGame();
+    }
+
+    public void DisableButtonCards()
+    {
+        //選択以外の操作をできないようにする
+        //手札のカードをドラッグ不可にする
+        TurnEndButton.interactable = false;
+        CanvasGroup[] playerHandCards = playerHandTransform.GetComponentsInChildren<CanvasGroup>();
+        foreach (CanvasGroup card in playerHandCards)
+        {
+            card.blocksRaycasts = false;
+        }
+    }
+
+    public void EnableButtonCards()
+    {
+        //選択以外の操作をできるようにする
+        //手札のカードをドラッグ可能にする
+        TurnEndButton.interactable = true;
+        CanvasGroup[] playerHandCards = playerHandTransform.GetComponentsInChildren<CanvasGroup>();
+        foreach (CanvasGroup card in playerHandCards)
+        {
+            card.blocksRaycasts = true;
+        }
     }
 
     void SettingInitHand()
@@ -116,6 +143,19 @@ public class GameManager : MonoBehaviour
         deck.RemoveAt(0);
         CreateCard(cardID, hand);
     }
+
+    public void DrawCard(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            GiveCardToHand(player.deck, playerHandTransform);
+        }
+        else
+        {
+            GiveCardToHand(enemy.deck, enemyHandTransform);
+        }
+    }
+
 
     void CreateCard(int cardID, Transform hand)
     {
@@ -159,6 +199,54 @@ public class GameManager : MonoBehaviour
         ChangeTurn();
     }
 
+    public Transform GetEnemyFieldTransform(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return enemyFieldTransform;
+        }
+        else
+        {
+            return playerFieldTransform;
+        }
+    }
+
+    public Transform GetFriendFieldTransform(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return playerFieldTransform;
+        }
+        else
+        {
+            return enemyFieldTransform;
+        }
+    }
+
+    public CardController[] GetEnemyHandTransform(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return enemyHandTransform.GetComponentsInChildren<CardController>();
+        }
+        else
+        {
+            return playerHandTransform.GetComponentsInChildren<CardController>();
+        }
+    }
+
+    public CardController[] GetFriendHandTransform(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return playerHandTransform.GetComponentsInChildren<CardController>();
+        }
+        else
+        {
+            return enemyHandTransform.GetComponentsInChildren<CardController>();
+        }
+    }
+
     public CardController[] GetEnemyFieldCards(bool isPlayer)
     {
         if (isPlayer)
@@ -182,6 +270,8 @@ public class GameManager : MonoBehaviour
             return enemyFieldTransform.GetComponentsInChildren<CardController>();
         }
     }
+
+    //自分と相手の手札を取得する
 
     public void OnClickTurnEndButton()
     {
@@ -238,7 +328,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("defender HP:" + defender.model.hp);
 
         attacker.Attack(defender);
-        defender.Attack(attacker);
+        defender.Defense(attacker);
         Debug.Log("attacker HP:" + attacker.model.hp);
         Debug.Log("defender HP:" + defender.model.hp);
         attacker.CheckAlive();
@@ -256,8 +346,24 @@ public class GameManager : MonoBehaviour
         {
             player.heroHp -= attacker.model.at;
         }
-        attacker.SetCanAttack(false);
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+        if (attacker.model.isDoubleAction)
+        {
+            if (!attacker.model.isSingleAction)
+            {
+                attacker.SetCanAttack(true);
+                attacker.model.isSingleAction = true;
+            }
+            else
+            {
+                attacker.SetCanAttack(false);
+                attacker.model.isSingleAction = false;
+            }
+        }
+        else
+        {
+            attacker.SetCanAttack(false);
+        }
     }
 
     public void HealToHero(CardController healer)
@@ -286,3 +392,27 @@ public class GameManager : MonoBehaviour
         uiManager.ShowResultPanel(heroHp);
     }
 }
+
+/* 追加機能リスト
+ * 手札をドラッグしたときに順番が変わらない
+ * スペルやアビリティの追加　アビリティ複数持ち
+ * フィールドの敵を倒す、フィールドの敵を自分のフィールドのカードにする
+ * カードを複数枚引く、特定のユニットを手札orフィールドに出す
+ * 選択した敵にダメージを与える、
+ * 破壊された時に発動、場に出た時に発動
+ * 手札のカードのコストを減らす
+ * 自分のコストを増やす
+ * 一度だけ受けるダメージを0にする
+ * 二回行動
+ * 攻撃した分回復する
+ * 
+ * 
+ * 
+ * 
+ * カードの効果を読めるようにする（右クリック）
+ * エフェクト、演出の追加
+ * アウトゲーム部分の実装
+ * 手札の並べ方
+ * 
+ * 
+*/

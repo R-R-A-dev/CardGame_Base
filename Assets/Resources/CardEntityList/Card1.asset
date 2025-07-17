@@ -17,3 +17,7 @@ MonoBehaviour:
   at: 5
   cost: 5
   icon: {fileID: -1796945640, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  ability: 0
+  spell: 0
+  abilities: 0
+  targetCardID: 

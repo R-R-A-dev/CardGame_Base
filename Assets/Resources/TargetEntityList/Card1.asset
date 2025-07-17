@@ -10,19 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
-  m_Name: Card2
+  m_Name: Card1
   m_EditorClassIdentifier: 
-  no: 0
-  name: test2
-  hp: 3
-  at: 2
-  cost: 2
-  effectDmg: 0
-  effectHeal: 0
-  icon: {fileID: -1199421710, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
-  rare: 0
+  name: test
+  hp: 5
+  at: 5
+  cost: 5
+  icon: {fileID: -190086642, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   ability: 0
   spell: 0
-  spells: 0
   abilities: 0
-  targetCardID: 0100000001000000
+  targetCardID: 

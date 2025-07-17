@@ -12,10 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
   m_Name: Card4
   m_EditorClassIdentifier: 
+  no: 0
   name: SPELL
   hp: 5
   at: 1
   cost: 1
+  effectDmg: 1
+  effectHeal: 0
   icon: {fileID: 546334584, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  rare: 0
   ability: 0
-  spell: 1
+  spell: 0
+  spells: 1
+  abilities: 0
+  targetCardID: 

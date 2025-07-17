@@ -8,6 +8,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public Transform defaultParent;
 
     public bool isDraggable;
+    public CardController draggCard;
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -20,6 +21,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         else if (card.model.isPlayerCard && GameManager.instance.isPlayerTurn && card.model.isFieldCard && card.model.canAttack)
         {
             isDraggable = true;
+            draggCard = card;
         }
         else
         {

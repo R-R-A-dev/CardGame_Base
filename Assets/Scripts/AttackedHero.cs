@@ -11,13 +11,15 @@ public class AttackedHero : MonoBehaviour, IDropHandler
         {
             return;
         }
-        //　敵フィールドにシールドカードがあれば攻撃できない
-        CardController[] enemyFieldCards = GameManager.instance.GetEnemyFieldCards(attacker.model.isPlayerCard);
-        if(Array.Exists(enemyFieldCards,card=> card.model.ability == ABILITY.SHIELD))
+        if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
         {
-            return;
+            //　敵フィールドにシールドカードがあれば攻撃できない
+            CardController[] enemyFieldCards = GameManager.instance.GetEnemyFieldCards(attacker.model.isPlayerCard);
+            if (Array.Exists(enemyFieldCards, card => card.model.abilities.HasFlag(ABILITIES.SHIELD)))
+            {
+                return;
+            }
         }
-
 
         if (attacker.model.canAttack)
         {

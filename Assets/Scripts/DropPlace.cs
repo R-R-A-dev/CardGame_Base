@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public class DropPlace : MonoBehaviour, IDropHandler
 {
-
+    public static CardController droppedCard;
     public enum TYPE
     {
         HAND,
@@ -33,6 +33,8 @@ public class DropPlace : MonoBehaviour, IDropHandler
             {
                 return;
             }
+            droppedCard = card;
+            Debug.Log(droppedCard.model);
             card.OnFiled();
         }
     }

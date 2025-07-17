@@ -235,6 +235,7 @@ MonoBehaviour:
   isPlayerTurn: 0
   playerHero: {fileID: 1723306815}
   enemyHero: {fileID: 529008219}
+  TurnEndButton: {fileID: 2019606412}
 --- !u!4 &138320883
 Transform:
   m_ObjectHideFlags: 0

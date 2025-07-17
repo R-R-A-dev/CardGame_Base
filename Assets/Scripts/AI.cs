@@ -26,10 +26,10 @@ public class AI : MonoBehaviour
         // コスト以下のカードがあれば、カードをフィールドに出し続ける
         // 条件：モンスターカードならコストのみ
         // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
-        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpell()))))
+        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))))//CanUseSpell()
         {
             // コスト以下のカードリストを取得
-            CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpell())));
+            CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells())));//CanUseSpell()
             // 場に出すカードを選択
             CardController selectCard = selectableHandCardList[0];
             //　カードを表にする
@@ -44,6 +44,11 @@ public class AI : MonoBehaviour
                 // カードを移動
                 StartCoroutine(selectCard.movement.MoveToField(gameManager.enemyFieldTransform));
                 selectCard.OnFiled();
+                //アビリティ発動
+                if (selectCard.IsAbilities && selectCard.CanUseAbilities())
+                {
+                    StartCoroutine(CastAbilityOf(selectCard));
+                }
             }
             yield return new WaitForSeconds(1);
             handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
@@ -68,11 +73,16 @@ public class AI : MonoBehaviour
 
             if (playerFieldCardList.Length > 0)
             {
-                // defenderカードを選択
-                // シールドカードのみ攻撃対象にする
-                if (Array.Exists(playerFieldCardList, card => card.model.ability == ABILITY.SHIELD))
+                CardController card = new CardController();
+
+                if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
                 {
-                    playerFieldCardList = Array.FindAll(playerFieldCardList, card => card.model.ability == ABILITY.SHIELD);
+                    // defenderカードを選択
+                    // シールドカードのみ攻撃対象にする
+                    if (Array.Exists(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD)))
+                    {
+                        playerFieldCardList = Array.FindAll(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD));
+                    }
                 }
 
                 CardController defender = playerFieldCardList[0];
@@ -98,32 +108,52 @@ public class AI : MonoBehaviour
         gameManager.ChangeTurn();
     }
 
+    IEnumerator CastAbilityOf(CardController card)
+    {
+        CardController target = null;
+        if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
+        {
+            //destoryは先頭ではなく体力を調べさせる
+            target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
+        }
+        if (card.model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARD))
+        {
+            //　対象を選ぶときは計算させる
+            target = card;
+        }
+        yield return new WaitForSeconds(0.75f);
+        card.UseAbilitiesTo(target);
+    }
+
     IEnumerator CastSpellOf(CardController card)
     {
         CardController target = null;
         Transform movePosition = null;
-        switch (card.model.spell)
+        if (card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD))
         {
-            case SPELL.DAMAGE_ENEMY_CARD:
-                target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
-                movePosition = target.transform;
-                break;
-            case SPELL.HEAL_FRIEND_CARD:
-                target = gameManager.GetFriendFieldCards(card.model.isPlayerCard)[0];
-                movePosition = target.transform;
-                break;
-            case SPELL.DAMAGE_ENEMY_CARDS:
-                movePosition = gameManager.playerFieldTransform;
-                break;
-            case SPELL.HEAL_FRIEND_CARDS:
-                movePosition = gameManager.enemyFieldTransform;
-                break;
-            case SPELL.DAMAGE_ENEMY_HERO:
-                movePosition = gameManager.playerHero;
-                break;
-            case SPELL.HEAL_FRIEND_HERO:
-                movePosition = gameManager.enemyHero;
-                break;
+            target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
+            movePosition = target.transform;
+        }
+        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD))
+        {
+            target = gameManager.GetFriendFieldCards(card.model.isPlayerCard)[0];
+            movePosition = target.transform;
+        }
+        else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
+        {
+            movePosition = gameManager.playerFieldTransform;
+        }
+        else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
+        {
+            movePosition = gameManager.enemyFieldTransform;
+        }
+        else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
+        {
+            movePosition = gameManager.playerHero;
+        }
+        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
+        {
+            movePosition = gameManager.enemyHero;
         }
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
         StartCoroutine(card.movement.MoveToField(movePosition));
