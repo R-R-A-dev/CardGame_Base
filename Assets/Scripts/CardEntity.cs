@@ -11,6 +11,10 @@ public class CardEntity : ScriptableObject
     public int cost;
     public int effectDmg;
     public int effectHeal;
+    [TextArea] public string description;
+    public AudioClip summonAudio;
+    public AudioClip attackAudio;
+    public AudioClip destroyAudio;
     public Sprite icon;
     public RARE rare;
     public ABILITY ability;
@@ -44,11 +48,15 @@ public enum ABILITIES
     INCREASE_ENEMY_COST = 65536, // 敵のコストを増やす
     DAMAGE_NULLIFY_ONCE = 131072,// 一度だけ受けるダメージを0にする
     DOUBLE_ACTION = 262144,      // 二回行動
-    HEAL_BY_DAMAGE = 524288,     // 攻撃した分回復する //ここから
+    HEAL_BY_DAMAGE = 524288,     // 攻撃した分回復する
     PIERCE = 1048576,            // 貫通
     CONDITIONAL_ENEMY_DEBUFF = 2097152, // 敵のパラメータ変更（条件付き）
     STATS_UP_ON_ATTACK = 4194304, // 攻撃をするたびにパラメータアップ
     RANDOM_DAMAGE = 8388608,     // ランダムダメージ
+    DISCARD_ENEMY_HAND = 16777216,   // 相手の手札を破棄
+    DISCARD_ALL_ENEMY_HAND = 33554432, // 相手の手札を全て破棄
+    DISCARD_FRIEND_HAND = 67108864,  // 自分の手札を破棄
+    DISCARD_ALL_FRIEND_HAND = 134217728, // 自分の手札を全て破棄
 }
 
 public enum RARE 

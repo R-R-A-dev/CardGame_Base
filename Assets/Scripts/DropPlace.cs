@@ -34,7 +34,6 @@ public class DropPlace : MonoBehaviour, IDropHandler
                 return;
             }
             droppedCard = card;
-            Debug.Log(droppedCard.model);
             card.OnFiled();
         }
     }

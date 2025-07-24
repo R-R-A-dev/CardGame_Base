@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -11,7 +12,7 @@ public class GameManager : MonoBehaviour
     public GamePlayerManager enemy;
 
     [SerializeField] AI enemyAI;
-    [SerializeField] UIManager uiManager;
+    [SerializeField] public UIManager uiManager;
 
     public Transform playerHandTransform,
                                playerFieldTransform,
@@ -27,6 +28,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Button TurnEndButton;
 
+
+    public bool isOnCard;
+    public bool showDescriptionClicked;
+
     // 時間管理
     int timeCount;
 
@@ -39,22 +44,34 @@ public class GameManager : MonoBehaviour
             instance = this;
         }
     }
-
     void Start()
     {
         StartGame();
     }
 
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (isOnCard) { return; }
+            uiManager.CloseDescriptionPanel();
+        }
+    }
+
+
+    private bool skipNextCheck = false;
+
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 4, 3, 4, 3, 1, 1, 1, 1 });
+        player.Init(new List<int>() { 4, 3, 2, 3, 1, 1, 1, 1 });
         enemy.Init(new List<int>() { 4, 3, 3, 2, 1, 1, 1, 1, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
         SettingInitHand();
         isPlayerTurn = true;
+        showDescriptionClicked = false;
         TurnCalc();
     }
 
@@ -171,6 +188,43 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void EffectSearchCard(Transform hand, CardModel model)
+    {
+        CardController card = Instantiate(cardPrefab, hand, false);
+        card.EffectCardInit(model);
+    }
+
+    public void EffectSummonCard(Transform hand, CardModel model, CardController baseCard)
+    {
+        CardController card = Instantiate(cardPrefab, hand, false);
+        card.EffectCardInit(model);
+        if (baseCard.model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
+        {
+            if (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
+            {
+                card.SetCanAttack(true);
+            }
+            card.model.isFieldCard = true;
+            if (card.CanUseAbilities())
+            {
+
+
+                if (card.model.isPlayerCard)
+                {
+
+                    card.movement.isDraggable = false;
+                    card.movement.isHand = false;
+                    card.OnFiledAbilities();
+                }
+                else
+                {
+                    card.UseAbilitiesTo();
+                }
+            }
+        }
+    }
+
+
     void TurnCalc()
     {
         StopAllCoroutines();
@@ -197,6 +251,30 @@ public class GameManager : MonoBehaviour
             uiManager.UpdateTime(timeCount);
         }
         ChangeTurn();
+    }
+
+    public Transform GetFriendHandFieldTransform(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return playerHandTransform;
+        }
+        else
+        {
+            return enemyHandTransform;
+        }
+    }
+
+    public Transform GetEnemyHandFieldTransform(bool isPlayer)
+    {
+        if (isPlayer)
+        {
+            return enemyHandTransform;
+        }
+        else
+        {
+            return playerHandTransform;
+        }
     }
 
     public Transform GetEnemyFieldTransform(bool isPlayer)
@@ -271,7 +349,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //自分と相手の手札を取得する
+
 
     public void OnClickTurnEndButton()
     {
@@ -315,7 +393,7 @@ public class GameManager : MonoBehaviour
 
     void PlayerTurn()
     {
-        Debug.Log("Playerのターン");
+        //Debug.Log("Playerのターン");
         // フィールドのカードを攻撃可能にする
         CardController[] playerFieldCardList = playerFieldTransform.GetComponentsInChildren<CardController>();
         SettingCanAttackView(playerFieldCardList, true);
@@ -323,14 +401,14 @@ public class GameManager : MonoBehaviour
 
     public void CardsBattle(CardController attacker, CardController defender)
     {
-        Debug.Log("CardsBattle");
-        Debug.Log("attacker HP:" + attacker.model.hp);
-        Debug.Log("defender HP:" + defender.model.hp);
+        /*        Debug.Log("CardsBattle");
+                Debug.Log("attacker HP:" + attacker.model.hp);
+                Debug.Log("defender HP:" + defender.model.hp);*/
 
         attacker.Attack(defender);
         defender.Defense(attacker);
-        Debug.Log("attacker HP:" + attacker.model.hp);
-        Debug.Log("defender HP:" + defender.model.hp);
+        /*        Debug.Log("attacker HP:" + attacker.model.hp);
+                Debug.Log("defender HP:" + defender.model.hp);*/
         attacker.CheckAlive();
         defender.CheckAlive();
     }
@@ -408,7 +486,7 @@ public class GameManager : MonoBehaviour
  * 
  * 
  * 
- * 
+ * 保持カードの取得
  * カードの効果を読めるようにする（右クリック）
  * エフェクト、演出の追加
  * アウトゲーム部分の実装

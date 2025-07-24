@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -14,12 +15,50 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI timeCountText;
 
+    [SerializeField] public GameObject descriptionObj;
+    [SerializeField] public TextMeshProUGUI descriptionText;
+    [SerializeField] public TextMeshProUGUI nameText;
+    [SerializeField] public TextMeshProUGUI costText;
+    [SerializeField] public TextMeshProUGUI attackText;
+    [SerializeField] public TextMeshProUGUI hpText;
+    [SerializeField] public Image characterImage;
+    [SerializeField] GameObject attackPanel;
+    [SerializeField] GameObject hpPanel;
+
+
+
+    public void ShowDescriptionPanel(CardController card)
+    {
+        nameText.text = card.model.name;
+        descriptionText.text = card.model.description;
+        costText.text = card.model.cost.ToString();
+        attackText.text = card.model.at.ToString();
+        hpText.text = card.model.hp.ToString();
+        characterImage.sprite = card.model.icon;
+        if (!card.IsSpell)
+        {
+            attackPanel.SetActive(true);
+            hpPanel.SetActive(true);
+
+        }
+        else if(card.IsSpell)
+        {
+            attackPanel.SetActive(false);
+            hpPanel.SetActive(false);
+        }
+        descriptionObj.SetActive(true);
+    }
+    public void CloseDescriptionPanel()
+    {
+        descriptionObj.SetActive(false);
+    }
+
     public void HideResultPanel()
     {
         resultPanel.SetActive(false);
     }
 
-    public void ShowManaCost(int playerManaCost,int enemyManaCost)
+    public void ShowManaCost(int playerManaCost, int enemyManaCost)
     {
         playerManaCostText.text = playerManaCost.ToString();
         enemyManaCostText.text = enemyManaCost.ToString();
@@ -30,7 +69,7 @@ public class UIManager : MonoBehaviour
         timeCountText.text = timeCount.ToString();
     }
 
-    public void ShowHeroHP(int playerHeroHp,int enemyHeroHp)
+    public void ShowHeroHP(int playerHeroHp, int enemyHeroHp)
     {
         playerHeroHpText.text = playerHeroHp.ToString();
         enemyHeroHpText.text = enemyHeroHp.ToString();

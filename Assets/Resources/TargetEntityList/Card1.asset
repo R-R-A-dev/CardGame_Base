@@ -12,12 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
   m_Name: Card1
   m_EditorClassIdentifier: 
-  name: test
+  no: 0
+  name: target
   hp: 5
   at: 5
   cost: 5
+  effectDmg: 0
+  effectHeal: 1
+  description: 
+  summonAudio: {fileID: 0}
+  attackAudio: {fileID: 0}
+  destroyAudio: {fileID: 0}
   icon: {fileID: -190086642, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  rare: 0
   ability: 0
   spell: 0
-  abilities: 0
+  spells: 0
+  abilities: 3
   targetCardID: 

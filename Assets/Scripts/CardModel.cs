@@ -10,6 +10,7 @@ public class CardModel
     public int effectDmg;
     public int effectHeal;
     public int cost;
+    public string description;
     public Sprite icon;
     public ABILITY ability;
     public ABILITIES abilities;
@@ -27,7 +28,7 @@ public class CardModel
     public CardModel(int cardID, bool isPlayerCard)
     {
         CardEntity cardEntity = Resources.Load<CardEntity>("CardEntityList/Card" + cardID);
-        no = cardEntity.no;
+        no = cardID;
         name = cardEntity.name;
         hp = cardEntity.hp;
         at = cardEntity.at;
@@ -35,38 +36,46 @@ public class CardModel
         effectHeal = cardEntity.effectHeal;
         cost = cardEntity.cost;
         icon = cardEntity.icon;
+        description = cardEntity.description;
         ability = cardEntity.ability;
         abilities = cardEntity.abilities;
         spells = cardEntity.spells;
 
-        /*        if (cardEntity.targetCardID.Length > 0)
-                {
-                    targetCards = new CardModel[cardEntity.targetCardID.Length];
-                    for (int i = 0; i < cardEntity.targetCardID.Length; i++)
-                    {
-                        CardEntity targetEntity = Resources.Load<CardEntity>("TargetEntityList/Card" + cardEntity.targetCardID[i]);
-                        targetCards[i].no = targetEntity.no
-                        targetCards[i].name = targetEntity.name;
-                        targetCards[i].hp = targetEntity.hp;
-                        targetCards[i].at = targetEntity.at;
-                        targetCards[i].effectDmg = targetEntity.effectDmg;
-                        targetCards[i].effectHeal = targetEntity.effectHeal;
-                        targetCards[i].cost = targetEntity.cost;
-                        targetCards[i].icon = targetEntity.icon;
-                        targetCards[i].ability = targetEntity.ability;
-                        targetCards[i].abilities = targetEntity.abilities;
-                        targetCards[i].spells = targetEntity.spells;
-                        targetCards[i].spell = targetEntity.spell;
-                    }
-                }*/
+        if (cardEntity.targetCardID.Length > 0)
+        {
+            targetCards = new CardModel[cardEntity.targetCardID.Length];
+            for (int i = 0; i < cardEntity.targetCardID.Length; i++)
+            {
+                CardEntity targetEntity = Resources.Load<CardEntity>("TargetEntityList/Card" + cardEntity.targetCardID[i]);
+                targetCards[i] = new CardModel();
+                targetCards[i].no = cardEntity.targetCardID[i];
+                targetCards[i].name = targetEntity.name;
+                targetCards[i].hp = targetEntity.hp;
+                targetCards[i].at = targetEntity.at;
+                targetCards[i].effectDmg = targetEntity.effectDmg;
+                targetCards[i].effectHeal = targetEntity.effectHeal;
+                targetCards[i].cost = targetEntity.cost;
+                targetCards[i].icon = targetEntity.icon;
+                targetCards[i].description = targetEntity.description;
+                targetCards[i].ability = targetEntity.ability;
+                targetCards[i].abilities = targetEntity.abilities;
+                targetCards[i].spells = targetEntity.spells;
+                targetCards[i].isPlayerCard = isPlayerCard;
+                targetCards[i].isAlive = true;
+            }
+        }
 
         isAlive = true;
         this.isPlayerCard = isPlayerCard;
     }//効果召喚用のフォルダからmodelに代入するようにする
 
+    public  CardModel()
+    {
+    }
+
     void Damage(int damage)
     {
-        if(isDamageNullifyOnce)
+        if (isDamageNullifyOnce)
         {
             isDamageNullifyOnce = false;
             return;
@@ -86,7 +95,7 @@ public class CardModel
 
     public void EffectHeal(CardController card)
     {
-        RecoveryHP(effectHeal);
+        card.model.RecoveryHP(effectHeal);
     }
 
     public void Attack(CardController card)
@@ -97,6 +106,24 @@ public class CardModel
     public void Destroy(CardController card)
     {
         card.model.Damage(card.model.hp);
+    }
+
+    public void CardToHand(CardModel[] cards ,Transform hand,bool isPlayer)
+    {
+        foreach (CardModel card in cards)
+        {
+            card.isPlayerCard = isPlayer;
+            GameManager.instance.EffectSearchCard(hand, card);
+        }
+    }
+
+    public void SummonCard(CardModel[] cards, Transform hand, bool isPlayer,CardController baseCard)
+    {
+        foreach (CardModel card in cards)
+        {
+            card.isPlayerCard = isPlayer;
+            GameManager.instance.EffectSummonCard(hand, card,baseCard);
+        }
     }
 
     public void Steal(CardController target)

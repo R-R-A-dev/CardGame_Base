@@ -1,12 +1,13 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using DG.Tweening;
 
 public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Transform defaultParent;
-
+    public bool isHand = true;
     public bool isDraggable;
     public CardController draggCard;
 
@@ -14,23 +15,31 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     {
         //　カードのコストとPlayerのManaコストを比較して、ドラッグ可能かどうかを判断
         CardController card = GetComponent<CardController>();
+        //　アビリティで場に出したときにドラッグの線が出る
         if (card.model.isPlayerCard && GameManager.instance.isPlayerTurn && !card.model.isFieldCard && card.model.cost <= GameManager.instance.player.manaCost)
         {
             isDraggable = true;
         }
         else if (card.model.isPlayerCard && GameManager.instance.isPlayerTurn && card.model.isFieldCard && card.model.canAttack)
         {
-            isDraggable = true;
-            draggCard = card;
+            isDraggable = false;
+            //draggCard = card;
+            isHand = false;
         }
         else
         {
             isDraggable = false;
         }
+        if (!isHand && card.model.canAttack)
+        {
+            BezierArrows.Instance.Show();
+            return;
+        }
         if (!isDraggable)
         {
             return;
         }
+
         defaultParent = transform.parent;
         transform.SetParent(defaultParent.parent);
         GetComponent<CanvasGroup>().blocksRaycasts = false;
@@ -38,16 +47,24 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!isHand)
+        {
+            BezierArrows.Instance.SetOriginPos(transform.position);
+            BezierArrows.Instance.SetTopPos(Input.mousePosition);
+            return;
+        }
         if (!isDraggable)
         {
             return;
         }
+
         transform.position = eventData.position;
     }
     public void OnEndDrag(PointerEventData eventData)
     {
         if (!isDraggable)
         {
+            BezierArrows.Instance.Hide();
             return;
         }
         transform.SetParent(defaultParent, false);
@@ -79,7 +96,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         //　元の位置に戻す
         transform.DOMove(currentPosition, 0.25f);
         yield return new WaitForSeconds(0.25f);
-        if(this != null)
+        if (this != null)
         {
             transform.SetParent(defaultParent);
             transform.SetSiblingIndex(siblingIndex);

@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using static UnityEngine.Rendering.GPUSort;
 
 public class CardController : MonoBehaviour
 {
@@ -34,9 +36,20 @@ public class CardController : MonoBehaviour
         view.SetCard(model);
     }
 
+    public void EffectCardInit(CardModel effectModel)
+    {
+        //modelにパラメータを代入してviewにセット
+        model = effectModel;
+        view.SetCard(effectModel);
+    }
+
     public void Attack(CardController enemyCard)
     {
         model.Attack(enemyCard);
+        if (model.abilities.HasFlag(ABILITIES.HEAL_BY_DAMAGE))
+        {
+            Heal(this);
+        }
         if (model.isDoubleAction)
         {
             if (!model.isSingleAction)
@@ -62,7 +75,7 @@ public class CardController : MonoBehaviour
         SetCanAttack(false);
     }
 
-    public void Destroy(CardController enemyCard)
+    public void Destroys(CardController enemyCard)
     {
         model.Destroy(enemyCard);
     }
@@ -86,15 +99,64 @@ public class CardController : MonoBehaviour
         }
     }
 
-    public void CardToHand()
+    public void DiscardEnemyHandAllCard()
     {
+        CardController[] cards = GameManager.instance.GetEnemyHandTransform(model.isPlayerCard);
 
+        //cardsをすべて破棄する
+        foreach (CardController card in cards)
+        {
+            Destroy(card.gameObject);
+        }
+    }
+
+    public void DiscardPlayerHandAllCard()
+    {
+        CardController[] cards = GameManager.instance.GetFriendHandTransform(model.isPlayerCard);
+        foreach (CardController card in cards)
+        {
+            Destroy(card.gameObject);
+        }
+    }
+
+    public void DiscardEnemyHandCard()
+    {
+        CardController[] cards = GameManager.instance.GetEnemyHandTransform(model.isPlayerCard);
+        for (int i = 0; i < model.effectDmg; i++)
+        {
+            if (cards.Length > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, cards.Length);
+                Destroy(cards[randomIndex].gameObject);
+            }
+        }
+    }
+    public void DiscardPlayerHandCard()
+    {
+        CardController[] cards = GameManager.instance.GetFriendHandTransform(model.isPlayerCard);
+        for (int i = 0; i < model.effectDmg; i++)
+        {
+            if (cards.Length > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, cards.Length);
+                Destroy(cards[randomIndex].gameObject);
+            }
+        }
+    }
+
+
+    public void CardToHand(CardController card)
+    {
+        Transform hand = gameManager.GetFriendHandFieldTransform(card.model.isPlayerCard);
+        CardModel[] targetCard = card.model.targetCards;
+        model.CardToHand(targetCard, hand, card.model.isPlayerCard);
     }
 
     public void SummonCard(CardController card)
     {
-        Debug.Log(card.model.targetCards[0].name);
-        Debug.Log(card.model.targetCards[1].at);
+        Transform hand = gameManager.GetFriendFieldTransform(card.model.isPlayerCard);
+        CardModel[] targetCard = card.model.targetCards;
+        model.SummonCard(targetCard, hand, card.model.isPlayerCard, card);
     }
 
     public void EffectHeal(CardController friendCard)
@@ -227,9 +289,12 @@ public class CardController : MonoBehaviour
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
         {
             CardController[] friendsCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-            foreach (CardController friendCard in friendsCards)
+            if (friendsCards.Length > 0)
             {
-                EffectHeal(friendCard);
+                foreach (CardController friendCard in friendsCards)
+                {
+                    EffectHeal(friendCard);
+                }
             }
             EffectHeal(this);
         }
@@ -243,7 +308,7 @@ public class CardController : MonoBehaviour
             {
                 return;
             }
-            Destroy(target);
+            Destroys(target);
             target.CheckAlive();
         }
         if (model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
@@ -261,6 +326,10 @@ public class CardController : MonoBehaviour
         if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
             DrawCard();
+        }
+        if (model.abilities.HasFlag(ABILITIES.SEARCH_SPECIFIC_UNIT))
+        {
+            CardToHand(this);
         }
         if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
@@ -292,6 +361,22 @@ public class CardController : MonoBehaviour
         {
             model.isDoubleAction = true;
         }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
+        {
+            DiscardEnemyHandAllCard();
+        }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
+        {
+            DiscardEnemyHandCard();
+        }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+        {
+            DiscardPlayerHandAllCard();
+        }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
+        {
+            DiscardPlayerHandCard();
+        }
     }
 
     public bool CanUseAbilities()
@@ -305,7 +390,11 @@ public class CardController : MonoBehaviour
             {
                 canUse = true;
             }
-            canUse = false;
+            else
+            {
+                return false;
+            }
+
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) || model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
@@ -313,7 +402,6 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARD) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
         {
-            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
             canUse = true;
         }
         if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
@@ -327,7 +415,11 @@ public class CardController : MonoBehaviour
             {
                 canUse = true;
             }
-            canUse = false;
+            else
+            {
+                return false;
+            }
+
         }
         if (model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST))
         {
@@ -336,7 +428,10 @@ public class CardController : MonoBehaviour
             {
                 canUse = true;
             }
-            return false;
+            else
+            {
+                return false;
+            }
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
         {
@@ -346,7 +441,53 @@ public class CardController : MonoBehaviour
         {
             canUse = true;
         }
+        if (model.abilities.HasFlag(ABILITIES.SEARCH_SPECIFIC_UNIT))
+        {
+            if (model.targetCards != null && model.targetCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
+        {
+            if (model.targetCards != null && model.targetCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
 
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
+        {
+            CardController[] cards = GameManager.instance.GetEnemyHandTransform(model.isPlayerCard);
+            if (cards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
+        {
+            CardController[] cards = GameManager.instance.GetEnemyHandTransform(model.isPlayerCard);
+            if (cards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+        {
+            CardController[] cards = GameManager.instance.GetFriendHandTransform(model.isPlayerCard);
+            if (cards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
+        {
+            CardController[] cards = GameManager.instance.GetFriendHandTransform(model.isPlayerCard);
+            if (cards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
         return canUse;
     }
 
@@ -437,39 +578,39 @@ public class CardController : MonoBehaviour
         {
             DrawCard();
         }
-            gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
-            Destroy(this.gameObject);
-        }
-/*    public bool CanUseSpell()
-    {
-        switch (model.spells)
+        gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
+        Destroy(this.gameObject);
+    }
+    /*    public bool CanUseSpell()
         {
-            case SPELL.DAMAGE_ENEMY_CARD:
-            case SPELL.DAMAGE_ENEMY_CARDS:
-            case SPELL.STEAL_ENEMY_CARD:
-                CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
-                if (enemyCards.Length > 0)
-                {
+            switch (model.spells)
+            {
+                case SPELL.DAMAGE_ENEMY_CARD:
+                case SPELL.DAMAGE_ENEMY_CARDS:
+                case SPELL.STEAL_ENEMY_CARD:
+                    CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+                    if (enemyCards.Length > 0)
+                    {
+                        return true;
+                    }
+                    return false;
+                case SPELL.DAMAGE_ENEMY_HERO:
+                case SPELL.HEAL_FRIEND_HERO:
+                case SPELL.DRAW_CARDS:
                     return true;
-                }
-                return false;
-            case SPELL.DAMAGE_ENEMY_HERO:
-            case SPELL.HEAL_FRIEND_HERO:
-            case SPELL.DRAW_CARDS:
-                return true;
-            case SPELL.HEAL_FRIEND_CARD:
-            case SPELL.HEAL_FRIEND_CARDS:
-                CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-                if (friendCards.Length > 0)
-                {
-                    return true;
-                }
-                return false;
-            case SPELL.NONE:
-                return false;
-        }
-        return false;
-    }*/
+                case SPELL.HEAL_FRIEND_CARD:
+                case SPELL.HEAL_FRIEND_CARDS:
+                    CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+                    if (friendCards.Length > 0)
+                    {
+                        return true;
+                    }
+                    return false;
+                case SPELL.NONE:
+                    return false;
+            }
+            return false;
+        }*/
 
     public bool CanUseSpells()
     {

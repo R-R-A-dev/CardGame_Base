@@ -17,12 +17,16 @@ MonoBehaviour:
   hp: 3
   at: 2
   cost: 2
-  effectDmg: 0
-  effectHeal: 0
+  effectDmg: 1
+  effectHeal: 1
+  description: test
+  summonAudio: {fileID: 0}
+  attackAudio: {fileID: 0}
+  destroyAudio: {fileID: 0}
   icon: {fileID: -1199421710, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   rare: 0
   ability: 0
   spell: 0
   spells: 0
-  abilities: 0
+  abilities: 4096
   targetCardID: 0100000001000000

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -28,6 +29,7 @@ public class AttackedCard : MonoBehaviour, IDropHandler
         }
         if (attacker.model.canAttack)
         {
+            BezierArrows.Instance.Hide();
             GameManager.instance.CardsBattle(attacker, defender);
         }
 
