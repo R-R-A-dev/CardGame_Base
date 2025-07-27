@@ -47,6 +47,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!GameManager.instance.isPlayerTurn) 
+        {
+            BezierArrows.Instance.Hide();
+        }
         if (!isHand)
         {
             BezierArrows.Instance.SetOriginPos(transform.position);

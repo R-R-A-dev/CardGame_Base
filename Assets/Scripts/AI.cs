@@ -87,7 +87,7 @@ public class AI : MonoBehaviour
 
                 CardController defender = playerFieldCardList[0];
                 // attackerとdefenderを戦わせる
-                StartCoroutine(attacker.movement.MoveToTarget(defender.transform));
+                //StartCoroutine(attacker.movement.MoveToTarget(defender.transform));
                 yield return new WaitForSeconds(0.51f);
                 gameManager.CardsBattle(attacker, defender);
 
@@ -154,6 +154,17 @@ public class AI : MonoBehaviour
         else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
         {
             movePosition = gameManager.enemyHero;
+        }
+        if (card.model.spells.HasFlag(SPELLS.RANDOM_DAMAGE))
+        {
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
+            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            movePosition = target.transform;
+        }
+        if (card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        {
+            Transform enemyCards = gameManager.GetFriendFieldTransform(card.model.isPlayerCard);
+            movePosition = enemyCards.transform;
         }
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
         StartCoroutine(card.movement.MoveToField(movePosition));

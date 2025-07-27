@@ -24,6 +24,8 @@ public class CardModel
     public bool isDamageNullifyOnce;
     public bool isDoubleAction;
     public bool isSingleAction;
+    public bool isStatsUpOnAttack;
+    public bool isDestroyer;
 
     public CardModel(int cardID, bool isPlayerCard)
     {

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -45,7 +47,15 @@ public class CardController : MonoBehaviour
 
     public void Attack(CardController enemyCard)
     {
-        model.Attack(enemyCard);
+        if (!model.isAlive) return;
+        if (model.isDestroyer)
+        {
+            Destroys(enemyCard);
+        }
+        else
+        {
+            model.Attack(enemyCard);
+        }
         if (model.abilities.HasFlag(ABILITIES.HEAL_BY_DAMAGE))
         {
             Heal(this);
@@ -66,6 +76,11 @@ public class CardController : MonoBehaviour
         else
         {
             SetCanAttack(false);
+        }
+        if (model.isStatsUpOnAttack)
+        {
+            model.at += model.effectDmg;
+            model.hp += model.effectHeal;
         }
     }
 
@@ -255,6 +270,7 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
         {
+
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             foreach (CardController enemyCard in enemyCards)
             {
@@ -267,12 +283,12 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO))
         {
-            gameManager.AttackToHero(this);
+            gameManager.AttackToHeroAbility(this);
             gameManager.CheckHeroHP();
         }
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO))
         {
-            gameManager.HealToHero(this);
+            gameManager.HealToHeroAbility(this);
         }
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARD))
         {
@@ -377,6 +393,14 @@ public class CardController : MonoBehaviour
         {
             DiscardPlayerHandCard();
         }
+        if (model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
+        {
+            model.isStatsUpOnAttack = true;
+        }
+        if (model.abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET))
+        {
+            model.isDestroyer = true;
+        }
     }
 
     public bool CanUseAbilities()
@@ -385,6 +409,7 @@ public class CardController : MonoBehaviour
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS)
             || model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
         {
+
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
             {
@@ -488,6 +513,14 @@ public class CardController : MonoBehaviour
                 canUse = true;
             }
         }
+        if (model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
+        {
+            canUse = true;
+        }
+        if (model.abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET))
+        {
+            canUse = true;
+        }
         return canUse;
     }
 
@@ -499,6 +532,7 @@ public class CardController : MonoBehaviour
         }
         else
         {
+            if (this == null) return;
             Destroy(this.gameObject);
         }
     }
@@ -558,6 +592,19 @@ public class CardController : MonoBehaviour
                 EffectHeal(friendCard);
             }
         }
+        if (model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
+        {
+            if (target == null)
+            {
+                return;
+            }
+            if (target.model.isPlayerCard == model.isPlayerCard)
+            {
+                return;
+            }
+            Destroys(target);
+            target.CheckAlive();
+        }
         if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
         {
             gameManager.HealToHero(this);
@@ -578,6 +625,38 @@ public class CardController : MonoBehaviour
         {
             DrawCard();
         }
+        if (model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        {
+            CardController[] friendsCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (friendsCards.Length > 0)
+            {
+                foreach (CardController friendCard in friendsCards)
+                {
+                    Destroys(friendCard);
+                    friendCard.CheckAlive();
+                }
+            }
+            if (enemyCards.Length > 0)
+            {
+                foreach (CardController enemyCard in enemyCards)
+                {
+                    Destroys(enemyCard);
+                    enemyCard.CheckAlive();
+                }
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.RANDOM_DAMAGE))
+        {
+            if (target == null)
+            {
+                CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            }
+            EffectAttack(target);
+            target.CheckAlive();
+        }
+
         gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
         Destroy(this.gameObject);
     }
@@ -631,7 +710,10 @@ public class CardController : MonoBehaviour
         if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD) || model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-            canUse = true;
+            if (friendCards.Length > 0)
+            {
+                canUse = true;
+            }
         }
         if (model.spells.HasFlag(SPELLS.SUMMON_SPECIFIC_UNIT))
         {
@@ -649,6 +731,23 @@ public class CardController : MonoBehaviour
         {
             CardController[] enemyHandCards = gameManager.GetEnemyHandTransform(this.model.isPlayerCard);
             if (enemyHandCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        {
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (friendCards.Length > 0 || enemyCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.RANDOM_DAMAGE))
+        {
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (enemyCards.Length > 0)
             {
                 canUse = true;
             }

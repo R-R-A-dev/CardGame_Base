@@ -603,6 +603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultParent: {fileID: 0}
+  isHand: 1
   isDraggable: 0
   draggCard: {fileID: 0}
 --- !u!225 &3250521729447992486

@@ -17,7 +17,7 @@ MonoBehaviour:
   hp: 5
   at: 1
   cost: 1
-  effectDmg: 0
+  effectDmg: 1
   effectHeal: 1
   description: 
   summonAudio: {fileID: 0}
@@ -28,5 +28,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 16416
+  abilities: 268697601
   targetCardID: 

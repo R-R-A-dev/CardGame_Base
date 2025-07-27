@@ -57,6 +57,7 @@ public enum ABILITIES
     DISCARD_ALL_ENEMY_HAND = 33554432, // 相手の手札を全て破棄
     DISCARD_FRIEND_HAND = 67108864,  // 自分の手札を破棄
     DISCARD_ALL_FRIEND_HAND = 134217728, // 自分の手札を全て破棄
+    DESTROY_ATTACKED_TARGET = 268435456, // 攻撃した相手を破壊する
 }
 
 public enum RARE 
@@ -110,4 +111,5 @@ public enum SPELLS
     CONDITIONAL_ENEMY_DEBUFF = 32768, // 敵のパラメータ変更（条件付き）
     STATS_UP_ON_ATTACK = 65536,     // 攻撃をするたびにパラメータアップ
     RANDOM_DAMAGE = 131072,          // ランダムダメージ
+    DESTROY_ALL_FIELD_CARDS = 262144, // 場のカードをすべて破壊する
 }

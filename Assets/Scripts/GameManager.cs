@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
     {
         uiManager.HideResultPanel();
         player.Init(new List<int>() { 4, 3, 2, 3, 1, 1, 1, 1 });
-        enemy.Init(new List<int>() { 4, 3, 3, 2, 1, 1, 1, 1, 1 });
+        enemy.Init(new List<int>() { 2, 3, 3, 4, 1, 1, 1, 1, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -207,8 +207,6 @@ public class GameManager : MonoBehaviour
             card.model.isFieldCard = true;
             if (card.CanUseAbilities())
             {
-
-
                 if (card.model.isPlayerCard)
                 {
 
@@ -442,6 +440,25 @@ public class GameManager : MonoBehaviour
         {
             attacker.SetCanAttack(false);
         }
+        if (attacker.model.isStatsUpOnAttack)
+        {
+            attacker.model.at += attacker.model.effectDmg;
+            attacker.model.hp += attacker.model.effectHeal;
+            attacker.RefreshView();
+        }
+    }
+
+    public void AttackToHeroAbility(CardController card)
+    {
+        if (card.model.isPlayerCard)
+        {
+            enemy.heroHp -= card.model.effectDmg;
+        }
+        else
+        {
+            player.heroHp -= card.model.effectDmg;
+        }
+        uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
     }
 
     public void HealToHero(CardController healer)
@@ -453,6 +470,19 @@ public class GameManager : MonoBehaviour
         else
         {
             enemy.heroHp += healer.model.at;
+        }
+        uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+    }
+
+    public void HealToHeroAbility(CardController card)
+    {
+        if (card.model.isPlayerCard)
+        {
+            player.heroHp += card.model.effectHeal;
+        }
+        else
+        {
+            enemy.heroHp += card.model.effectHeal;
         }
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
     }
@@ -484,6 +514,8 @@ public class GameManager : MonoBehaviour
  * 二回行動
  * 攻撃した分回復する
  * 
+ * エラー内容
+ * フィールドに追加で出す効果のカードが矢印が出る
  * 
  * 
  * 保持カードの取得
