@@ -514,8 +514,6 @@ public class GameManager : MonoBehaviour
  * 二回行動
  * 攻撃した分回復する
  * 
- * エラー内容
- * フィールドに追加で出す効果のカードが矢印が出る
  * 
  * 
  * 保持カードの取得

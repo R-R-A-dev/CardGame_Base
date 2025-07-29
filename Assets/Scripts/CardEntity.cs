@@ -13,8 +13,16 @@ public class CardEntity : ScriptableObject
     public int effectHeal;
     [TextArea] public string description;
     public AudioClip summonAudio;
+    public AudioClip summonAbilityAudio;
     public AudioClip attackAudio;
+    public AudioClip hitAudio;
     public AudioClip destroyAudio;
+    public GameObject summonEffect;
+    public GameObject summonAbilityEffect;
+    public GameObject attackEffect;
+    public GameObject hitEffect;
+    public GameObject destroyEffect;
+    public float attackTime = 0.5f;
     public Sprite icon;
     public RARE rare;
     public ABILITY ability;

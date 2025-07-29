@@ -111,6 +111,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     void Start()
     {
+        BezierArrows.Instance.Hide();
         defaultParent = transform.parent;
     }
 }
