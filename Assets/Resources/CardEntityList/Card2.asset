@@ -21,12 +21,21 @@ MonoBehaviour:
   effectHeal: 1
   description: test
   summonAudio: {fileID: 0}
+  summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
+  hitAudio: {fileID: 0}
   destroyAudio: {fileID: 0}
+  summonEffect: {fileID: 0}
+  summonAbilityEffect: {fileID: 0}
+  attackEffect: {fileID: 0}
+  hitEffect: {fileID: 0}
+  destroyEffect: {fileID: 8443315704496310908, guid: 6ef35fa36e3a65043b2d800600204bdd, type: 3}
+  attackTime: 0
   icon: {fileID: -1199421710, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  attackType: 0
   rare: 0
   ability: 0
   spell: 0
   spells: 0
-  abilities: 4096
+  abilities: 0
   targetCardID: 0100000001000000

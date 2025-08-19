@@ -237,6 +237,7 @@ MonoBehaviour:
   playerHero: {fileID: 1723306815}
   enemyHero: {fileID: 529008219}
   TurnEndButton: {fileID: 2019606412}
+  isAttacking: 0
   isOnCard: 0
   showDescriptionClicked: 0
 --- !u!4 &138320883
@@ -2004,7 +2005,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -2029,10 +2030,10 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 614668916}
-  - {fileID: 2128038133}
   - {fileID: 279227783}
   - {fileID: 961733477}
+  - {fileID: 614668916}
+  - {fileID: 2128038133}
   - {fileID: 1723306815}
   - {fileID: 529008219}
   - {fileID: 2019606411}
@@ -4214,7 +4215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ArrowHeadPrefab: {fileID: 7058917458775637440, guid: 8c97e7c4252c24c4cac84557e617c6d9, type: 3}
   ArrowNodePrefab: {fileID: 7676861933008682929, guid: a6f776feba312b24cbf34c0b338a6399, type: 3}
-  arrowNodeNum: 10
+  arrowNodeNum: 20
   scaleFactor: 1.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

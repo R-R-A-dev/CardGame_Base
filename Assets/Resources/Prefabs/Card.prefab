@@ -514,6 +514,7 @@ GameObject:
   - component: {fileID: 5656143763074589798}
   - component: {fileID: 8251656474152664701}
   - component: {fileID: 8722014602671462816}
+  - component: {fileID: 5051034170406623290}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -570,6 +571,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movement: {fileID: 0}
+  effect: {fileID: 0}
 --- !u!114 &3541411670201569632
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -655,6 +657,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isClickable: 0
+--- !u!114 &5051034170406623290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712488482611326971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d7e64a72baa28439b61b670087fd91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UIParticleObj: {fileID: 8480964048141866627, guid: eba3a28ea3b76cd4186fd5e6c22a8b92, type: 3}
+  effect: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
+  effect2: {fileID: 3817663088807389354, guid: b62515ee11412284f8a213b943f9aab1, type: 3}
+  canvas: {fileID: 0}
+  effectObj: {fileID: 6946326454923785546, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
 --- !u!1 &5263026021843677536
 GameObject:
   m_ObjectHideFlags: 0
