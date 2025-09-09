@@ -570,6 +570,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a65456ade3b0c19428f1b3cf5a6e3f1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  view: {fileID: 0}
   movement: {fileID: 0}
   effect: {fileID: 0}
 --- !u!114 &3541411670201569632
@@ -592,6 +593,7 @@ MonoBehaviour:
   selectablePanel: {fileID: 5263026021843677536}
   shieldPanel: {fileID: 3082528052981376236}
   maskPanel: {fileID: 6724691667608227162}
+  canvasGroup: {fileID: 3250521729447992486}
 --- !u!114 &2085607855128091621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,7 +641,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4712488482611326971}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f93af13442a6f843aa2ee46b914d254, type: 3}
   m_Name: 

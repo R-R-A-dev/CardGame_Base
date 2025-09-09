@@ -26,6 +26,7 @@ public class DropPlace : MonoBehaviour, IDropHandler
 
             if (card.IsSpell)
             {
+                droppedCard = card;
                 return;
             }
             if (card.model.isFieldCard)

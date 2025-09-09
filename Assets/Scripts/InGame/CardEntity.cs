@@ -50,30 +50,34 @@ public enum ABILITIES
     STEAL_ENEMY_CARD = 512,      // 敵のフィールドのカードを自分のフィールドのカードにする
     DRAW_CARDS = 1024,           // カードを複数枚引く //ここまでやった
     SEARCH_SPECIFIC_UNIT = 2048, // 特定のユニットを手札にする
-    SUMMON_SPECIFIC_UNIT = 4096, // 特定のユニットをフィールドに出す//保留
+    SUMMON_SPECIFIC_UNIT = 4096, // 特定のユニットをフィールドに出す
     ON_DESTROY_TRIGGER = 8192,   // 破壊された時に発動
-    EFFECT_SELECTION = 16384,    // 効果対象を選択
-    REDUCE_HAND_COST = 32768,    // 手札のカードのコストを減らす
-    INCREASE_ENEMY_COST = 65536, // 敵のコストを増やす
-    DAMAGE_NULLIFY_ONCE = 131072,// 一度だけ受けるダメージを0にする
-    DOUBLE_ACTION = 262144,      // 二回行動
-    HEAL_BY_DAMAGE = 524288,     // 攻撃した分回復する
-    PIERCE = 1048576,            // 貫通
-    CONDITIONAL_ENEMY_DEBUFF = 2097152, // 敵のパラメータ変更（条件付き）
-    STATS_UP_ON_ATTACK = 4194304, // 攻撃をするたびにパラメータアップ
-    RANDOM_DAMAGE = 8388608,     // ランダムダメージ
-    DISCARD_ENEMY_HAND = 16777216,   // 相手の手札を破棄
-    DISCARD_ALL_ENEMY_HAND = 33554432, // 相手の手札を全て破棄
-    DISCARD_FRIEND_HAND = 67108864,  // 自分の手札を破棄
-    DISCARD_ALL_FRIEND_HAND = 134217728, // 自分の手札を全て破棄
-    DESTROY_ATTACKED_TARGET = 268435456, // 攻撃した相手を破壊する
+    EFFECT_SELECTION_FRIEND = 16384,  // 味方効果対象を選択
+    EFFECT_SELECTION_ENEMY = 32768,   // 敵効果対象を選択
+    RANDOM_ENEMY = 65536,        // 敵のランダムターゲット
+    RANDOM_FRIEND = 131072,      // 味方のランダムターゲット
+    REDUCE_HAND_COST = 262144,   // 手札のカードのコストを減らす
+    INCREASE_ENEMY_COST = 524288, // 敵のコストを増やす
+    DAMAGE_NULLIFY_ONCE = 1048576,// 一度だけ受けるダメージを0にする
+    DOUBLE_ACTION = 2097152,     // 二回行動
+    HEAL_BY_DAMAGE = 4194304,    // 攻撃した分回復する
+    PIERCE = 8388608,            // 貫通
+    CONDITIONAL_ENEMY_DEBUFF = 16777216, // 敵のパラメータ変更（条件付き）
+    STATS_UP_ON_ATTACK = 33554432, // 攻撃をするたびにパラメータアップ
+    //RANDOM_DAMAGE = 67108864,     // ランダムダメージ
+    DISCARD_ENEMY_HAND = 67108864,  // 相手の手札を破棄
+    DISCARD_ALL_ENEMY_HAND = 134217728, // 相手の手札を全て破棄
+    DISCARD_FRIEND_HAND = 268435456,  // 自分の手札を破棄
+    DISCARD_ALL_FRIEND_HAND = 536870912, // 自分の手札を全て破棄
+    DESTROY_ATTACKED_TARGET = 1073741824, // 攻撃した相手を破壊する
+    //ON_FIELD_TRIGGER = 4294967296, //フィールで任意のタイミングでアビリティ発動
 }
 
 public enum ATTACKTYPE
 {
     THROW,
     DIRECT,
-    AREA,
+    SPAWN,
 }
 
 public enum RARE 
@@ -120,12 +124,15 @@ public enum SPELLS
     DRAW_CARDS = 256,                // カードを複数枚引く
     SEARCH_SPECIFIC_UNIT = 512,      // 特定のユニットを手札にする
     SUMMON_SPECIFIC_UNIT = 1024,     // 特定のユニットをフィールドに出す
-    EFFECT_SELECTION = 2048,         // 効果対象を選択
-    REDUCE_HAND_COST = 4096,         // 手札のカードのコストを減らす
-    INCREASE_ENEMY_COST = 8192,     // 敵のコストを増やす
-    HEAL_BY_DAMAGE = 16384,          // 攻撃した分回復する
-    CONDITIONAL_ENEMY_DEBUFF = 32768, // 敵のパラメータ変更（条件付き）
-    STATS_UP_ON_ATTACK = 65536,     // 攻撃をするたびにパラメータアップ
-    RANDOM_DAMAGE = 131072,          // ランダムダメージ
-    DESTROY_ALL_FIELD_CARDS = 262144, // 場のカードをすべて破壊する
+    EFFECT_SELECTION_FRIEND = 2048,  // 味方効果対象を選択
+    EFFECT_SELECTION_ENEMY = 4096,   // 敵効果対象を選択
+    REDUCE_HAND_COST = 8192,         // 手札のカードのコストを減らす
+    INCREASE_ENEMY_COST = 16384,     // 敵のコストを増やす
+    HEAL_BY_DAMAGE = 32768,          // 攻撃した分回復する
+    CONDITIONAL_ENEMY_DEBUFF = 65536, // 敵のパラメータ変更（条件付き）
+    STATS_UP_ON_ATTACK = 131072,     // 攻撃をするたびにパラメータアップ
+    RANDOM_DAMAGE = 262144,          // ランダムダメージ
+    DESTROY_ALL_FIELD_CARDS = 524288, // 場のカードをすべて破壊する
+    RANDOM_ENEMY = 1048576,          // 敵のランダムターゲット
+    RANDOM_FRIEND = 2097152,         // 味方のランダムターゲット
 }

@@ -5,6 +5,8 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using DG.Tweening;
+using Coffee.UIExtensions;
 
 public class GameManager : MonoBehaviour
 {
@@ -28,6 +30,16 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Button TurnEndButton;
 
+    public RectTransform summonLight;
+    [SerializeField] UIParticle UIParticleObj;
+    public ParticleSystem summonTrail;
+    public ParticleSystem summonEffect;
+    public UIParticlesManager uiParticlesManager;
+    public CameraShake cameraShake;
+    [SerializeField] Image selectingPanel;
+
+
+    public bool isSummoning = false;
     public bool isAttacking;
     public bool isOnCard;
     public bool showDescriptionClicked;
@@ -56,6 +68,17 @@ public class GameManager : MonoBehaviour
             if (isOnCard) { return; }
             uiManager.CloseDescriptionPanel();
         }
+
+/*        if (!isPlayerTurn && isEffectSelectPhase)
+        {
+            DropPlace.droppedCard.view.SetActiveSelectablePanel(false);
+            DropPlace.droppedCard.model.isFieldCard = false;
+            DropPlace.droppedCard.movement.PlayerSelectMoveOff(DropPlace.droppedCard);
+            DropPlace.droppedCard = null;
+            SelectingPanelOff();
+            isEffectSelectPhase = false;
+            EnableButtonCards();
+        }*/
     }
 
 
@@ -64,8 +87,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 4, 3, 2, 3, 1, 1, 1, 1 });
-        enemy.Init(new List<int>() { 2, 3, 3, 4, 1, 1, 1, 1, 1 });
+        player.Init(new List<int>() { 4, 3, 3, 3, 1, 1, 1, 1 });
+        enemy.Init(new List<int>() { 2, 4, 4, 4, 4, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -209,7 +232,6 @@ public class GameManager : MonoBehaviour
             {
                 if (card.model.isPlayerCard)
                 {
-
                     card.movement.isDraggable = false;
                     card.movement.isHand = false;
                     card.OnFiledAbilities();
@@ -239,7 +261,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountDown()
     {
-        timeCount = 20;
+        timeCount = 5;
         uiManager.UpdateTime(timeCount);
 
         while (timeCount > 0)
@@ -361,6 +383,9 @@ public class GameManager : MonoBehaviour
     {
         isPlayerTurn = !isPlayerTurn;
 
+        if (DropPlace.droppedCard != null)
+            DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
+
         CardController[] playerFieldCardList = playerFieldTransform.GetComponentsInChildren<CardController>();
         SettingCanAttackView(playerFieldCardList, false);
         CardController[] enemyFieldCardList = enemyFieldTransform.GetComponentsInChildren<CardController>();
@@ -404,7 +429,7 @@ public class GameManager : MonoBehaviour
                 Debug.Log("attacker HP:" + attacker.model.hp);
                 Debug.Log("defender HP:" + defender.model.hp);*/
         attacker.Attack(defender);
-        yield return new WaitForSeconds(0.8f+(attacker.model.attackTime/60));
+        yield return new WaitForSeconds(0.8f + (attacker.model.attackTime / 60));
         defender.Defense(attacker);
         /*        Debug.Log("attacker HP:" + attacker.model.hp);
                 Debug.Log("defender HP:" + defender.model.hp);*/
@@ -500,6 +525,55 @@ public class GameManager : MonoBehaviour
         StopAllCoroutines();
         uiManager.ShowResultPanel(heroHp);
     }
+
+    public void SummonLightOn()
+    {
+        summonLight.GetComponent<Image>().color = new Color(255, 255, 255, 255);
+    }
+
+    public ParticleSystem SummonTrailOn()
+    {
+        summonTrail.gameObject.SetActive(true);
+        return summonTrail;
+    }
+
+    public ParticleSystem GetSummonEffect()
+    {
+        return summonEffect;
+    }
+    public void SummonEffectOff()
+    {
+        summonTrail.gameObject.SetActive(false);
+    }
+
+    public void ScaleYSummonLightFadeOut()
+    {
+        summonLight.DOScaleY(0f, 0.3f).OnComplete(() =>
+        {
+
+        });
+    }
+
+    public void ScaleYSummonLightOn()
+    {
+        summonLight.localScale = new Vector3(2, 2, 1);
+    }
+
+    public void SelectingPanelOn()
+    {
+        selectingPanel.gameObject.SetActive(true);
+        Color initialColor = selectingPanel.color;
+        initialColor.a = 0f;
+        selectingPanel.color = initialColor;
+
+        selectingPanel.DOFade(200f / 255f, 0.2f);
+    }
+
+    public void SelectingPanelOff()
+    {
+        selectingPanel.gameObject.SetActive(false);
+    }
+
 }
 
 /* 追加機能リスト

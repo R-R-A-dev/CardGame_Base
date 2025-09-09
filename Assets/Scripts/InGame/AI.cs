@@ -42,8 +42,8 @@ public class AI : MonoBehaviour
             else
             {
                 // カードを移動
-                selectCard.movement.MoveCardToField(gameManager.enemyFieldTransform,selectCard);
-                //StartCoroutine(selectCard.movement.MoveToField(gameManager.enemyFieldTransform));
+                StartCoroutine(selectCard.movement.SummonMove(selectCard, gameManager.enemyFieldTransform));
+                yield return new WaitForSeconds(0.5f);
                 selectCard.OnFiled();
                 //アビリティ発動
                 if (selectCard.IsAbilities && selectCard.CanUseAbilities())
@@ -65,11 +65,12 @@ public class AI : MonoBehaviour
         //攻撃可能カードがあれば攻撃を繰り返す
         while (Array.Exists(fieldCardList, card => card.model.canAttack))
         {
-            if (GameManager.instance.isAttacking)
+            if (GameManager.instance.isAttacking||GameManager.instance.isSummoning)
             {
                 yield return null;
                 continue;
             }
+            
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
             CardController[] playerFieldCardList = gameManager.playerFieldTransform.GetComponentsInChildren<CardController>();
@@ -174,8 +175,9 @@ public class AI : MonoBehaviour
             movePosition = enemyCards.transform;
         }
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
-        StartCoroutine(card.movement.MoveToField(movePosition));
-        yield return new WaitForSeconds(0.25f);
+        StartCoroutine(card.movement.MoveCenterSpell(card));
+        //　スペル発動時に一回転して中央に移動したから右に回転しながら移動
+        yield return new WaitForSeconds(0.6f);
         card.UseSpellTo(target);
     }
 

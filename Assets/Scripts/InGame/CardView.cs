@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class CardView : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class CardView : MonoBehaviour
     [SerializeField] GameObject selectablePanel;
     [SerializeField] GameObject shieldPanel;
     [SerializeField] GameObject maskPanel;
+    [SerializeField] CanvasGroup canvasGroup;
 
     public void SetCard(CardModel cardModel)
     {
@@ -60,5 +62,19 @@ public class CardView : MonoBehaviour
     public void SetActiveSelectablePanel(bool flag)
     {
         selectablePanel.SetActive(flag);
+    }
+
+    public void HideCard()
+    {
+        canvasGroup.DOFade(0f, 0.2f).OnComplete(() => {
+            
+        });
+    }
+
+    public void ShowCard()
+    {
+        canvasGroup.DOFade(1f, 0.2f).OnComplete(() => {
+
+        });
     }
 }

@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using Coffee.UIExtensions;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,10 +13,10 @@ using static UnityEngine.Rendering.GPUSort;
 
 public class CardController : MonoBehaviour
 {
-    CardView view;                 // 見かけ(view)に関することを操作
+    public CardView view;          // 見かけ(view)に関することを操作
     public CardModel model;        // データ(model)に関することを操作
     public CardMovement movement;  // 移動(movement)に関することを操作
-    public EffectController effect;
+    public EffectController effect;// エフェクト(effect)に関することを操作
 
     GameManager gameManager;
 
@@ -231,13 +232,18 @@ public class CardController : MonoBehaviour
 
     public void OnFiled()
     {
-        if (!IsSpell && model.summonEffect != null && !model.isPlayerCard)
-        {
-            summonEffect(model.summonEffect, transform);
-        }
+        /*        if (!IsSpell && model.summonEffect != null && !model.isPlayerCard)
+                {
+                    summonEffect(model.summonEffect, transform);
+                }*/
         gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
         model.isFieldCard = true;
         OnFiledAbilities();
+        /*場に出した後のアビリティの選択効果と自動効果の処理
+         *選択まで他のカードに触れられない
+         *
+         * 
+        */
     }
 
     public void OnFiledAbilities()
@@ -248,12 +254,17 @@ public class CardController : MonoBehaviour
         }
         if (gameManager.isPlayerTurn)
         {
-            if (model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION))
+            if (model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY))
             {
                 if (CanUseAbilities())
                 {
                     gameManager.isEffectSelectPhase = true;
+                    StartCoroutine(movement.PlayerSelectMoveOn());
                     gameManager.DisableButtonCards();
+                }
+                else
+                {
+                    StartCoroutine(movement.SummonMove(this, gameManager.playerFieldTransform));
                 }
             }
             else if (CanUseAbilities())
@@ -280,7 +291,6 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
         {
-
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             foreach (CardController enemyCard in enemyCards)
             {
@@ -740,7 +750,45 @@ public class CardController : MonoBehaviour
     public void attackEffect(CardController target, bool isDefense)
     {
         Transform trans = effect.AttackEffect(model.attackEffect, transform);
-        StartThrow(trans, 5, transform.position, target.transform.position, model.attackTime, target, isDefense);
+        switch (model.attackType)
+        {
+            case ATTACKTYPE.THROW:
+                StartThrow(trans, 5, transform.position, target.transform.position, model.attackTime, target, isDefense);
+                break;
+
+            case ATTACKTYPE.DIRECT:
+                DirectAttack(trans, target.transform, target, isDefense, model.attackTime/60);
+                break;
+
+            case ATTACKTYPE.SPAWN:
+                StartCoroutine(SpawnEffect(trans, target.transform, target, isDefense, model.attackTime / 60));
+                break;
+        }
+    }
+
+    public IEnumerator SpawnEffect(Transform effect, Transform targetPos,CardController enemy,bool isDefense,float attackTime)
+    {
+        effect.position = targetPos.position;
+        yield return new WaitForSeconds(attackTime);
+        GameManager.instance.isAttacking = !isDefense;
+        model.Attack(enemy);
+        enemy.RefreshView();
+        CheckAttackParticle(effect);
+        effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+    }
+
+    public void DirectAttack(Transform effect,Transform endPos,CardController enemy,bool isDefense,float attackTime)
+    {
+        effect.DOMove(endPos.position, attackTime)
+            .OnComplete(() =>
+            {
+                hitEffect(endPos);
+                GameManager.instance.isAttacking = !isDefense;
+                model.Attack(enemy);
+                enemy.RefreshView();
+                CheckAttackParticle(effect);
+                effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+            });
     }
     public void StartThrow(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
     {
@@ -768,7 +816,8 @@ public class CardController : MonoBehaviour
                     GameManager.instance.isAttacking = !isDefense;
                     model.Attack(enemyCC);
                     enemyCC.RefreshView();
-                    Destroy(target.gameObject);
+                    CheckAttackParticle(target);
+                    target.SetParent(GameManager.instance.uiParticlesManager.transform);
                 }
                 yield break;
             }
@@ -787,24 +836,157 @@ public class CardController : MonoBehaviour
         return Vector3.Lerp(a, b, t);
     }
 
+    public void spellEffect(CardController target, bool isDefense)
+    {
+        GameManager.instance.isAttacking = true;
+        Transform trans = effect.AttackEffect(model.attackEffect, transform);
+        switch (model.attackType)
+        {
+            case ATTACKTYPE.DIRECT:
+                DirectSpellAttack(trans, target.transform, target, isDefense, model.attackTime / 60);
+                break;
+
+            case ATTACKTYPE.SPAWN:
+                StartCoroutine(SpawnSpellEffect(trans, target.transform, target, isDefense, model.attackTime / 60));
+                break;
+        }
+    }
+
+
+    public void DirectSpellAttack(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
+    {
+        effect.DOMove(endPos.position, attackTime)
+            .OnComplete(() =>
+            {
+                GameManager.instance.isAttacking = !isDefense;
+                //model.Attack(enemy);
+                UseSpellTo(enemy);
+                enemy.RefreshView();
+                CheckAttackParticle(effect);
+                effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+            });
+    }
+
+    public IEnumerator SpawnSpellEffect(Transform effect, Transform targetPos, CardController enemy, bool isDefense, float attackTime)
+    {
+        effect.position = targetPos.position;
+        yield return new WaitForSeconds(attackTime);
+        GameManager.instance.isAttacking = !isDefense;
+        //model.Attack(enemy);
+        UseSpellTo(enemy);
+        enemy.RefreshView();
+        CheckAttackParticle(effect);
+        effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+    }
+
     public void hitEffect(Transform target)
     {
-        effect.HitEffect(model.hitEffect, target.transform);
+        Transform hitEffect = effect.HitEffect(model.hitEffect, target.transform);
+        CheckAnyParticle(hitEffect);
     }
 
     public void destroyEffect(ParticleSystem destroyObj, Transform trans)
     {
-        effect.DestroyEffect(destroyObj, trans);
+        Transform destroyEffect = effect.DestroyEffect(destroyObj, trans);
+        CheckAnyParticle(destroyEffect);
     }
 
     public void summonEffect(ParticleSystem summonObj, Transform trans)
     {
-        effect.SummonEffect(summonObj, trans);
+        Transform summonEffect = effect.SummonEffect(summonObj, trans);
+        StartCoroutine(CheckDestroyParticle(summonEffect));
+    }
+
+    public void CardDisappearEffect(ParticleSystem summonObj, Transform trans)
+    {
+        Transform summonEffect = effect.CardDisappearEffect(summonObj, trans);
+        StartCoroutine(CheckDestroyParticle(summonEffect));
+    }
+
+    public void CheckAttackParticle(Transform target)
+    {
+        if (target != null && target.childCount > 0)
+        {
+            // 最初の実際のパーティクルオブジェクトを探す
+            Transform particleChild = null;
+            for (int i = 0; i < target.childCount; i++)
+            {
+                var child = target.GetChild(i);
+                if (!child.name.StartsWith("[generated]") &&
+                    !child.GetComponent<UIParticleRenderer>())
+                {
+                    particleChild = child;
+                    break;
+                }
+            }
+
+            if (particleChild != null)
+            {
+                Destroy(particleChild.gameObject);
+                target.SetParent(GameManager.instance.uiParticlesManager.transform);
+            }
+        }
+    }
+    public void CheckAnyParticle(Transform target)
+    {
+        if (target != null && target.childCount > 0)
+        {
+            // 最初の実際のパーティクルオブジェクトを探す
+            Transform particleChild = null;
+            for (int i = 0; i < target.childCount; i++)
+            {
+                var child = target.GetChild(i);
+                if (!child.name.StartsWith("[generated]") &&
+                    !child.GetComponent<UIParticleRenderer>())
+                {
+                    particleChild = child;
+                    break;
+                }
+            }
+
+            if (particleChild != null)
+            {
+                Destroy(particleChild.gameObject, 0.5f);
+                target.SetParent(GameManager.instance.uiParticlesManager.transform);
+            }
+        }
+    }
+
+    public IEnumerator CheckDestroyParticle(Transform target)
+    {
+        if (target != null && target.childCount > 0)
+        {
+            // 最初の実際のパーティクルオブジェクトを探す
+            Transform particleChild = null;
+            for (int i = 0; i < target.childCount; i++)
+            {
+                var child = target.GetChild(i);
+                if (!child.name.StartsWith("[generated]") &&
+                    !child.GetComponent<UIParticleRenderer>())
+                {
+                    particleChild = child;
+                    break;
+                }
+            }
+
+            if (particleChild != null)
+            {
+                Destroy(particleChild.gameObject, 0.5f);
+                yield return new WaitForSeconds(0.5f);
+                target.SetParent(GameManager.instance.uiParticlesManager.transform);
+            }
+        }
     }
 }
 
 /*　
  *　配列管理のエフェクトや音源
+ *　
+ *　場に出すときの整合性
+ *　
+ *　スペルエフェクト実装　ランダムと敵分
+ *　時間制限後の処理
+ *　
  *　
  *　
  * 演出
