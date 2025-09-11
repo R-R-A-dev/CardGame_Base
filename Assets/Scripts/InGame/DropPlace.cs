@@ -36,6 +36,10 @@ public class DropPlace : MonoBehaviour, IDropHandler
             card.movement.defaultParent = this.transform;
             droppedCard = card;
             card.OnFiled();
+            if (!(droppedCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) ||
+                droppedCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY)))
+                droppedCard = null;
+
         }
     }
 

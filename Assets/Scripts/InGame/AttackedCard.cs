@@ -9,7 +9,7 @@ public class AttackedCard : MonoBehaviour, IDropHandler
     {
         CardController attacker = eventData.pointerDrag.GetComponent<CardController>();
         CardController defender = GetComponent<CardController>();
-        if (attacker == null || defender == null)
+        if (attacker == null || defender == null||!defender.model.isFieldCard)
         {
             return;
         }

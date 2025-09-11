@@ -55,6 +55,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                     droppedCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY) && !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard)
                 {
                     StartCoroutine(SummonMove(droppedCard, selectedCard));
+                    DropPlace.droppedCard = null;
                     CancelSelect();
                 }
                 else
@@ -70,7 +71,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             {
                 //droppedCard.UseSpellTo(selectedCard);
                 StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
-                droppedCard.spellEffect(selectedCard, false);
+                droppedCard.spellEffect(selectedCard, true);
                 CancelSelect();
             }
             else

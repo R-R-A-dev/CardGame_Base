@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.XR;
 using DG.Tweening;
 using UnityEngine.UI;
+using Unity.Jobs;
 
 public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
@@ -193,10 +194,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         rectTransform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
         rectTransform.DOScale(2f, 0.3f);
         yield return rectTransform.DOAnchorPos(new Vector2(960, -540), 0.3f).WaitForCompletion();
-        GameManager.instance.ScaleYSummonLightOn();
+        GameManager.instance.ScaleYSummonLightCenterOn();
 
         //光のエフェクトを表示しながら縮小　カードは非表示
-        GameManager.instance.SummonLightOn();
+        GameManager.instance.SummonLightCenterOn();
         summonCard.view.HideCard();
         GameManager.instance.ScaleYSummonLightFadeOut();
         yield return new WaitForSeconds(0.3f);
@@ -241,7 +242,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public IEnumerator SelectedSummon(CardController summonCard, Transform summonPlace)
     {
         GameManager.instance.isSummoning = true;
-        GameManager.instance.SummonLightOn();
+        GameManager.instance.SummonLightLeftOn();
         summonCard.view.HideCard();
         GameManager.instance.ScaleYSummonLightFadeOut();
         yield return new WaitForSeconds(0.3f);
@@ -267,17 +268,17 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         GameManager.instance.isSummoning = false;
     }
 
-    public IEnumerator MoveCenterSpell(CardController summonCard)
+    public IEnumerator MoveLeftSpell(CardController summonCard)
     {
-        //拡大しながら中央へ移動
+
         RectTransform rectTransform = GetComponent<RectTransform>();
         rectTransform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
-        rectTransform.DOScale(2f, 0.3f);
-        yield return rectTransform.DOAnchorPos(new Vector2(960, -540), 0.3f).WaitForCompletion();
-        GameManager.instance.ScaleYSummonLightOn();
+        //rectTransform.DOScale(2f, 0.3f);
+        yield return rectTransform.DOAnchorPos(new Vector2(160, -140), 0.3f).WaitForCompletion();
+        GameManager.instance.ScaleYSummonLightLeftOn();
 
         //光のエフェクトを表示しながら縮小　カードは非表示
-        GameManager.instance.SummonLightOn();
+        GameManager.instance.SummonLightLeftOn();
         summonCard.view.HideCard();
         GameManager.instance.ScaleYSummonLightFadeOut();
         yield return new WaitForSeconds(0.3f);
@@ -286,7 +287,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     public IEnumerator UseSpellEffect(CardController summonCard)
     {
-        GameManager.instance.SummonLightOn();
+        GameManager.instance.SummonLightLeftOn();
+        GameManager.instance.ScaleYSummonLightLeftOn();
+        GameManager.instance.ScaleYSummonLightFadeOut();
         summonCard.view.HideCard();
         yield return new WaitForSeconds(0.3f);
         summonCard.CardDisappearEffect(GameManager.instance.summonEffect, transform);

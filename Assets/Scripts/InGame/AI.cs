@@ -51,20 +51,21 @@ public class AI : MonoBehaviour
                     StartCoroutine(CastAbilityOf(selectCard));
                 }
             }
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(2);
             handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
         }
 
 
 
         yield return new WaitForSeconds(1);
-
         /* 攻撃 */
         // フィールドのカードリストを取得
         CardController[] fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
+        
         //攻撃可能カードがあれば攻撃を繰り返す
         while (Array.Exists(fieldCardList, card => card.model.canAttack))
         {
+            
             if (GameManager.instance.isAttacking||GameManager.instance.isSummoning)
             {
                 yield return null;
@@ -77,7 +78,6 @@ public class AI : MonoBehaviour
 
             // attackerカードを選択
             CardController attacker = enemyCanAttackCardList[0];
-
             if (playerFieldCardList.Length > 0)
             {
                 
@@ -92,7 +92,6 @@ public class AI : MonoBehaviour
                         playerFieldCardList = Array.FindAll(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD));
                     }
                 }
-
                 CardController defender = playerFieldCardList[0];
                 // attackerとdefenderを戦わせる
                 //StartCoroutine(attacker.movement.MoveToTarget(defender.transform));
@@ -175,10 +174,11 @@ public class AI : MonoBehaviour
             movePosition = enemyCards.transform;
         }
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
-        StartCoroutine(card.movement.MoveCenterSpell(card));
+        StartCoroutine(card.movement.MoveLeftSpell(card));
         //　スペル発動時に一回転して中央に移動したから右に回転しながら移動
-        yield return new WaitForSeconds(0.6f);
-        card.UseSpellTo(target);
+        yield return new WaitForSeconds(0.9f);
+        card.spellEffect(target, true);
+        //card.UseSpellTo(target);//スペルエフェクト
     }
 
 }

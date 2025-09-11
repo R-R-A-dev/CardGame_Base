@@ -749,6 +749,7 @@ public class CardController : MonoBehaviour
 
     public void attackEffect(CardController target, bool isDefense)
     {
+        transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
         Transform trans = effect.AttackEffect(model.attackEffect, transform);
         switch (model.attackType)
         {
@@ -771,9 +772,9 @@ public class CardController : MonoBehaviour
         effect.position = targetPos.position;
         yield return new WaitForSeconds(attackTime);
         GameManager.instance.isAttacking = !isDefense;
+        CheckAttackParticle(effect);
         model.Attack(enemy);
         enemy.RefreshView();
-        CheckAttackParticle(effect);
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
     }
 
@@ -784,9 +785,9 @@ public class CardController : MonoBehaviour
             {
                 hitEffect(endPos);
                 GameManager.instance.isAttacking = !isDefense;
+                CheckAttackParticle(effect);
                 model.Attack(enemy);
                 enemy.RefreshView();
-                CheckAttackParticle(effect);
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
             });
     }
@@ -814,9 +815,9 @@ public class CardController : MonoBehaviour
                 {
                     hitEffect(targetPos);
                     GameManager.instance.isAttacking = !isDefense;
+                    CheckAttackParticle(target);
                     model.Attack(enemyCC);
                     enemyCC.RefreshView();
-                    CheckAttackParticle(target);
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
                 }
                 yield break;
@@ -860,9 +861,9 @@ public class CardController : MonoBehaviour
             {
                 GameManager.instance.isAttacking = !isDefense;
                 //model.Attack(enemy);
+                CheckAttackParticle(effect);
                 UseSpellTo(enemy);
                 enemy.RefreshView();
-                CheckAttackParticle(effect);
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
             });
     }
@@ -874,8 +875,8 @@ public class CardController : MonoBehaviour
         GameManager.instance.isAttacking = !isDefense;
         //model.Attack(enemy);
         UseSpellTo(enemy);
-        enemy.RefreshView();
         CheckAttackParticle(effect);
+        enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
     }
 
@@ -985,8 +986,11 @@ public class CardController : MonoBehaviour
  *　場に出すときの整合性
  *　
  *　スペルエフェクト実装　ランダムと敵分
+ *　攻撃で片方が死んだときの処理
  *　時間制限後の処理
  *　
+ *　不具合
+ *　時間ギリギリに場に出したときに手札に戻る
  *　
  *　
  * 演出

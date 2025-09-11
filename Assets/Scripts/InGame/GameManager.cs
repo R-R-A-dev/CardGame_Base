@@ -433,6 +433,7 @@ public class GameManager : MonoBehaviour
         defender.Defense(attacker);
         /*        Debug.Log("attacker HP:" + attacker.model.hp);
                 Debug.Log("defender HP:" + defender.model.hp);*/
+        yield return new WaitForSeconds(0.8f + (defender.model.attackTime / 60));
         attacker.CheckAlive();
         defender.CheckAlive();
     }
@@ -526,8 +527,15 @@ public class GameManager : MonoBehaviour
         uiManager.ShowResultPanel(heroHp);
     }
 
-    public void SummonLightOn()
+    public void SummonLightCenterOn()
     {
+        summonLight.localPosition = new Vector3(0, 0, 0);
+        summonLight.GetComponent<Image>().color = new Color(255, 255, 255, 255);
+    }
+
+    public void SummonLightLeftOn()
+    {
+        summonLight.localPosition = new Vector3(-800, 400, 0);
         summonLight.GetComponent<Image>().color = new Color(255, 255, 255, 255);
     }
 
@@ -554,9 +562,14 @@ public class GameManager : MonoBehaviour
         });
     }
 
-    public void ScaleYSummonLightOn()
+    public void ScaleYSummonLightCenterOn()
     {
         summonLight.localScale = new Vector3(2, 2, 1);
+    }
+
+    public void ScaleYSummonLightLeftOn()
+    {
+        summonLight.localScale = new Vector3(1, 1, 1);
     }
 
     public void SelectingPanelOn()
