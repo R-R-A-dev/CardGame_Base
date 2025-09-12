@@ -18,7 +18,7 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
         if (spellCard.CanUseSpells())
         {
             if (!GameManager.instance.isPlayerTurn) return;
-
+            spellCard.movement.isDraggable = false;
             //spellCard.UseSpellTo(target);
             //分岐 effetselectの分岐
             if (spellCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY) ||

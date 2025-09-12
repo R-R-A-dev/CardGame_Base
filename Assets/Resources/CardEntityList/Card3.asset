@@ -15,7 +15,7 @@ MonoBehaviour:
   no: 0
   name: test3
   hp: 5
-  at: 1
+  at: 5
   cost: 1
   effectDmg: 1
   effectHeal: 1
@@ -30,9 +30,9 @@ MonoBehaviour:
   attackEffect: {fileID: 3817663088807389354, guid: b62515ee11412284f8a213b943f9aab1, type: 3}
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
-  attackTime: 120
+  attackTime: 30
   icon: {fileID: 619223149, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
-  attackType: 2
+  attackType: 0
   rare: 0
   ability: 0
   spell: 0

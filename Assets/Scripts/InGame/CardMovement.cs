@@ -115,6 +115,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
                 if (dropPlace.type == DropPlace.TYPE.FIELD &&
                     !(summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY)))
                 {
+                    isDraggable = false;
                     StartCoroutine(SummonMove(summonCard, dropPlace.transform));
                 }
             }else if (summonCard.IsSpell)

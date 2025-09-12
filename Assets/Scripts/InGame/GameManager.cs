@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     public bool showDescriptionClicked;
 
     // 時間管理
-    int timeCount;
+    public int timeCount;
 
     // シングルトン化（どこからでもアクセスできるようにする）
     public static GameManager instance;
@@ -69,16 +69,16 @@ public class GameManager : MonoBehaviour
             uiManager.CloseDescriptionPanel();
         }
 
-/*        if (!isPlayerTurn && isEffectSelectPhase)
-        {
-            DropPlace.droppedCard.view.SetActiveSelectablePanel(false);
-            DropPlace.droppedCard.model.isFieldCard = false;
-            DropPlace.droppedCard.movement.PlayerSelectMoveOff(DropPlace.droppedCard);
-            DropPlace.droppedCard = null;
-            SelectingPanelOff();
-            isEffectSelectPhase = false;
-            EnableButtonCards();
-        }*/
+        /*        if (!isPlayerTurn && isEffectSelectPhase)
+                {
+                    DropPlace.droppedCard.view.SetActiveSelectablePanel(false);
+                    DropPlace.droppedCard.model.isFieldCard = false;
+                    DropPlace.droppedCard.movement.PlayerSelectMoveOff(DropPlace.droppedCard);
+                    DropPlace.droppedCard = null;
+                    SelectingPanelOff();
+                    isEffectSelectPhase = false;
+                    EnableButtonCards();
+                }*/
     }
 
 
@@ -261,16 +261,23 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountDown()
     {
-        timeCount = 5;
+        timeCount = 50;
         uiManager.UpdateTime(timeCount);
 
         while (timeCount > 0)
         {
-            yield return new WaitForSeconds(1); // 1秒待機
+            yield return new WaitForSeconds(1);
             timeCount--;
             uiManager.UpdateTime(timeCount);
         }
-        ChangeTurn();
+        while (isSummoning || isAttacking)
+        {
+            yield return null;
+        }
+        if (!isSummoning && !isAttacking)
+        {
+            StartCoroutine(ChangeTurn());
+        }
     }
 
     public Transform GetFriendHandFieldTransform(bool isPlayer)
@@ -375,16 +382,34 @@ public class GameManager : MonoBehaviour
     {
         if (isPlayerTurn)
         {
-            ChangeTurn();
+            StartCoroutine(WaitAndChangeTurn());
         }
     }
 
-    public void ChangeTurn()
+    private IEnumerator WaitAndChangeTurn()
     {
-        isPlayerTurn = !isPlayerTurn;
+        while (isSummoning || isAttacking)
+        {
+            yield return null;
+        }
 
+        if (!isSummoning && !isAttacking)
+        {
+            StartCoroutine(ChangeTurn());
+        }
+    }
+
+    public IEnumerator ChangeTurn()
+    {
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
+
+        yield return new WaitForSeconds(4f);
+
+        //ターン変更演出
+
+
+        isPlayerTurn = !isPlayerTurn;
 
         CardController[] playerFieldCardList = playerFieldTransform.GetComponentsInChildren<CardController>();
         SettingCanAttackView(playerFieldCardList, false);

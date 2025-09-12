@@ -26,7 +26,7 @@ public class AI : MonoBehaviour
         // コスト以下のカードがあれば、カードをフィールドに出し続ける
         // 条件：モンスターカードならコストのみ
         // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
-        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))))//CanUseSpell()
+        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0)//CanUseSpell()
         {
             // コスト以下のカードリストを取得
             CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells())));//CanUseSpell()
@@ -61,17 +61,17 @@ public class AI : MonoBehaviour
         /* 攻撃 */
         // フィールドのカードリストを取得
         CardController[] fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
-        
+
         //攻撃可能カードがあれば攻撃を繰り返す
-        while (Array.Exists(fieldCardList, card => card.model.canAttack))
+        while (Array.Exists(fieldCardList, card => card.model.canAttack) && gameManager.timeCount > 0)
         {
-            
-            if (GameManager.instance.isAttacking||GameManager.instance.isSummoning)
+
+            if (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
             {
                 yield return null;
                 continue;
             }
-            
+
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
             CardController[] playerFieldCardList = gameManager.playerFieldTransform.GetComponentsInChildren<CardController>();
@@ -80,7 +80,7 @@ public class AI : MonoBehaviour
             CardController attacker = enemyCanAttackCardList[0];
             if (playerFieldCardList.Length > 0)
             {
-                
+
                 CardController card = new CardController();
 
                 if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
@@ -112,7 +112,7 @@ public class AI : MonoBehaviour
         }
 
         yield return new WaitForSeconds(1);
-        gameManager.ChangeTurn();
+        StartCoroutine(gameManager.ChangeTurn());
     }
 
     IEnumerator CastAbilityOf(CardController card)
