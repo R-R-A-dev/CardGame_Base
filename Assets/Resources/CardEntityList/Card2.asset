@@ -37,5 +37,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 0
+  abilities: 4096
   targetCardID: 0100000001000000

@@ -116,6 +116,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
                     !(summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY)))
                 {
                     isDraggable = false;
+                    isHand = false;
                     StartCoroutine(SummonMove(summonCard, dropPlace.transform));
                 }
             }else if (summonCard.IsSpell)
@@ -271,7 +272,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     public IEnumerator MoveLeftSpell(CardController summonCard)
     {
-
+        GameManager.instance.isSummoning = true;
         RectTransform rectTransform = GetComponent<RectTransform>();
         rectTransform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
         //rectTransform.DOScale(2f, 0.3f);
@@ -284,6 +285,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         GameManager.instance.ScaleYSummonLightFadeOut();
         yield return new WaitForSeconds(0.3f);
         summonCard.CardDisappearEffect(GameManager.instance.summonEffect, transform);
+        GameManager.instance.isSummoning = false;
     }
 
     public IEnumerator UseSpellEffect(CardController summonCard)

@@ -80,7 +80,7 @@ public enum ATTACKTYPE
     SPAWN,
 }
 
-public enum RARE 
+public enum RARE
 {
     N,
     R,
@@ -128,11 +128,16 @@ public enum SPELLS
     EFFECT_SELECTION_ENEMY = 4096,   // 敵効果対象を選択
     REDUCE_HAND_COST = 8192,         // 手札のカードのコストを減らす
     INCREASE_ENEMY_COST = 16384,     // 敵のコストを増やす
-    HEAL_BY_DAMAGE = 32768,          // 攻撃した分回復する
+    HEAL_BY_DAMAGE = 32768,          // 攻撃した分回復する頭
     CONDITIONAL_ENEMY_DEBUFF = 65536, // 敵のパラメータ変更（条件付き）
-    STATS_UP_ON_ATTACK = 131072,     // 攻撃をするたびにパラメータアップ
+    CONDITIONAL_FRIEND_BUFF = 131072, // 味方のパラメータ変更（条件付き）
     RANDOM_DAMAGE = 262144,          // ランダムダメージ
     DESTROY_ALL_FIELD_CARDS = 524288, // 場のカードをすべて破壊する
     RANDOM_ENEMY = 1048576,          // 敵のランダムターゲット
     RANDOM_FRIEND = 2097152,         // 味方のランダムターゲット
+    SWAP_HP_ATK = 4194304,           // HPと攻撃力を入れ替える
+    DISCARD_ENEMY_HAND = 8388608,    // 相手の手札を破棄
+    DISCARD_ALL_ENEMY_HAND = 16777216, // 相手の手札を全て破棄
+    DISCARD_FRIEND_HAND = 33554432,  // 自分の手札を破棄
+    DISCARD_ALL_FRIEND_HAND = 67108864, // 自分の手札を全て破棄
 }

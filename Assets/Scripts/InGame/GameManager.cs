@@ -87,8 +87,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 4, 3, 3, 3, 1, 1, 1, 1 });
-        enemy.Init(new List<int>() { 2, 4, 4, 4, 4, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 4, 3, 3, 3, 3, 3, 1, 1 });
+        enemy.Init(new List<int>() { 3, 4, 4, 4, 4, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -221,6 +221,7 @@ public class GameManager : MonoBehaviour
     {
         CardController card = Instantiate(cardPrefab, hand, false);
         card.EffectCardInit(model);
+        card.summonEffect(card.model.summonEffect, card.transform);
         if (baseCard.model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
             if (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
@@ -466,37 +467,74 @@ public class GameManager : MonoBehaviour
 
     public void AttackToHero(CardController attacker)
     {
+        GameManager.instance.isAttacking = true;
+
         if (attacker.model.isPlayerCard)
         {
-            enemy.heroHp -= attacker.model.at;
+            attacker.AttackHero(enemyHero);
         }
-        else
+        else if (!attacker.model.isPlayerCard)
         {
-            player.heroHp -= attacker.model.at;
+            attacker.AttackHero(playerHero);
         }
-        uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
-        if (attacker.model.isDoubleAction)
+
+        //if (attacker.model.isPlayerCard)
+        //{
+        //    enemy.heroHp -= attacker.model.at;
+        //}
+        //else
+        //{
+        //    player.heroHp -= attacker.model.at;
+        //}
+        //uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+        //if (attacker.model.isDoubleAction)
+        //{
+        //    if (!attacker.model.isSingleAction)
+        //    {
+        //        attacker.SetCanAttack(true);
+        //        attacker.model.isSingleAction = true;
+        //    }
+        //    else
+        //    {
+        //        attacker.SetCanAttack(false);
+        //        attacker.model.isSingleAction = false;
+        //    }
+        //}
+        //else
+        //{
+        //    attacker.SetCanAttack(false);
+        //}
+        //if (attacker.model.isStatsUpOnAttack)
+        //{
+        //    attacker.model.at += attacker.model.effectDmg;
+        //    attacker.model.hp += attacker.model.effectHeal;
+        //    attacker.RefreshView();
+        //}
+    }
+    public void AttackToHeroSpell(CardController card)
+    {
+        GameManager.instance.isAttacking = true;
+        if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
         {
-            if (!attacker.model.isSingleAction)
+            if (card.model.isPlayerCard)
             {
-                attacker.SetCanAttack(true);
-                attacker.model.isSingleAction = true;
+                card.AttackHeroSpell(enemyHero);
             }
-            else
+            else if (!card.model.isPlayerCard)
             {
-                attacker.SetCanAttack(false);
-                attacker.model.isSingleAction = false;
+                card.AttackHeroSpell(playerHero);
             }
         }
-        else
+        if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
         {
-            attacker.SetCanAttack(false);
-        }
-        if (attacker.model.isStatsUpOnAttack)
-        {
-            attacker.model.at += attacker.model.effectDmg;
-            attacker.model.hp += attacker.model.effectHeal;
-            attacker.RefreshView();
+            if (card.model.isPlayerCard)
+            {
+                card.AttackHeroSpell(playerHero);
+            }
+            else if (!card.model.isPlayerCard)
+            {
+                card.AttackHeroSpell(enemyHero);
+            }
         }
     }
 

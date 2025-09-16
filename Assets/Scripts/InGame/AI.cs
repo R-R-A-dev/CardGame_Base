@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.GPUSort;
 
 public class AI : MonoBehaviour
 {
@@ -101,7 +102,7 @@ public class AI : MonoBehaviour
             }
             else
             {
-                StartCoroutine(attacker.movement.MoveToTarget(gameManager.playerHero));
+                //StartCoroutine(attacker.movement.MoveToTarget(gameManager.playerHero));
                 yield return new WaitForSeconds(0.25f);
                 gameManager.AttackToHero(attacker);
                 yield return new WaitForSeconds(0.25f);
@@ -136,49 +137,97 @@ public class AI : MonoBehaviour
     {
         CardController target = null;
         Transform movePosition = null;
-        if (card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD))
+        CardController[] targets = null;
+        if (card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF)||
+            card.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD)|| card.model.spells.HasFlag(SPELLS.SWAP_HP_ATK) && card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY))
         {
             target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
-            movePosition = target.transform;
         }
-        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD))
+        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD)|| card.model.spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF)&&
+                card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_FRIEND))
         {
             target = gameManager.GetFriendFieldCards(card.model.isPlayerCard)[0];
-            movePosition = target.transform;
         }
         else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
         {
-            movePosition = gameManager.playerFieldTransform;
+            targets = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
         }
-        else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
+        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
         {
-            movePosition = gameManager.enemyFieldTransform;
+            targets = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
         }
-        else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
+        else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO)||card.model.spells.HasFlag(SPELLS.HEAL_BY_DAMAGE))
         {
+            StartCoroutine(card.movement.MoveLeftSpell(card));
+            yield return new WaitForSeconds(0.9f);
             movePosition = gameManager.playerHero;
+            card.attackSpellEffectHero(movePosition,true);
+            yield break;
         }
         else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
         {
+            StartCoroutine(card.movement.MoveLeftSpell(card));
+            yield return new WaitForSeconds(0.9f);
             movePosition = gameManager.enemyHero;
+            card.attackSpellEffectHero(movePosition, true);
+            yield break;
+        }else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS))
+        {
+            StartCoroutine(card.movement.MoveLeftSpell(card));
+            yield return new WaitForSeconds(0.9f);
+            //ドロー処理
         }
-        if (card.model.spells.HasFlag(SPELLS.RANDOM_DAMAGE))
+            if (card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        {
+            Transform enemyCards = gameManager.GetFriendFieldTransform(card.model.isPlayerCard);
+        }
+
+        if (card.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        {
+            target = gameManager.GetFriendHandTransform(card.model.isPlayerCard)[0];
+        }
+        if (card.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST)|| card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND)|| card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        {
+            target = gameManager.GetEnemyHandTransform(card.model.isPlayerCard)[0];
+        }
+
+        if (card.model.spells.HasFlag(SPELLS.RANDOM_ENEMY))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
             target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
-            movePosition = target.transform;
         }
-        if (card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        else if (card.model.spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
-            Transform enemyCards = gameManager.GetFriendFieldTransform(card.model.isPlayerCard);
-            movePosition = enemyCards.transform;
+            CardController[] friendCards = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
+            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
         }
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
         StartCoroutine(card.movement.MoveLeftSpell(card));
         //　スペル発動時に一回転して中央に移動したから右に回転しながら移動
         yield return new WaitForSeconds(0.9f);
-        card.spellEffect(target, true);
+        if(card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
+        {
+            for(int i = 0; i < targets.Length; i++)
+            {
+                card.spellEffect(targets[i], true);
+            }
+        }
+        else
+        {
+            card.spellEffect(target, true);
+        }
+
         //card.UseSpellTo(target);//スペルエフェクト
     }
 
 }
+/*
+ * RANDOM_DAMAGE　SEARCH_SPECIFIC_UNIT　SUMMON_SPECIFIC_UNIT
+ * EFFECT_SELECTION_FRIEND　EFFECT_SELECTION_ENEMY
+ * 
+ * 
+ * 敵のスペル使用時の挙動について
+ * EFFECT_SELECTIONがあれば選択の処理にする
+ * ランダムは記入のとおり
+ * 
+*/

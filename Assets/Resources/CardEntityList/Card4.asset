@@ -18,7 +18,7 @@ MonoBehaviour:
   at: 1
   cost: 1
   effectDmg: 1
-  effectHeal: 0
+  effectHeal: 1
   description: spell
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
@@ -36,6 +36,6 @@ MonoBehaviour:
   rare: 0
   ability: 0
   spell: 0
-  spells: 4097
+  spells: 16
   abilities: 0
   targetCardID: 
