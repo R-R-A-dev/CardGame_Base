@@ -14,11 +14,15 @@ public class AI : MonoBehaviour
     public IEnumerator EnemyTurn()
     {
         Debug.Log("Enemyのターン");
+        while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
+        {
+            yield return null;
+            continue;
+        }
+        yield return new WaitForSeconds(1);
         // フィールドのカードを攻撃可能にする
         CardController[] enemyFieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
         gameManager.SettingCanAttackView(enemyFieldCardList, true);
-
-        yield return new WaitForSeconds(1);
 
         /* 場にカードをだす */
         // 手札のカードリストを取得
@@ -67,11 +71,6 @@ public class AI : MonoBehaviour
         while (Array.Exists(fieldCardList, card => card.model.canAttack) && gameManager.timeCount > 0)
         {
 
-            if (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
-            {
-                yield return null;
-                continue;
-            }
 
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
@@ -138,12 +137,12 @@ public class AI : MonoBehaviour
         CardController target = null;
         Transform movePosition = null;
         CardController[] targets = null;
-        if (card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF)||
-            card.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD)|| card.model.spells.HasFlag(SPELLS.SWAP_HP_ATK) && card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY))
+        if (card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF) ||
+            card.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.SWAP_HP_ATK) && card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY))
         {
             target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
         }
-        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD)|| card.model.spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF)&&
+        else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD) || card.model.spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF) &&
                 card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_FRIEND))
         {
             target = gameManager.GetFriendFieldCards(card.model.isPlayerCard)[0];
@@ -156,12 +155,12 @@ public class AI : MonoBehaviour
         {
             targets = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
         }
-        else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO)||card.model.spells.HasFlag(SPELLS.HEAL_BY_DAMAGE))
+        else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) || card.model.spells.HasFlag(SPELLS.HEAL_BY_DAMAGE))
         {
             StartCoroutine(card.movement.MoveLeftSpell(card));
             yield return new WaitForSeconds(0.9f);
             movePosition = gameManager.playerHero;
-            card.attackSpellEffectHero(movePosition,true);
+            card.attackSpellEffectHero(movePosition, true);
             yield break;
         }
         else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
@@ -171,43 +170,57 @@ public class AI : MonoBehaviour
             movePosition = gameManager.enemyHero;
             card.attackSpellEffectHero(movePosition, true);
             yield break;
-        }else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS))
+        }
+        else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS))
         {
             StartCoroutine(card.movement.MoveLeftSpell(card));
             yield return new WaitForSeconds(0.9f);
             //ドロー処理
         }
-            if (card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        if (card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
         {
             Transform enemyCards = gameManager.GetFriendFieldTransform(card.model.isPlayerCard);
         }
 
         if (card.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
         {
-            target = gameManager.GetFriendHandTransform(card.model.isPlayerCard)[0];
+            CardController[] hand = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
+            targets = new CardController[hand.Length - 1]; 
+
+            int index = 0;
+            for (int i = 0; i < hand.Length; i++)
+            {
+                if (card == hand[i])
+                    continue;
+
+                targets[index] = hand[i];
+                index++;
+            }
         }
-        if (card.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST)|| card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND)|| card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        if (card.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
         {
-            target = gameManager.GetEnemyHandTransform(card.model.isPlayerCard)[0];
+            targets = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
         }
 
         if (card.model.spells.HasFlag(SPELLS.RANDOM_ENEMY))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
         }
         else if (card.model.spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
-            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
+            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
+
         }
+        //Debug.Log(targets[0]);
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
         StartCoroutine(card.movement.MoveLeftSpell(card));
         //　スペル発動時に一回転して中央に移動したから右に回転しながら移動
         yield return new WaitForSeconds(0.9f);
-        if(card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
+        if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
         {
-            for(int i = 0; i < targets.Length; i++)
+            for (int i = 0; i < targets.Length; i++)
             {
                 card.spellEffect(targets[i], true);
             }

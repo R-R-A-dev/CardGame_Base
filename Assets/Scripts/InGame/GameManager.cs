@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Coffee.UIExtensions;
+using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using DG.Tweening;
-using Coffee.UIExtensions;
+using UnityEngine.XR;
 
 public class GameManager : MonoBehaviour
 {
@@ -37,6 +38,9 @@ public class GameManager : MonoBehaviour
     public UIParticlesManager uiParticlesManager;
     public CameraShake cameraShake;
     [SerializeField] Image selectingPanel;
+
+    [SerializeField] Transform playerDeck;
+    [SerializeField] Transform enemyDeck;
 
 
     public bool isSummoning = false;
@@ -88,7 +92,7 @@ public class GameManager : MonoBehaviour
     {
         uiManager.HideResultPanel();
         player.Init(new List<int>() { 4, 3, 3, 3, 3, 3, 1, 1 });
-        enemy.Init(new List<int>() { 3, 4, 4, 4, 4, 4, 4, 4, 1 });
+        enemy.Init(new List<int>() { 3, 3, 3, 3, 4, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -184,18 +188,51 @@ public class GameManager : MonoBehaviour
         CreateCard(cardID, hand);
     }
 
+    public void DrawCard(List<int> deck, Transform hand)
+    {
+        if (deck.Count == 0)
+        {
+            return;
+        }
+        int cardID = deck[0];
+        deck.RemoveAt(0);
+        CreateCardEffect(cardID, hand);
+    }
+
     public void DrawCard(bool isPlayer)
     {
         if (isPlayer)
         {
-            GiveCardToHand(player.deck, playerHandTransform);
+            DrawCard(player.deck, playerHandTransform);
         }
         else
         {
-            GiveCardToHand(enemy.deck, enemyHandTransform);
+            DrawCard(enemy.deck, enemyHandTransform);
         }
     }
 
+
+    void CreateCardEffect(int cardID, Transform hand)
+    {
+        // カードの生成とデータの受け渡し
+        CardController card = Instantiate(cardPrefab, hand, false);
+        if (hand.name == "PlayerHand")
+        {
+            card.Init(cardID, true); 
+            card.transform.SetParent(playerDeck);
+        }
+        else
+        {
+            card.Init(cardID, false); 
+            card.transform.SetParent(enemyDeck);
+        }
+
+        card.transform.localPosition = Vector3.zero;
+        card.transform.localEulerAngles = Vector3.zero;
+        card.transform.SetParent(card.transform.parent.parent);
+        //
+        card.movement.DrawEffect(card);
+    }
 
     void CreateCard(int cardID, Transform hand)
     {
@@ -421,12 +458,12 @@ public class GameManager : MonoBehaviour
         if (isPlayerTurn)
         {
             player.IncreaseManaCost();
-            GiveCardToHand(player.deck, playerHandTransform);
+            DrawCard(player.deck, playerHandTransform);
         }
         else
         {
             enemy.IncreaseManaCost();
-            GiveCardToHand(enemy.deck, enemyHandTransform);
+            DrawCard(enemy.deck, enemyHandTransform);
         }
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
         TurnCalc();

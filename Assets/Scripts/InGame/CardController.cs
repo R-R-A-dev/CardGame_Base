@@ -240,23 +240,25 @@ public class CardController : MonoBehaviour
 
     public void ReduceHandCost(CardController card)
     {
-        CardController[] handCards = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
-        foreach (CardController handCard in handCards)
-        {
-            handCard.model.ReduceHandCost(card.model.at);
-            handCard.RefreshView();
-        }
+        //CardController[] handCards = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
+        //foreach (CardController handCard in handCards)
+        //{
+
+        //}
+        model.ReduceHandCost(card);
+        card.RefreshView();
 
     }
 
     public void IncreaseEnemyHandCost(CardController card)
     {
-        CardController[] enemyHandCards = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
-        foreach (CardController enemyHandCard in enemyHandCards)
-        {
-            enemyHandCard.model.IncreaseEnemyHandCost(card.model.at);
-            enemyHandCard.RefreshView();
-        }
+        //CardController[] enemyHandCards = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
+        //foreach (CardController enemyHandCard in enemyHandCards)
+        //{
+
+        //}
+        model.IncreaseEnemyHandCost(card);
+        card.RefreshView();
     }
 
     public void SwapHPToATK(CardController target)
@@ -429,20 +431,22 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
         {
-            CardController[] handCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
-            if (handCards.Length > 0)
-            {
-                ReduceHandCost(this);
-            }
+            //CardController[] handCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
+            //if (handCards.Length > 0)
+            //{
+
+            //}
+            ReduceHandCost(this);
             return;
         }
         if (model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST))
         {
-            CardController[] enemyHandCards = gameManager.GetEnemyHandTransform(this.model.isPlayerCard);
-            if (enemyHandCards.Length > 0)
-            {
-                IncreaseEnemyHandCost(this);
-            }
+            //CardController[] enemyHandCards = gameManager.GetEnemyHandTransform(this.model.isPlayerCard);
+            //if (enemyHandCards.Length > 0)
+            //{
+
+            //}
+            IncreaseEnemyHandCost(this);
             return;
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
@@ -707,24 +711,27 @@ public class CardController : MonoBehaviour
         }
         if (model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
         {
-            CardController[] friendsCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
-            if (friendsCards.Length > 0)
-            {
-                foreach (CardController friendCard in friendsCards)
-                {
-                    Destroys(friendCard);
-                    friendCard.CheckAlive();
-                }
-            }
-            if (enemyCards.Length > 0)
-            {
-                foreach (CardController enemyCard in enemyCards)
-                {
-                    Destroys(enemyCard);
-                    enemyCard.CheckAlive();
-                }
-            }
+            //CardController[] friendsCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            //CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            //if (friendsCards.Length > 0)
+            //{
+            //    foreach (CardController friendCard in friendsCards)
+            //    {
+            //        Destroys(friendCard);
+            //        friendCard.CheckAlive();
+            //    }
+            //}
+            //if (enemyCards.Length > 0)
+            //{
+            //    foreach (CardController enemyCard in enemyCards)
+            //    {
+            //        Destroys(enemyCard);
+            //        enemyCard.CheckAlive();
+            //    }
+            //}
+
+            Destroys(target);
+            target.CheckAlive();
         }
         if (model.spells.HasFlag(SPELLS.RANDOM_DAMAGE))
         {
@@ -761,6 +768,16 @@ public class CardController : MonoBehaviour
                 AttackBuff(this, target);
                 target.RefreshView();
             }
+        }
+        if (model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST))
+        {
+            IncreaseEnemyHandCost(target);
+            return;
+        }
+        if (model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
+        {
+            ReduceHandCost(target);
+            return;
         }
 
         gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
@@ -1352,7 +1369,8 @@ public class CardController : MonoBehaviour
  *　場に出すときの演出と攻撃中はターン変更が行われずに操作ができないようにする
  *　
  *　デッキ編成画面
- *　スペルの処理確認
+ *　スペル、アビリティの処理確認
+ *　ドロー時とターン変更の整合性
  *　
  *　
  * 演出

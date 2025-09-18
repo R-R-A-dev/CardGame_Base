@@ -175,18 +175,18 @@ public class CardModel
         target.transform.SetParent(fieldTransform);
     }
 
-    public void ReduceHandCost(int point)
+    public void ReduceHandCost(CardController card)
     {
-        cost -= point;
-        if (cost - point < 0)
+        card.model.cost -= effectDmg;
+        if (cost - effectDmg < 0)
         {
             cost = 0;
         }
     }
 
-    public void IncreaseEnemyHandCost(int point)
+    public void IncreaseEnemyHandCost(CardController card)
     {
-        cost += point;
+        card.model.cost += effectDmg;
     }
 
     void RecoveryHP(int point)

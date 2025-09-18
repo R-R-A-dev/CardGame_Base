@@ -62,7 +62,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             if (GameManager.instance.isSummoning) return;
             if (GameManager.instance.isEffectSelectPhase) return;
-           
+
             // ドラッグ中にプレイヤーのターンでない場合は元の手札に戻る
             if (isDraggable)
             {
@@ -119,7 +119,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
                     isHand = false;
                     StartCoroutine(SummonMove(summonCard, dropPlace.transform));
                 }
-            }else if (summonCard.IsSpell)
+            }
+            else if (summonCard.IsSpell)
             {
                 transform.SetParent(defaultParent, false);
                 transform.SetSiblingIndex(handSiblingIndex);
@@ -296,5 +297,54 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         summonCard.view.HideCard();
         yield return new WaitForSeconds(0.3f);
         summonCard.CardDisappearEffect(GameManager.instance.summonEffect, transform);
+    }
+
+    public void DrawEffect(CardController card)
+    {
+        GameManager.instance.isSummoning = true;
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+        RectTransform rectTransform = GetComponent<RectTransform>();
+        Transform handTransform;
+
+        if (card.model.isPlayerCard)
+        {
+            handTransform = GameManager.instance.playerHandTransform;
+
+            // プレイヤー用：回転演出
+            seq.Join(rectTransform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd));
+            seq.Join(rectTransform.DOAnchorPos(Vector2.zero, 0.3f));
+            seq.Join(rectTransform.DORotateQuaternion(Quaternion.Euler(0, rectTransform.localEulerAngles.y, 0), 0.3f));
+        }
+        else
+        {
+            seq.AppendInterval(1.3f);
+            handTransform = GameManager.instance.enemyHandTransform;
+
+            // 敵用：移動と回転を同時に実行
+            Vector3 handPos = handTransform.position;
+
+            // Appendで基準の移動Tweenを追加
+            seq.Append(transform.DOMove(handPos, 0.3f).OnComplete(() =>
+            {
+                transform.SetParent(handTransform, false);
+                GameManager.instance.isSummoning = false;
+            }));
+
+            // その移動Tweenと同時にJoinで回転Tweenを追加
+            seq.Join(rectTransform.DORotateQuaternion(Quaternion.Euler(0, rectTransform.localEulerAngles.y, 0), 0.3f));
+
+            return; 
+        }
+
+        // プレイヤー用処理の続き
+        Vector3 playerHandPos = handTransform.position;
+
+        seq.AppendInterval(1f);
+        seq.Join(rectTransform.DORotateQuaternion(Quaternion.Euler(0, rectTransform.localEulerAngles.y, 0), 0.3f));
+        seq.Append(transform.DOMove(playerHandPos, 0.3f).OnComplete(() =>
+        {
+            transform.SetParent(handTransform, false);
+            GameManager.instance.isSummoning = false;
+        }));
     }
 }
