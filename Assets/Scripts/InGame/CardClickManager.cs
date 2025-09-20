@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening.Core.Easing;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -71,6 +72,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             {
                 //droppedCard.UseSpellTo(selectedCard);
                 StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
+                GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
                 droppedCard.spellEffect(selectedCard, true);
                 CancelSelect();
             }

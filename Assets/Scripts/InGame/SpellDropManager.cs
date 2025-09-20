@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using static Coffee.UIExtensions.UIParticleAttractor;
+using static UnityEngine.GraphicsBuffer;
 
 public class SpellDropManager : MonoBehaviour, IDropHandler
 {
@@ -56,14 +57,39 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
                 StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
                 StartCoroutine(AllDestroy(spellCard));
             }
+            else if (spellCard.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND) || spellCard.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+            {
+                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
+                StartCoroutine(DiscardAll(spellCard));
+            }
+            else if (spellCard.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || spellCard.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND))
+            {
+                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
+                StartCoroutine(DiscardRandom(spellCard));
+            }
+            else if (spellCard.model.spells.HasFlag(SPELLS.DRAW_CARDS))
+            {
+                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
+                StartCoroutine(DrawCard(spellCard));
+            }
         }
-        
+
+    }
+
+    private IEnumerator DrawCard(CardController card)
+    {
+        card.transform.SetParent(card.transform.parent.parent);
+        yield return new WaitForSeconds(0.9f);
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
+        card.DrawCard(card);
+
     }
 
     private IEnumerator WaitSpell(CardController card)
     {
         yield return new WaitForSeconds(0.9f);
         GameManager.instance.AttackToHeroSpell(card);
+        card.spellEffect(card, true);
     }
 
     private IEnumerator AllDestroy(CardController card)
@@ -71,6 +97,7 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
         yield return new WaitForSeconds(0.9f);
         CardController[] enemyCards = GameManager.instance.GetEnemyFieldCards(card.model.isPlayerCard);
         CardController[] friendCards = GameManager.instance.GetFriendFieldCards(card.model.isPlayerCard);
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
         for (int i = 0; i < enemyCards.Length; i++)
         {
             card.spellEffect(enemyCards[i], true);
@@ -85,6 +112,7 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
     {
         CardController[] targets;
         yield return new WaitForSeconds(0.9f);
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
         if (card.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
         {
             targets = GameManager.instance.GetFriendHandTransform(card.model.isPlayerCard);
@@ -103,10 +131,51 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
         }
     }
 
+    private IEnumerator DiscardAll(CardController card)
+    {
+        yield return new WaitForSeconds(0.9f);
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
+        if (card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        {
+            CardController[] targets = GameManager.instance.GetEnemyHandTransform(card.model.isPlayerCard);
+            for (int i = 0; i < targets.Length; i++)
+            {
+                card.spellEffect(targets[i], true);
+            }
+        }
+        else if (card.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        {
+            CardController[] targets = GameManager.instance.GetFriendHandTransform(card.model.isPlayerCard);
+            for (int i = 0; i < targets.Length; i++)
+            {
+                card.spellEffect(targets[i], true);
+            }
+        }
+    }
+
+    private IEnumerator DiscardRandom(CardController card)
+    {
+        yield return new WaitForSeconds(0.9f);
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
+        if (card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND))
+        {
+            CardController[] targets = GameManager.instance.GetEnemyHandTransform(card.model.isPlayerCard);
+            CardController target = targets[UnityEngine.Random.Range(0, targets.Length)];
+            card.spellEffect(target, true);
+        }
+        else if (card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND))
+        {
+            CardController[] targets = GameManager.instance.GetFriendHandTransform(card.model.isPlayerCard);
+            CardController target = targets[UnityEngine.Random.Range(0, targets.Length)];
+            card.spellEffect(target, true);
+        }
+    }
+
     private IEnumerator CardsEffect(CardController card)
     {
         CardController[] targets;
         yield return new WaitForSeconds(0.9f);
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
         if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
         {
             targets = GameManager.instance.GetEnemyFieldCards(card.model.isPlayerCard);
@@ -123,13 +192,13 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
                 card.spellEffect(targets[i], true);
             }
         }
-
     }
     private IEnumerator WaitAndContinue(CardController card)
     {
         yield return new WaitForSeconds(0.9f);
         CardController target = new CardController();
         CardController[] cards = null;
+        GameManager.instance.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
         if (card.model.spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
             cards = GameManager.instance.GetFriendFieldCards(card.model.isPlayerCard);

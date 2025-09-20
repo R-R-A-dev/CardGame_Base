@@ -75,6 +75,7 @@ public enum ABILITIES
 
 public enum ATTACKTYPE
 {
+    NONE,
     THROW,
     DIRECT,
     SPAWN,

@@ -32,10 +32,10 @@ MonoBehaviour:
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
   icon: {fileID: 546334584, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
-  attackType: 1
+  attackType: 0
   rare: 0
   ability: 0
   spell: 0
-  spells: 524288
+  spells: 256
   abilities: 0
   targetCardID: 

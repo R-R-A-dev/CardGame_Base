@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static UnityEngine.Rendering.GPUSort;
 
@@ -33,6 +34,12 @@ public class AI : MonoBehaviour
         // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
         while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0)//CanUseSpell()
         {
+            while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
+            {
+                yield return null;
+                continue;
+            }
+
             // コスト以下のカードリストを取得
             CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells())));//CanUseSpell()
             // 場に出すカードを選択
@@ -71,7 +78,11 @@ public class AI : MonoBehaviour
         while (Array.Exists(fieldCardList, card => card.model.canAttack) && gameManager.timeCount > 0)
         {
 
-
+            while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
+            {
+                yield return null;
+                continue;
+            }
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
             CardController[] playerFieldCardList = gameManager.playerFieldTransform.GetComponentsInChildren<CardController>();
@@ -173,16 +184,19 @@ public class AI : MonoBehaviour
         }
         else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS))
         {
+            transform.SetParent(transform.parent.parent);
             StartCoroutine(card.movement.MoveLeftSpell(card));
-            yield return new WaitForSeconds(0.9f);
-            //ドロー処理
+            //yield return new WaitForSeconds(0.9f);
+
         }
         if (card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
         {
-            Transform enemyCards = gameManager.GetFriendFieldTransform(card.model.isPlayerCard);
+            CardController[] enemys = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
+            CardController[] friends = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
+            targets = enemys.Concat(friends).ToArray();
         }
 
-        if (card.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        if (card.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST)|| card.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
         {
             CardController[] hand = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
             targets = new CardController[hand.Length - 1]; 
@@ -197,9 +211,29 @@ public class AI : MonoBehaviour
                 index++;
             }
         }
-        if (card.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        if (card.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
         {
             targets = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
+        }
+        if (card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND))
+        {
+            target = gameManager.GetEnemyHandTransform(card.model.isPlayerCard)[0];
+        }
+        if (card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND))
+        {
+            CardController[] hand = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
+            targets = new CardController[hand.Length - 1];
+
+            int index = 0;
+            for (int i = 0; i < hand.Length; i++)
+            {
+                if (card == hand[i])
+                    continue;
+
+                targets[index] = hand[i];
+                index++;
+            }
+            target = targets[0];
         }
 
         if (card.model.spells.HasFlag(SPELLS.RANDOM_ENEMY))
@@ -211,15 +245,17 @@ public class AI : MonoBehaviour
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
             target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
-
         }
         //Debug.Log(targets[0]);
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
         StartCoroutine(card.movement.MoveLeftSpell(card));
         //　スペル発動時に一回転して中央に移動したから右に回転しながら移動
         yield return new WaitForSeconds(0.9f);
-        if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
+        if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) || card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS)|| card.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS)||
+            card.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) || card.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND)||
+            card.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST)|| card.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
         {
+            gameManager.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
             for (int i = 0; i < targets.Length; i++)
             {
                 card.spellEffect(targets[i], true);
@@ -227,6 +263,7 @@ public class AI : MonoBehaviour
         }
         else
         {
+            gameManager.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
             card.spellEffect(target, true);
         }
 

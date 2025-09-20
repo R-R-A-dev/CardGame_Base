@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour
     {
         uiManager.HideResultPanel();
         player.Init(new List<int>() { 4, 3, 3, 3, 3, 3, 1, 1 });
-        enemy.Init(new List<int>() { 3, 3, 3, 3, 4, 4, 4, 4, 1 });
+        enemy.Init(new List<int>() { 4, 3, 3, 3, 4, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);

@@ -153,12 +153,18 @@ public class CardController : MonoBehaviour
     }
 
 
-    public void DrawCard()
+    public void DrawCard(CardController card)
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < card.model.effectDmg; i++)
         {
             GameManager.instance.DrawCard(model.isPlayerCard);
         }
+        if (model.spells.HasFlag(SPELLS.DRAW_CARDS))
+        {
+            Destroy(card.gameObject);
+            GameManager.instance.isAttacking = false;
+        }
+
     }
 
     public void DiscardEnemyHandAllCard()
@@ -181,29 +187,13 @@ public class CardController : MonoBehaviour
         }
     }
 
-    public void DiscardEnemyHandCard()
+    public void DiscardEnemyHandCard(CardController card)
     {
-        CardController[] cards = GameManager.instance.GetEnemyHandTransform(model.isPlayerCard);
-        for (int i = 0; i < model.effectDmg; i++)
-        {
-            if (cards.Length > 0)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, cards.Length);
-                Destroy(cards[randomIndex].gameObject);
-            }
-        }
+        Destroy(card.gameObject);
     }
-    public void DiscardPlayerHandCard()
+    public void DiscardPlayerHandCard(CardController card)
     {
-        CardController[] cards = GameManager.instance.GetFriendHandTransform(model.isPlayerCard);
-        for (int i = 0; i < model.effectDmg; i++)
-        {
-            if (cards.Length > 0)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, cards.Length);
-                Destroy(cards[randomIndex].gameObject);
-            }
-        }
+        Destroy(card.gameObject);
     }
 
 
@@ -419,7 +409,7 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
-            DrawCard();
+            DrawCard(this);
         }
         if (model.abilities.HasFlag(ABILITIES.SEARCH_SPECIFIC_UNIT))
         {
@@ -437,7 +427,6 @@ public class CardController : MonoBehaviour
 
             //}
             ReduceHandCost(this);
-            return;
         }
         if (model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST))
         {
@@ -447,7 +436,6 @@ public class CardController : MonoBehaviour
 
             //}
             IncreaseEnemyHandCost(this);
-            return;
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
         {
@@ -459,19 +447,19 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
         {
-            DiscardEnemyHandAllCard();
+            //DiscardEnemyHandAllCard();
         }
-        if (model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
         {
-            DiscardEnemyHandCard();
+            DiscardEnemyHandCard(target);
         }
         if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
         {
-            DiscardPlayerHandAllCard();
+            //DiscardPlayerHandAllCard();
         }
-        if (model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
         {
-            DiscardPlayerHandCard();
+            DiscardPlayerHandCard(target);
         }
         if (model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
         {
@@ -707,7 +695,7 @@ public class CardController : MonoBehaviour
         }
         if (model.spells.HasFlag(SPELLS.DRAW_CARDS))
         {
-            DrawCard();
+            DrawCard(this);
         }
         if (model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
         {
@@ -772,15 +760,21 @@ public class CardController : MonoBehaviour
         if (model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST))
         {
             IncreaseEnemyHandCost(target);
-            return;
         }
         if (model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
         {
             ReduceHandCost(target);
-            return;
+        }
+        if (model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) || model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        {
+            DiscardPlayerHandCard(target);
+        }
+        if (model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        {
+            DiscardEnemyHandCard(target);
         }
 
-        gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
+        //gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
         Destroy(this.gameObject);
     }
 
@@ -851,6 +845,22 @@ public class CardController : MonoBehaviour
         {
             CardController[] enemyCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        {
+            CardController[] cards = GameManager.instance.GetEnemyHandTransform(model.isPlayerCard);
+            if (cards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) || model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        {
+            CardController[] cards = GameManager.instance.GetFriendHandTransform(model.isPlayerCard);
+            if (cards.Length > 0)
             {
                 canUse = true;
             }
@@ -1215,7 +1225,11 @@ public class CardController : MonoBehaviour
     public void spellEffect(CardController target, bool isDefense)
     {
         GameManager.instance.isAttacking = true;
-        Transform trans = effect.AttackEffect(model.attackEffect, transform);
+        Transform trans = null;
+        if (model.attackType != ATTACKTYPE.NONE)
+        {
+            trans = effect.AttackEffect(model.attackEffect, transform);
+        }
         switch (model.attackType)
         {
             case ATTACKTYPE.DIRECT:
@@ -1224,6 +1238,10 @@ public class CardController : MonoBehaviour
 
             case ATTACKTYPE.SPAWN:
                 StartCoroutine(SpawnSpellEffect(trans, target.transform, target, isDefense, model.attackTime / 60));
+                break;
+
+            case ATTACKTYPE.NONE:
+                UseSpellTo(target);
                 break;
         }
     }

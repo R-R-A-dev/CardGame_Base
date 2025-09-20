@@ -327,13 +327,16 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
             seq.Append(transform.DOMove(handPos, 0.3f).OnComplete(() =>
             {
                 transform.SetParent(handTransform, false);
-                GameManager.instance.isSummoning = false;
+                seq.Join(rectTransform.DORotateQuaternion(Quaternion.Euler(0, rectTransform.localEulerAngles.y, 0), 0f));
             }));
+            seq.AppendInterval(1f);
+            seq.AppendCallback(() =>
+            {
+                GameManager.instance.isSummoning = false;
+            });
 
-            // その移動Tweenと同時にJoinで回転Tweenを追加
-            seq.Join(rectTransform.DORotateQuaternion(Quaternion.Euler(0, rectTransform.localEulerAngles.y, 0), 0.3f));
 
-            return; 
+            return;
         }
 
         // プレイヤー用処理の続き
