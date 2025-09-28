@@ -55,12 +55,15 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 if (droppedCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) && clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard ||
                     droppedCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY) && !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard)
                 {
+                    //droppedCard.movement.isHand = false;
+                    //droppedCard.movement.isDraggable = false;
                     StartCoroutine(SummonMove(droppedCard, selectedCard));
                     DropPlace.droppedCard = null;
                     CancelSelect();
                 }
                 else
                 {
+                    //TODO: エラー
                     dropped.view.SetActiveSelectablePanel(false);
                     dropped.model.isFieldCard = false;
                     droppedCard.movement.PlayerSelectMoveOff(droppedCard);

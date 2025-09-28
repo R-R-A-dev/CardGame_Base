@@ -16,7 +16,7 @@ MonoBehaviour:
   name: test3
   hp: 5
   at: 1
-  cost: 1
+  cost: 8
   effectDmg: 1
   effectHeal: 1
   description: 
@@ -32,10 +32,10 @@ MonoBehaviour:
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
   icon: {fileID: 619223149, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
-  attackType: 0
+  attackType: 1
   rare: 0
   ability: 0
   spell: 0
   spells: 0
-  abilities: 0
+  abilities: 4
   targetCardID: 

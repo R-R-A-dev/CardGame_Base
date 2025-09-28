@@ -3,11 +3,13 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.Rendering.GPUSort;
 
@@ -52,6 +54,7 @@ public class CardController : MonoBehaviour
 
     public void Attack(CardController enemyCard)
     {
+        Debug.Log("Attack");
         if (!model.isAlive) return;
         if (model.isDestroyer)
         {
@@ -287,19 +290,11 @@ public class CardController : MonoBehaviour
         gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
         model.isFieldCard = true;
         OnFiledAbilities();
-        /*場に出した後のアビリティの選択効果と自動効果の処理
-         *選択まで他のカードに触れられない
-         *
-         * 
-        */
     }
 
     public void OnFiledAbilities()
     {
-        if (model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
-        {
-            SetCanAttack(true);
-        }
+        SetAbility(this);
         if (gameManager.isPlayerTurn)
         {
             if (model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY))
@@ -312,13 +307,116 @@ public class CardController : MonoBehaviour
                 }
                 else
                 {
+                    movement.isHand = false;
                     StartCoroutine(movement.SummonMove(this, gameManager.playerFieldTransform));
                 }
             }
             else if (CanUseAbilities())
             {
-                UseAbilitiesTo();
+                //攻撃エフェクト
+                StartCoroutine(ActAbility());
             }
+        }
+    }
+
+    IEnumerator ActAbility()
+    {
+        yield return new WaitForSeconds(1.5f);
+        CardController target = null;
+        CardController[] targets = null;
+        Transform movePosition = null;
+
+        if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
+            targets = gameManager.GetEnemyFieldCards(model.isPlayerCard);
+
+        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
+            targets = gameManager.GetFriendFieldCards(model.isPlayerCard);
+
+        if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+            targets = gameManager.GetFriendHandTransform(model.isPlayerCard);
+
+        if (model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
+            targets = gameManager.GetEnemyHandTransform(model.isPlayerCard);
+
+        if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) || model.abilities.HasFlag(ABILITIES.HEAL_BY_DAMAGE))
+        {
+            movePosition = gameManager.enemyHero;
+            attackSpellEffectHero(movePosition, true);
+        }
+
+        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO))
+        {
+            movePosition = gameManager.playerHero;
+            attackSpellEffectHero(movePosition, true);
+        }
+
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
+        {
+            CardController[] enemyCards = gameManager.GetEnemyHandTransform(this.model.isPlayerCard);
+            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+        }
+
+        if (model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
+        {
+            CardController[] friendCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
+            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
+        }
+
+        if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY))
+        {
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+        }
+
+        if (model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND))
+        {
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
+        }
+
+
+        if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS) ||
+            model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND) ||
+            model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+        {
+            transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
+            for (int i = 0; i < targets.Length; i++)
+            {
+                AbilityEffect(targets[i], true);
+            }
+        }
+        else if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY) || model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND)||
+                 model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) || model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
+        {
+            AbilityEffect(target, true);
+        }
+        else if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS) || model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
+        {
+            UseAbilitiesTo(this);
+        }
+    }
+
+    public void SetAbility(CardController card)
+    {
+        if (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
+        {
+            SetCanAttack(true);
+        }
+        if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
+        {
+            card.model.isDamageNullifyOnce = true;
+        }
+        if (card.model.abilities.HasFlag(ABILITIES.DOUBLE_ACTION))
+        {
+            card.model.isDoubleAction = true;
+        }
+        if (card.model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
+        {
+            card.model.isStatsUpOnAttack = true;
+        }
+        if (card.model.abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET))
+        {
+            card.model.isDestroyer = true;
         }
     }
 
@@ -339,15 +437,17 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
         {
-            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
-            foreach (CardController enemyCard in enemyCards)
-            {
-                EffectAttack(enemyCard);
-            }
-            foreach (CardController enemyCard in enemyCards)
-            {
-                enemyCard.CheckAlive();
-            }
+            //CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            //foreach (CardController enemyCard in enemyCards)
+            //{
+            //    EffectAttack(enemyCard);
+            //}
+            //foreach (CardController enemyCard in enemyCards)
+            //{
+            //    enemyCard.CheckAlive();
+            //}
+            EffectAttack(target);
+            target.CheckAlive();
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO))
         {
@@ -372,15 +472,15 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
         {
-            CardController[] friendsCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-            if (friendsCards.Length > 0)
-            {
-                foreach (CardController friendCard in friendsCards)
-                {
-                    EffectHeal(friendCard);
-                }
-            }
-            EffectHeal(this);
+            //CardController[] friendsCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            //if (friendsCards.Length > 0)
+            //{
+            //    foreach (CardController friendCard in friendsCards)
+            //    {
+            //        EffectHeal(friendCard);
+            //    }
+            //}
+            EffectHeal(target);
         }
         if (model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD))
         {
@@ -426,7 +526,7 @@ public class CardController : MonoBehaviour
             //{
 
             //}
-            ReduceHandCost(this);
+            ReduceHandCost(target);
         }
         if (model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST))
         {
@@ -435,7 +535,7 @@ public class CardController : MonoBehaviour
             //{
 
             //}
-            IncreaseEnemyHandCost(this);
+            IncreaseEnemyHandCost(target);
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
         {
@@ -477,7 +577,6 @@ public class CardController : MonoBehaviour
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS)
             || model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
         {
-
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
             {
@@ -493,9 +592,29 @@ public class CardController : MonoBehaviour
         {
             canUse = true;
         }
-        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARD) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
+        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARD))
         {
-            canUse = true;
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            if (friendCards.Length > 0)
+            {
+                canUse = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
+        {
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            if (friendCards.Length > 0)
+            {
+                canUse = true;
+            }
+            else
+            {
+                return false;
+            }
         }
         if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
@@ -589,6 +708,31 @@ public class CardController : MonoBehaviour
         {
             canUse = true;
         }
+        if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY))
+        {
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (enemyCards.Length > 0)
+            {
+                canUse = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if (model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND))
+        {
+            CardController[] enemyCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            if (enemyCards.Length > 0)
+            {
+                canUse = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         return canUse;
     }
 
@@ -840,6 +984,10 @@ public class CardController : MonoBehaviour
             {
                 canUse = true;
             }
+            else
+            {
+                return false;
+            }
         }
         if (model.spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
@@ -847,6 +995,10 @@ public class CardController : MonoBehaviour
             if (enemyCards.Length > 0)
             {
                 canUse = true;
+            }
+            else
+            {
+                return false;
             }
         }
         if (model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
@@ -957,6 +1109,92 @@ public class CardController : MonoBehaviour
         var a = Vector3.Lerp(p0, p1, t);
         var b = Vector3.Lerp(p1, p2, t);
         return Vector3.Lerp(a, b, t);
+    }
+
+    //アビリティエフェクト
+    public void AbilityEffect(CardController target, bool isDefense)
+    {
+        Transform trans = null;
+        if (model.attackType != ATTACKTYPE.NONE)
+        {
+            trans = effect.AttackEffect(model.summonAbilityEffect, transform);
+        }
+        switch (model.attackType)
+        {
+            case ATTACKTYPE.THROW:
+                StartThrowAbility(trans, 5, transform.position, target.transform.position, model.attackTime, target, isDefense);
+                break;
+
+            case ATTACKTYPE.DIRECT:
+                DirectAttackAbility(trans, target.transform, target, isDefense, model.attackTime / 60);
+                break;
+
+            case ATTACKTYPE.SPAWN:
+                StartCoroutine(SpawnEffectAbility(trans, target.transform, target, isDefense, model.attackTime / 60));
+                break;
+        }
+    }
+
+    public IEnumerator SpawnEffectAbility(Transform effect, Transform targetPos, CardController enemy, bool isDefense, float attackTime)
+    {
+        effect.position = targetPos.position;
+        yield return new WaitForSeconds(attackTime);
+        GameManager.instance.isAttacking = !isDefense;
+        CheckAttackParticle(effect);
+        UseAbilitiesTo(enemy);
+        enemy.RefreshView();
+        effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+    }
+    public void DirectAttackAbility(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
+    {
+        effect.DOMove(endPos.position, attackTime)
+            .OnComplete(() =>
+            {
+                hitEffect(endPos);
+                GameManager.instance.isAttacking = !isDefense;
+                CheckAttackParticle(effect);
+                UseAbilitiesTo(enemy);
+                enemy.RefreshView();
+                effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+            });
+    }
+    public void StartThrowAbility(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
+    {
+        // 中点を求める
+        Vector3 half = end - start * 0.50f + start;
+        half.y += Vector3.up.y + height;
+
+        StartCoroutine(LerpThrowAbility(target, start, half, end, duration, destroyOnComplete, enemyCC, isDefense));
+    }
+
+    IEnumerator LerpThrowAbility(Transform target, Vector3 start, Vector3 half, Vector3 end, float duration, bool destroyOnComplete, CardController enemyCC, bool isDefense)
+    {
+        float startTime = Time.timeSinceLevelLoad;
+        float rate = 0f;
+        Transform targetPos = target;
+        while (true)
+        {
+            if (rate >= 1.0f)
+            {
+                target.position = end;
+
+                if (destroyOnComplete)
+                {
+                    hitEffect(enemyCC.transform);
+                    GameManager.instance.isAttacking = !isDefense;
+                    CheckAttackParticle(target);
+                    UseAbilitiesTo(enemyCC);
+                    enemyCC.RefreshView();
+                    target.SetParent(GameManager.instance.uiParticlesManager.transform);
+                }
+                yield break;
+            }
+            float diff = Time.timeSinceLevelLoad - startTime;
+            rate = diff / (duration / 60f);
+            target.position = CalcLerpPoint(start, half, end, rate);
+
+            yield return null;
+        }
     }
 
     //ヒーローへの攻撃
@@ -1121,6 +1359,10 @@ public class CardController : MonoBehaviour
         gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
         GameManager.instance.CheckHeroHP();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+        if (model.abilities.HasFlag(ABILITIES.NONE))
+        {
+            yield break;
+        }
         Destroy(this.gameObject);
     }
 
@@ -1157,6 +1399,10 @@ public class CardController : MonoBehaviour
                 gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                 GameManager.instance.CheckHeroHP();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+                if (model.abilities.HasFlag(ABILITIES.NONE))
+                {
+                    return;
+                }
                 Destroy(this.gameObject);
             });
     }
@@ -1185,7 +1431,8 @@ public class CardController : MonoBehaviour
                     hitEffect(targetPos);
                     GameManager.instance.isAttacking = !isDefense;
                     CheckAttackParticle(target);
-                    if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
+                    if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) ||
+                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO))
                     {
                         if (model.isPlayerCard)
                         {
@@ -1196,7 +1443,8 @@ public class CardController : MonoBehaviour
                             gameManager.player.heroHp -= model.effectDmg;
                         }
                     }
-                    else if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
+                    else if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) ||
+                        model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO))
                     {
                         if (model.isPlayerCard)
                         {
@@ -1210,6 +1458,10 @@ public class CardController : MonoBehaviour
                     gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                     GameManager.instance.CheckHeroHP();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
+                    if (model.abilities.HasFlag(ABILITIES.NONE))
+                    {
+                        yield break;
+                    }
                     Destroy(this.gameObject);
                 }
                 yield break;
@@ -1273,6 +1525,7 @@ public class CardController : MonoBehaviour
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
     }
 
+
     public void hitEffect(Transform target)
     {
         Transform hitEffect = effect.HitEffect(model.hitEffect, target.transform);
@@ -1325,24 +1578,11 @@ public class CardController : MonoBehaviour
     {
         if (target != null && target.childCount > 0)
         {
-            // 最初の実際のパーティクルオブジェクトを探す
-            Transform particleChild = null;
-            for (int i = 0; i < target.childCount; i++)
+            foreach (Transform child in target)
             {
-                var child = target.GetChild(i);
-                if (!child.name.StartsWith("[generated]") &&
-                    !child.GetComponent<UIParticleRenderer>())
-                {
-                    particleChild = child;
-                    break;
-                }
+                GameObject.Destroy(child.gameObject, 0.5f);
             }
-
-            if (particleChild != null)
-            {
-                Destroy(particleChild.gameObject, 0.5f);
-                target.SetParent(GameManager.instance.uiParticlesManager.transform);
-            }
+            target.SetParent(GameManager.instance.uiParticlesManager.transform);
         }
     }
 
@@ -1382,13 +1622,16 @@ public class CardController : MonoBehaviour
  *　攻撃で片方が死んだときの処理
  *　時間制限後の処理
  *　
- *　不具合
- *　自分の場に出したカードが相手のターン中にドラッグすると手札に戻る
- *　場に出すときの演出と攻撃中はターン変更が行われずに操作ができないようにする
+ *　不具合　
+ *済　EFFECT_SELECTIONのカードを場に出してターンが変わると手札に戻る
+ *済　攻撃時のドラッグの矢印が表示されない（攻撃もできない）
+ *済　EFFECT_SELECTIONで選択がエラーになる
+ *済  ドラッグ中にターンが変更されても手札にカードが戻らない
+ *　　
  *　
  *　デッキ編成画面
- *　スペル、アビリティの処理確認
- *　ドロー時とターン変更の整合性
+ *　アビリティの処理確認
+ *　ターン変更の整合性
  *　
  *　
  * 演出

@@ -91,8 +91,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 4, 3, 3, 3, 3, 3, 1, 1 });
-        enemy.Init(new List<int>() { 4, 3, 3, 3, 4, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 2, 2, 2, 3, 3, 1, 1 });
+        enemy.Init(new List<int>() { 3, 3, 3, 3, 3, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -218,12 +218,12 @@ public class GameManager : MonoBehaviour
         CardController card = Instantiate(cardPrefab, hand, false);
         if (hand.name == "PlayerHand")
         {
-            card.Init(cardID, true); 
+            card.Init(cardID, true);
             card.transform.SetParent(playerDeck);
         }
         else
         {
-            card.Init(cardID, false); 
+            card.Init(cardID, false);
             card.transform.SetParent(enemyDeck);
         }
 
@@ -261,10 +261,7 @@ public class GameManager : MonoBehaviour
         card.summonEffect(card.model.summonEffect, card.transform);
         if (baseCard.model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
-            if (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
-            {
-                card.SetCanAttack(true);
-            }
+            card.SetAbility(card);
             card.model.isFieldCard = true;
             if (card.CanUseAbilities())
             {
@@ -442,12 +439,13 @@ public class GameManager : MonoBehaviour
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
 
+        isPlayerTurn = !isPlayerTurn;
         yield return new WaitForSeconds(4f);
 
         //ターン変更演出
 
 
-        isPlayerTurn = !isPlayerTurn;
+
 
         CardController[] playerFieldCardList = playerFieldTransform.GetComponentsInChildren<CardController>();
         SettingCanAttackView(playerFieldCardList, false);

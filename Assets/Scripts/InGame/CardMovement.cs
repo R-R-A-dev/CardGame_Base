@@ -49,7 +49,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             return;
         }
-
+        if(DropPlace.droppedCard == null)
+        {
+            DropPlace.droppedCard = card;
+        }
         defaultParent = transform.parent;
         handSiblingIndex = transform.GetSiblingIndex();
         transform.SetParent(defaultParent.parent);
@@ -132,9 +135,11 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
             transform.SetParent(defaultParent, false);
             transform.SetSiblingIndex(handSiblingIndex);
         }
-
-
         GetComponent<CanvasGroup>().blocksRaycasts = true;
+        if(DropPlace.droppedCard != null)
+        {
+            DropPlace.droppedCard = null;
+        }
     }
 
     public IEnumerator MoveToField(Transform field)

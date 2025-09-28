@@ -128,7 +128,10 @@ public class AI : MonoBehaviour
 
     IEnumerator CastAbilityOf(CardController card)
     {
+        yield return new WaitForSeconds(1.5f);
         CardController target = null;
+        Transform movePosition = null;
+        CardController[] targets = null;
         if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
         {
             //destoryは先頭ではなく体力を調べさせる
