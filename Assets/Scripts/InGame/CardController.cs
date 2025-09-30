@@ -54,7 +54,6 @@ public class CardController : MonoBehaviour
 
     public void Attack(CardController enemyCard)
     {
-        Debug.Log("Attack");
         if (!model.isAlive) return;
         if (model.isDestroyer)
         {
@@ -90,6 +89,7 @@ public class CardController : MonoBehaviour
         {
             model.at += model.effectDmg;
             model.hp += model.effectHeal;
+            RefreshView();
         }
     }
 
@@ -130,6 +130,7 @@ public class CardController : MonoBehaviour
         {
             model.at += model.effectDmg;
             model.hp += model.effectHeal;
+            RefreshView();
         }
     }
 
@@ -165,6 +166,10 @@ public class CardController : MonoBehaviour
         if (model.spells.HasFlag(SPELLS.DRAW_CARDS))
         {
             Destroy(card.gameObject);
+            GameManager.instance.isAttacking = false;
+        }
+        else if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
+        {
             GameManager.instance.isAttacking = false;
         }
 
@@ -385,7 +390,7 @@ public class CardController : MonoBehaviour
                 AbilityEffect(targets[i], true);
             }
         }
-        else if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY) || model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND)||
+        else if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY) || model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND) ||
                  model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) || model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
         {
             AbilityEffect(target, true);
@@ -561,6 +566,14 @@ public class CardController : MonoBehaviour
         {
             DiscardPlayerHandCard(target);
         }
+        if (model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
+        {
+            if (target != null)
+            {
+                AttackDebuff(this, target);
+                target.RefreshView();
+            }
+        }
         if (model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
         {
             model.isStatsUpOnAttack = true;
@@ -574,8 +587,9 @@ public class CardController : MonoBehaviour
     public bool CanUseAbilities()
     {
         bool canUse = false;
-        if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS)
-            || model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
+        if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS) ||
+            model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD) ||
+            model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
@@ -1132,6 +1146,10 @@ public class CardController : MonoBehaviour
             case ATTACKTYPE.SPAWN:
                 StartCoroutine(SpawnEffectAbility(trans, target.transform, target, isDefense, model.attackTime / 60));
                 break;
+
+            case ATTACKTYPE.NONE:
+                UseAbilitiesTo(target);
+                break;
         }
     }
 
@@ -1627,7 +1645,8 @@ public class CardController : MonoBehaviour
  *済　攻撃時のドラッグの矢印が表示されない（攻撃もできない）
  *済　EFFECT_SELECTIONで選択がエラーになる
  *済  ドラッグ中にターンが変更されても手札にカードが戻らない
- *　　
+ *　　敵のアビリティ後にカード召喚が早い
+ *　　ターン終了時の整合性（一部動かせてしまう）
  *　
  *　デッキ編成画面
  *　アビリティの処理確認
