@@ -8,11 +8,12 @@ public class CardListView : MonoBehaviour
 {
     [SerializeField] GameObject cardListPrefab;
     [SerializeField] GameObject content;
+    [SerializeField] SimpleScrollSnap snap;
     void Start()
     {
         for(int i = 0; i < 5; i++)
         {
-            GameObject card = Instantiate(cardListPrefab, content.transform);
+            snap.AddToBack(cardListPrefab);
         }
     }
 

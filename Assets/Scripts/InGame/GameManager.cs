@@ -91,8 +91,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 2, 3, 3, 2, 3, 3, 1, 1 });
-        enemy.Init(new List<int>() { 2, 3, 3, 3, 3, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 2, 2, 2, 3, 3, 1, 1 });
+        enemy.Init(new List<int>() { 3, 3, 3, 3, 3, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -433,15 +433,16 @@ public class GameManager : MonoBehaviour
             StartCoroutine(ChangeTurn());
         }
     }
-
+    //ターン変更時の通常ドロー時もsummonningをtrueにする
     public IEnumerator ChangeTurn()
     {
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
 
         isPlayerTurn = !isPlayerTurn;
+        isSummoning = true;
         yield return new WaitForSeconds(4f);
-
+        isSummoning = false;
         //ターン変更演出
 
 

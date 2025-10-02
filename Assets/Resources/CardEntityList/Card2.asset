@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
   m_Name: Card2
   m_EditorClassIdentifier: 
-  no: 0
+  no: 2
   name: test2
   hp: 3
-  at: 2
-  cost: 3
+  at: 1
+  cost: 1
   effectDmg: 1
   effectHeal: 1
   description: test

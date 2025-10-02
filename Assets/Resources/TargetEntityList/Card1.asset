@@ -15,7 +15,7 @@ MonoBehaviour:
   no: 0
   name: target
   hp: 5
-  at: 5
+  at: 1
   cost: 5
   effectDmg: 1
   effectHeal: 1
@@ -26,13 +26,13 @@ MonoBehaviour:
   hitAudio: {fileID: 0}
   destroyAudio: {fileID: 0}
   summonEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
-  summonAbilityEffect: {fileID: 0}
-  attackEffect: {fileID: 0}
-  hitEffect: {fileID: 0}
-  destroyEffect: {fileID: 0}
-  attackTime: 0
+  summonAbilityEffect: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
+  attackEffect: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
+  hitEffect: {fileID: 7226583673155636403, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
+  destroyEffect: {fileID: 7226583673155636403, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
+  attackTime: 30
   icon: {fileID: -190086642, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
-  attackType: 0
+  attackType: 1
   rare: 0
   ability: 0
   spell: 0

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
   m_Name: Card3
   m_EditorClassIdentifier: 
-  no: 0
+  no: 3
   name: test3
   hp: 5
-  at: 1
-  cost: 1
+  at: 5
+  cost: 15
   effectDmg: 1
   effectHeal: 1
   description: 
@@ -37,5 +37,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 0
+  abilities: 32772
   targetCardID: 

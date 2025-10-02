@@ -62,6 +62,7 @@ public class AI : MonoBehaviour
                 if (selectCard.IsAbilities && selectCard.CanUseAbilities())
                 {
                     StartCoroutine(CastAbilityOf(selectCard));
+                    yield return new WaitForSeconds(2);
                 }
             }
             yield return new WaitForSeconds(2);
