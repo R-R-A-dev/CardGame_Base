@@ -515,6 +515,7 @@ GameObject:
   - component: {fileID: 8251656474152664701}
   - component: {fileID: 8722014602671462816}
   - component: {fileID: 5051034170406623290}
+  - component: {fileID: 9190347795835390991}
   m_Layer: 5
   m_Name: EditCard
   m_TagString: Untagged
@@ -676,6 +677,23 @@ MonoBehaviour:
   effect2: {fileID: 3817663088807389354, guid: b62515ee11412284f8a213b943f9aab1, type: 3}
   canvas: {fileID: 0}
   effectObj: {fileID: 6946326454923785546, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
+--- !u!114 &9190347795835390991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712488482611326971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76ccf787dd0cba142a1ac900db184ee0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  image: {fileID: 6021509550871728366}
+  cardNameText: {fileID: 608285253010043740}
+  cardAttackText: {fileID: 2907599540867990344}
+  cardHpText: {fileID: 775645654993507242}
+  cardCostText: {fileID: 5259589364532461155}
 --- !u!1 &5263026021843677536
 GameObject:
   m_ObjectHideFlags: 0

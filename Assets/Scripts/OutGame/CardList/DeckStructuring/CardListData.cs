@@ -12,4 +12,7 @@ public class CardListData
 
     public static List<List<int>> Decks { get { return decks; } set { decks = value; } }
     public static List<int> PossessionCard { get { return possessionCard; } set { possessionCard = value; } }
+
+    //ファイルから手持ちのカードやデッキのカード情報を読み込む
+
 }
