@@ -15,4 +15,5 @@ public class CardListData
 
     //ファイルから手持ちのカードやデッキのカード情報を読み込む
 
+
 }

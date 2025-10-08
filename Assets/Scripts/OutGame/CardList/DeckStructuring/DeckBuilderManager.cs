@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class DeckBuilderManager : MonoBehaviour
 {
-    [SerializeField] DeckBuilderUI deckBuilderUI;
+    [SerializeField] public DeckBuilderUI deckBuilderUI;
 
+    public static DeckBuilderManager Instance { get; private set; }
+
+    void Awake() => Instance = this;
     private void Start()
     {
 
@@ -13,9 +16,9 @@ public class DeckBuilderManager : MonoBehaviour
     /// <summary>
     /// デッキへのカードの追加
     /// </summary>
-    void AddCardToDeck()
+    public void AddCardToDeck(GameObject addCard)
     {
-
+        deckBuilderUI.AddDeckCard(addCard);
     }
 
     /// <summary>
@@ -28,11 +31,3 @@ public class DeckBuilderManager : MonoBehaviour
     }
 }
 
-/*追加事項
- * ドラッグアンドドラッグで追加と削除
- * 表示させるカードはオブジェクトプールを使用
- * 
- * 
- * 
- * 
-*/

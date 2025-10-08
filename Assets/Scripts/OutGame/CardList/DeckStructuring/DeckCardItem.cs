@@ -9,7 +9,7 @@ public class DeckCardItem : MonoBehaviour
     /// <summary>
     /// 表示するデッキのカード情報をセットする
     /// </summary>
-    public GameObject[] CardSetUp(GameObject cardPanel, Transform cardListContent, int deckNum)
+    public GameObject[] CardSetUp( Transform cardListContent, int deckNum)
     {
         //全カードデータと所持カードデータを比較して
         //デッキにあるカードとその枚数を取得する
@@ -23,9 +23,11 @@ public class DeckCardItem : MonoBehaviour
                 //カード番号：entitys[i].no
                 //カードの枚数：CardListData.PossessionCard[i]
                 //カードパネルを生成して、カード情報をセットしカードも生成する
-                GameObject panel = Instantiate(cardPanel, cardListContent.transform);
-                cardObject.GetComponent<OutGameCardList>().SetData(entitys[i]);
-                cardObjects[i] = Instantiate(cardObject, panel.transform);
+                GameObject obj = Instantiate(cardObject, cardListContent.transform);
+                OutGameCardList outGameCard = obj.GetComponent<OutGameCardList>();
+                outGameCard.SetData(entitys[i]);
+                obj.GetComponent<CardDragHandler>().isDeck = true;
+                cardObjects[i] = obj;
             }
         }
         return cardObjects;

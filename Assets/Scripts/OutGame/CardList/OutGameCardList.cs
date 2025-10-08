@@ -15,11 +15,18 @@ public class OutGameCardList : MonoBehaviour
     private int cost;
     private string description;
 
-    [SerializeField] Image image;
-    [SerializeField] TextMeshProUGUI cardNameText;
-    [SerializeField] TextMeshProUGUI cardAttackText;
-    [SerializeField] TextMeshProUGUI cardHpText;
-    [SerializeField] TextMeshProUGUI cardCostText;
+    public Image image;
+    public TextMeshProUGUI cardNameText;
+    public TextMeshProUGUI cardAttackText;
+    public TextMeshProUGUI cardHpText;
+    public TextMeshProUGUI cardCostText;
+
+
+    [SerializeField] private TextMeshProUGUI selectedText;
+    [SerializeField] private GameObject selectedPanel;
+    [SerializeField] private TextMeshProUGUI countText;
+    [SerializeField] private GameObject countPanel;
+
 
 
     public int No { get { return no; } set { no = value; } }
@@ -32,6 +39,10 @@ public class OutGameCardList : MonoBehaviour
     public int Cost { get { return cost; } set { cost = value; } }
     public string Description { get { return description; } set { description = value; } }
 
+    /// <summary>
+    /// 一覧表示時のデータセット
+    /// </summary>
+    /// <param name="entity"></param>
     public void SetData(CardEntity entity)
     {
         No = entity.no;
@@ -50,4 +61,85 @@ public class OutGameCardList : MonoBehaviour
         cardHpText.text = entity.hp.ToString();
         cardCostText.text = entity.cost.ToString();
     }
+
+    /// <summary>
+    /// ドラッグ時の生成されたカードのデータセット
+    /// </summary>
+    /// <param name="card"></param>
+    public void DragCardGen(OutGameCardList card)
+    {
+        No = card.No;
+        CardName = card.CardName;
+        Hp = card.Hp;
+        At = card.At;
+        CardSprite = card.CardSprite;
+        Cost = card.Cost;
+        Description = card.Description;
+
+        image.sprite = card.image.sprite;
+        cardNameText.text = card.cardNameText.text;
+        cardAttackText.text = card.cardAttackText.text;
+        cardHpText.text = card.cardHpText.text;
+        cardCostText.text = card.cardCostText.text;
+    }
+
+    /// <summary>
+    /// デッキ編成画面の全カードの表示更新
+    /// </summary>
+    public void RefreshViewAll(bool isDeck, int deckNum)
+    {
+        //所持カードデータとデッキデータを取得して比較
+        //一覧に複数ある場合は枚数を表示、デッキにある場合は編成中表示
+        //デッキにある場合は枚数を表示のみ
+        //自分の番号とデッキと一覧の比較からパネルの表示をする
+
+        int deckCardNum = CardListData.Decks[deckNum][No - 1];
+        int cardListNum = CardListData.PossessionCard[No - 1];
+
+
+        if (isDeck && deckCardNum > 0)
+        {
+            countText.gameObject.SetActive(true);
+            countPanel.SetActive(true);
+            countText.text = $"×{deckCardNum}";
+        }
+        else if (cardListNum > 0)
+        {
+            countText.gameObject.SetActive(true);
+            countPanel.SetActive(true);
+            countText.text = $"×{cardListNum - deckCardNum}";
+            if (deckCardNum > 0)
+            {
+                selectedText.gameObject.SetActive(true);
+                selectedPanel.SetActive(true);
+                selectedText.text = $"編成中\n×{deckCardNum}";
+            }
+            if (deckCardNum > 0 && cardListNum > 0)
+            {
+                CardListData.PossessionCard[No - 1] = cardListNum - deckCardNum;
+            }
+        }
+
+    }
+
+    /// <summary>
+    /// デッキ編成画面の追加されたカードの表示更新
+    /// </summary>
+    /// <param name="isDeck"></param>
+    public void RefreshView(bool isDeck)
+    {
+
+    }
+
+    /// <summary>
+    /// パネルオフ
+    /// </summary>
+    public void PanelOff()
+    {
+        selectedText.gameObject.SetActive(false);
+        selectedPanel.SetActive(false);
+        countText.gameObject.SetActive(false);
+        countPanel.SetActive(false);
+    }
+
 }
