@@ -84,9 +84,9 @@ public class OutGameCardList : MonoBehaviour
     }
 
     /// <summary>
-    /// デッキ編成画面の全カードの表示更新
+    /// デッキ編成画面のカードの表示更新
     /// </summary>
-    public void RefreshViewAll(bool isDeck, int deckNum)
+    public void RefreshView(bool isDeck, int deckNum)
     {
         //所持カードデータとデッキデータを取得して比較
         //一覧に複数ある場合は枚数を表示、デッキにある場合は編成中表示
@@ -123,12 +123,15 @@ public class OutGameCardList : MonoBehaviour
     }
 
     /// <summary>
-    /// デッキ編成画面の追加されたカードの表示更新
+    /// デッキ編成画面の追加、減少時のカードの表示更新
     /// </summary>
     /// <param name="isDeck"></param>
-    public void RefreshView(bool isDeck)
+    public void RefreshCardView(bool isDeck,int cardNo,int deckNum)
     {
-
+        int deckCardNum = CardListData.Decks[deckNum][No - 1];
+        int cardListNum = CardListData.PossessionCard[No - 1];
+        selectedText.text = $"編成中\n×{deckCardNum}";
+        countText.text = $"×{cardListNum}";
     }
 
     /// <summary>

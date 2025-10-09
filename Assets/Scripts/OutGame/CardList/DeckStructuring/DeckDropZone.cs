@@ -10,12 +10,15 @@ public class DeckDropZone : MonoBehaviour, IDropHandler
         if (card != null)
         {
             GameObject droppedCard = card.GetComponent<CardDragHandler>().GetHoldCard();
+            if (droppedCard == null) return;
             cardDragHandler = droppedCard.GetComponent<CardDragHandler>();
             if (cardDragHandler != null && cardDragHandler.isDeck == false)
             {
                 //一覧からデッキへドロップ
                 cardDragHandler.isDeck = true;
-                DeckBuilderManager.Instance.AddCardToDeck(droppedCard);
+                OutGameCardList outGameCardList = droppedCard.GetComponent<OutGameCardList>();
+                int cardNum = outGameCardList.No;
+                DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum);
             }
             else if (cardDragHandler != null && cardDragHandler.isDeck == true)
             {

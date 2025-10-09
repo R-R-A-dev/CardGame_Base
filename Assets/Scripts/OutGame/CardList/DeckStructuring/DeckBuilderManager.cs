@@ -4,6 +4,7 @@ using UnityEngine;
 public class DeckBuilderManager : MonoBehaviour
 {
     [SerializeField] public DeckBuilderUI deckBuilderUI;
+    public int deckNum = 0;
 
     public static DeckBuilderManager Instance { get; private set; }
 
@@ -16,13 +17,13 @@ public class DeckBuilderManager : MonoBehaviour
     /// <summary>
     /// デッキへのカードの追加
     /// </summary>
-    public void AddCardToDeck(GameObject addCard)
+    public void AddCardToDeck(OutGameCardList addCard,int cardNo)
     {
-        deckBuilderUI.AddDeckCard(addCard);
+        deckBuilderUI.AddDeckCard(addCard,cardNo);
     }
 
     /// <summary>
-    /// デッキへのカードの削除
+    /// デッキのカードの削除し一覧へ追加
     /// </summary>
     /// <param name="cardId"></param>
     void RemoveCardFromDeck(int cardId)

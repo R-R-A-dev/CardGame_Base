@@ -30,6 +30,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
         if (eventData.button == PointerEventData.InputButton.Right)
         {
+            if (!isDraggable()) return;
             holdCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
             if (holdCard == null)
             {
@@ -75,7 +76,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
     }
 
-    
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
@@ -97,10 +98,15 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     }
 
 
-    bool isDraggable(int cardNum)
+    bool isDraggable()
     {
         //所持一覧でoutgamecardlistのNoを取得してカードの枚数から取得可能か判定
         //CardListData.PossessionCard[cardNum - 1];
+        int cardNo = GetComponent<OutGameCardList>().No;
+        if (!isDeck && CardListData.PossessionCard[cardNo - 1] > 0)
+            return true;
+        else if (isDeck && CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] > 0)
+            return true;
 
         return false;
     }
@@ -117,6 +123,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
  * データ一覧と比較して枚数やデッキの使用状況を表示
  * 
  * 所持一覧のカードが0枚になったらドラッグできないようにする
+ * ドラッグアンドドロップからリストへの追加と削除を行う
  * 
  *不具合
  * ドロップの受付場所

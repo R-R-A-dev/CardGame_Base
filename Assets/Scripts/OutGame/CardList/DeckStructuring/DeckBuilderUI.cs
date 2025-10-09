@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DeckBuilderUI : MonoBehaviour
@@ -45,7 +46,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void DisplayDeck()
     {
-        deckListItem.CardSetUp(deckContent.transform, 0);
+        deckListItem.CardSetUp(deckContent.transform, DeckBuilderManager.Instance.deckNum);
     }
 
     /// <summary>
@@ -70,9 +71,30 @@ public class DeckBuilderUI : MonoBehaviour
     /// カード一覧からドラッグ＆ドロップでデッキに追加
     /// </summary>
     /// <param name="card"></param>
-    public void AddDeckCard(GameObject card)
+    public void AddDeckCard(OutGameCardList card, int cardNo)
     {
+        deckListItem.AddDeckCard(cardNo);
+        cardListItem.ReturnCardList(cardNo);
+        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
+        {
+            if(cardNo == outGameCardList.No)
+            {
+                //デッキから減らす
+                return;
+            }
+        }
+
+        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+        {
+            if(cardNo == outGameCardList.No)
+            {
+                //一覧から増やす
+                return;
+            }
+        }
+        //指定されたカードの番号からデッキと一覧から増減情報を更新
         card.transform.SetParent(deckContent.transform);
+
     }
 
     /// <summary>
@@ -90,11 +112,9 @@ public class DeckBuilderUI : MonoBehaviour
     public void RefreshAllCardUI()
     {
         foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
-            outGameCardList.RefreshViewAll(false, 0);
+            outGameCardList.RefreshView(false, DeckBuilderManager.Instance.deckNum);
         foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
-            outGameCardList.RefreshViewAll(true, 0);
-
-
+            outGameCardList.RefreshView(true, DeckBuilderManager.Instance.deckNum);
     }
 
     /// <summary>

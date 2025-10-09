@@ -15,10 +15,10 @@ public class DeckCardItem : MonoBehaviour
         //デッキにあるカードとその枚数を取得する
         CardEntity[] entitys = CardDatabase.LoadAllCards();
         CardListData.Decks = new List<List<int>> { new List<int> { 1, 1, 1, 1 } };
-        GameObject[] cardObjects = new GameObject[CardListData.Decks[0].Count];
-        for (int i = 0; i < CardListData.Decks[0].Count; i++)
+        GameObject[] cardObjects = new GameObject[CardListData.Decks[deckNum].Count];
+        for (int i = 0; i < CardListData.Decks[deckNum].Count; i++)
         {
-            if (CardListData.Decks[0][i] > 0)
+            if (CardListData.Decks[deckNum][i] > 0)
             {
                 //カード番号：entitys[i].no
                 //カードの枚数：CardListData.PossessionCard[i]
@@ -31,5 +31,23 @@ public class DeckCardItem : MonoBehaviour
             }
         }
         return cardObjects;
+    }
+
+    /// <summary>
+    /// 指定されたカードの番号からデッキの増加情報を更新
+    /// </summary>
+    /// <param name="cardNo"></param>
+    public void AddDeckCard(int cardNo)
+    {
+        CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1]++;
+    }
+
+    /// <summary>
+    /// 指定されたカードの番号をデッキから減少情報を更新
+    /// </summary>
+    /// <param name="cardNo"></param>
+    public void ReturnCardList(int cardNo)
+    {
+        CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1]--;
     }
 }

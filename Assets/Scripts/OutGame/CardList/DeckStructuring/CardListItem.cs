@@ -16,7 +16,7 @@ public class CardListItem : MonoBehaviour
         //全カードデータと所持カードデータを比較して
         //所持しているカードとその枚数を取得する
         CardEntity[] entitys = CardDatabase.LoadAllCards();
-        CardListData.PossessionCard = new List<int>() { 1, 1, 1, 1 };
+        CardListData.PossessionCard = new List<int>() { 2, 1, 1, 1 };
         GameObject[] cardObjects = new GameObject[CardListData.PossessionCard.Count];
         for (int i = 0; i < CardListData.PossessionCard.Count; i++)
         {
@@ -32,5 +32,23 @@ public class CardListItem : MonoBehaviour
             }
         }
         return cardObjects;
+    }
+
+    /// <summary>
+    /// 指定されたカードの番号から一覧の増加情報を更新
+    /// </summary>
+    /// <param name="cardNo"></param>
+    public void AddCardList(int cardNo)
+    {
+        CardListData.PossessionCard[cardNo - 1]++;
+    }
+
+    /// <summary>
+    /// 指定されたカードの番号を一覧から減少情報を更新
+    /// </summary>
+    /// <param name="cardNo"></param>
+    public void ReturnCardList(int cardNo)
+    {
+        CardListData.PossessionCard[cardNo - 1]--;
     }
 }

@@ -10,6 +10,7 @@ public class CardListDropZone : MonoBehaviour, IDropHandler
         if (card != null)
         {
             GameObject droppedCard = card.GetComponent<CardDragHandler>().GetHoldCard();
+            if(droppedCard == null) return;
             cardDragHandler = droppedCard.GetComponent<CardDragHandler>();
             if (cardDragHandler != null && cardDragHandler.isDeck == false)
             {
