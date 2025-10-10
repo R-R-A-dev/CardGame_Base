@@ -96,7 +96,6 @@ public class OutGameCardList : MonoBehaviour
         int deckCardNum = CardListData.Decks[deckNum][No - 1];
         int cardListNum = CardListData.PossessionCard[No - 1];
 
-
         if (isDeck && deckCardNum > 0)
         {
             countText.gameObject.SetActive(true);
@@ -114,11 +113,30 @@ public class OutGameCardList : MonoBehaviour
                 selectedPanel.SetActive(true);
                 selectedText.text = $"編成中\n×{deckCardNum}";
             }
-            if (deckCardNum > 0 && cardListNum > 0)
-            {
-                CardListData.PossessionCard[No - 1] = cardListNum - deckCardNum;
-            }
         }
+
+        //if (isDeck && deckCardNum > 0)
+        //{
+        //    countText.gameObject.SetActive(true);
+        //    countPanel.SetActive(true);
+        //    countText.text = $"×{deckCardNum}";
+        //}
+        //else if (cardListNum > 0)
+        //{
+        //    countText.gameObject.SetActive(true);
+        //    countPanel.SetActive(true);
+        //    countText.text = $"×{cardListNum - deckCardNum}";
+        //    if (deckCardNum > 0)
+        //    {
+        //        selectedText.gameObject.SetActive(true);
+        //        selectedPanel.SetActive(true);
+        //        selectedText.text = $"編成中\n×{deckCardNum}";
+        //    }
+        //    if (deckCardNum > 0 && cardListNum > 0)
+        //    {
+        //        CardListData.PossessionCard[No - 1] = cardListNum - deckCardNum;
+        //    }
+        //}
 
     }
 
@@ -126,12 +144,28 @@ public class OutGameCardList : MonoBehaviour
     /// デッキ編成画面の追加、減少時のカードの表示更新
     /// </summary>
     /// <param name="isDeck"></param>
-    public void RefreshCardView(bool isDeck,int cardNo,int deckNum)
+    public void RefreshCardView(bool isDeck, int cardNo, int deckNum, OutGameCardList outGameCardList)
     {
         int deckCardNum = CardListData.Decks[deckNum][No - 1];
         int cardListNum = CardListData.PossessionCard[No - 1];
-        selectedText.text = $"編成中\n×{deckCardNum}";
-        countText.text = $"×{cardListNum}";
+
+
+        if (isDeck)
+        {
+            outGameCardList.countText.text = $"×{cardListNum}";
+            outGameCardList.selectedText.text = $"編成中\n×{deckCardNum}";
+        }
+        else
+        {
+            outGameCardList.countText.text = $"×{deckCardNum}";
+        }
+    }
+
+
+    public void DeckAddPanelOn()
+    {
+        countText.gameObject.SetActive(true);
+        countPanel.SetActive(true);
     }
 
     /// <summary>

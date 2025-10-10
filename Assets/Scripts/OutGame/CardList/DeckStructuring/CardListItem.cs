@@ -13,10 +13,14 @@ public class CardListItem : MonoBehaviour
     /// </summary>
     public GameObject[] CardSetUp(Transform cardListContent)
     {
-        //全カードデータと所持カードデータを比較して
-        //所持しているカードとその枚数を取得する
+        // 全カードデータと所持カードデータを比較して
         CardEntity[] entitys = CardDatabase.LoadAllCards();
+
+        // 例: 総所持数で初期化
         CardListData.PossessionCard = new List<int>() { 2, 1, 1, 1 };
+
+
+
         GameObject[] cardObjects = new GameObject[CardListData.PossessionCard.Count];
         for (int i = 0; i < CardListData.PossessionCard.Count; i++)
         {
@@ -50,5 +54,20 @@ public class CardListItem : MonoBehaviour
     public void ReturnCardList(int cardNo)
     {
         CardListData.PossessionCard[cardNo - 1]--;
+    }
+
+    /// <summary>
+    /// 所持カードからデッキ分を減算して準備
+    /// </summary>
+    public void PrepareDeck()
+    {
+        // デッキに入っている分だけ減算
+        List<int> deck = CardListData.Decks[DeckBuilderManager.Instance.deckNum];
+        for (int i = 0; i < CardListData.PossessionCard.Count; i++)
+        {
+            CardListData.PossessionCard[i] -= deck[i];
+            if (CardListData.PossessionCard[i] < 0)
+                CardListData.PossessionCard[i] = 0;
+        }
     }
 }

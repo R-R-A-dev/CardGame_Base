@@ -46,7 +46,7 @@ public class DeckCardItem : MonoBehaviour
     /// 指定されたカードの番号をデッキから減少情報を更新
     /// </summary>
     /// <param name="cardNo"></param>
-    public void ReturnCardList(int cardNo)
+    public void ReturnListCard(int cardNo)
     {
         CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1]--;
     }

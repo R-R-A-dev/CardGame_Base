@@ -17,18 +17,18 @@ public class DeckBuilderManager : MonoBehaviour
     /// <summary>
     /// デッキへのカードの追加
     /// </summary>
-    public void AddCardToDeck(OutGameCardList addCard,int cardNo)
+    public void AddCardToDeck(OutGameCardList addCard,int cardNo,CardDragHandler cardDragHandler)
     {
-        deckBuilderUI.AddDeckCard(addCard,cardNo);
+        deckBuilderUI.AddDeckCard(addCard,cardNo, cardDragHandler);
     }
 
     /// <summary>
     /// デッキのカードの削除し一覧へ追加
     /// </summary>
     /// <param name="cardId"></param>
-    void RemoveCardFromDeck(int cardId)
+    public void RemoveCardFromDeck(OutGameCardList card, int cardNo)
     {
-
+        deckBuilderUI.ReturnCardList(card,cardNo);
     }
 }
 

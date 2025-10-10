@@ -21,9 +21,10 @@ public class DeckBuilderUI : MonoBehaviour
 
     void Start()
     {
-        DisplayCardList();
         DisplayDeck();
+        DisplayCardList();
         RefreshAllCardUI();
+        PrepareDeck();
     }
 
     void Update()
@@ -71,39 +72,97 @@ public class DeckBuilderUI : MonoBehaviour
     /// カード一覧からドラッグ＆ドロップでデッキに追加
     /// </summary>
     /// <param name="card"></param>
-    public void AddDeckCard(OutGameCardList card, int cardNo)
+    public void AddDeckCard(OutGameCardList card, int cardNo, CardDragHandler cardDragHandler)
     {
+        //デッキと所持一覧のリストに追加・削除
         deckListItem.AddDeckCard(cardNo);
         cardListItem.ReturnCardList(cardNo);
+
+
+        //デッキと所持一覧のカードUIを更新
         foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
         {
-            if(cardNo == outGameCardList.No)
+            if (cardNo == outGameCardList.No)
             {
-                //デッキから減らす
-                return;
+                card.RefreshCardView(true, cardNo,
+                DeckBuilderManager.Instance.deckNum, outGameCardList);
+                break;
             }
         }
 
         foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
         {
-            if(cardNo == outGameCardList.No)
+            if (cardNo == outGameCardList.No)
             {
-                //一覧から増やす
-                return;
+                card.RefreshCardView(false, cardNo,
+                DeckBuilderManager.Instance.deckNum, outGameCardList);
+                break;
             }
         }
-        //指定されたカードの番号からデッキと一覧から増減情報を更新
-        card.transform.SetParent(deckContent.transform);
+        //デッキに二枚目であればオブジェクトプールから取得して追加
+        //一枚目であればそのまま移動
+        if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] >= 2)
+        {
+            DeckBuilderManager.Instance.deckBuilderUI.PoolCard(card.gameObject);
+        }
+        else if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 1)
+        {
+            card.transform.SetParent(deckContent.transform);
+            foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+            {
+                if (cardNo == outGameCardList.No)
+                {
+                    outGameCardList.DeckAddPanelOn();
+                    break;
+                }
+            }
 
+        }
     }
 
     /// <summary>
     /// デッキからドラッグ＆ドロップでカード一覧に戻す
     /// </summary>
     /// <param name="card"></param>
-    public void ReturnCardList(OutGameCardList card)
+    public void ReturnCardList(OutGameCardList card, int cardNo)
     {
+        cardListItem.AddCardList(cardNo);
+        deckListItem.ReturnListCard(cardNo);
 
+
+        //デッキと所持一覧のカードUIを更新
+        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
+        {
+            if (cardNo == outGameCardList.No)
+            {
+                card.RefreshCardView(true, cardNo,
+                DeckBuilderManager.Instance.deckNum, outGameCardList);
+                break;
+            }
+        }
+
+        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+        {
+            if (cardNo == outGameCardList.No)
+            {
+                card.RefreshCardView(false, cardNo,
+                DeckBuilderManager.Instance.deckNum, outGameCardList);
+                break;
+            }
+        }
+
+        if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 0)
+        {
+            foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+            {
+                if (cardNo == outGameCardList.No)
+                {
+                    DeckBuilderManager.Instance.deckBuilderUI.PoolCard(outGameCardList.gameObject);
+                    break;
+                }
+            }
+        }
+        DeckBuilderManager.Instance.deckBuilderUI.PoolCard(card.gameObject);
     }
 
     /// <summary>
@@ -115,6 +174,14 @@ public class DeckBuilderUI : MonoBehaviour
             outGameCardList.RefreshView(false, DeckBuilderManager.Instance.deckNum);
         foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
             outGameCardList.RefreshView(true, DeckBuilderManager.Instance.deckNum);
+    }
+
+    /// <summary>
+    /// 一覧からデッキ分を減算して準備
+    /// </summary>
+    void PrepareDeck()
+    {
+        cardListItem.PrepareDeck();
     }
 
     /// <summary>

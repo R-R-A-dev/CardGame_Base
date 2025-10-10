@@ -33,16 +33,17 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             if (!isDraggable()) return;
             holdCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
             if (holdCard == null)
-            {
+            {//生成時に変数が表示されない
                 holdCard = Instantiate(gameObject, transform.root);
             }
             else if (holdCard != null)
             {
-                //クリックしたオブジェクトからholdCardに情報をコピー
-                holdCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
-                holdCard.GetComponent<CardDragHandler>().isDeck = isDeck;
-                holdCard.SetActive(true);
             }
+            //クリックしたオブジェクトからholdCardに情報をコピー
+            holdCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
+            holdCard.GetComponent<CardDragHandler>().isDeck = isDeck;
+            holdCard.SetActive(true);
+
             holdCard.GetComponent<OutGameCardList>().PanelOff();
             holdCard.GetComponent<CanvasGroup>().blocksRaycasts = false;
             //dropParent = transform.parent;
@@ -72,6 +73,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             {
                 CanvasGroup cg = holdCard.GetComponent<CanvasGroup>();
                 cg.blocksRaycasts = true;
+                holdCard = null;
             }
         }
     }

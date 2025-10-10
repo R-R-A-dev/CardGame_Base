@@ -18,7 +18,7 @@ public class DeckDropZone : MonoBehaviour, IDropHandler
                 cardDragHandler.isDeck = true;
                 OutGameCardList outGameCardList = droppedCard.GetComponent<OutGameCardList>();
                 int cardNum = outGameCardList.No;
-                DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum);
+                DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
             }
             else if (cardDragHandler != null && cardDragHandler.isDeck == true)
             {
