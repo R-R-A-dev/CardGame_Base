@@ -152,12 +152,12 @@ public class OutGameCardList : MonoBehaviour
 
         if (isDeck)
         {
-            outGameCardList.countText.text = $"×{cardListNum}";
+            outGameCardList.countText.text = $"×{deckCardNum}";
             outGameCardList.selectedText.text = $"編成中\n×{deckCardNum}";
         }
         else
         {
-            outGameCardList.countText.text = $"×{deckCardNum}";
+            outGameCardList.countText.text = $"×{cardListNum}";
         }
     }
 

@@ -19,12 +19,16 @@ public class DeckBuilderUI : MonoBehaviour
     [SerializeField] DeckCardItem deckListItem;
     [SerializeField] GameObject cardPool;
 
+
+
     void Start()
     {
         DisplayDeck();
         DisplayCardList();
         RefreshAllCardUI();
         PrepareDeck();
+        DeckBuilderManager.Instance.deckStatisticsUI.
+            RefreshStatistics(DeckBuilderManager.Instance.deckNum);
     }
 
     void Update()
@@ -84,7 +88,7 @@ public class DeckBuilderUI : MonoBehaviour
         {
             if (cardNo == outGameCardList.No)
             {
-                card.RefreshCardView(true, cardNo,
+                card.RefreshCardView(false, cardNo,
                 DeckBuilderManager.Instance.deckNum, outGameCardList);
                 break;
             }
@@ -94,7 +98,7 @@ public class DeckBuilderUI : MonoBehaviour
         {
             if (cardNo == outGameCardList.No)
             {
-                card.RefreshCardView(false, cardNo,
+                card.RefreshCardView(true, cardNo,
                 DeckBuilderManager.Instance.deckNum, outGameCardList);
                 break;
             }
@@ -116,7 +120,6 @@ public class DeckBuilderUI : MonoBehaviour
                     break;
                 }
             }
-
         }
     }
 
@@ -135,7 +138,7 @@ public class DeckBuilderUI : MonoBehaviour
         {
             if (cardNo == outGameCardList.No)
             {
-                card.RefreshCardView(true, cardNo,
+                card.RefreshCardView(false, cardNo,
                 DeckBuilderManager.Instance.deckNum, outGameCardList);
                 break;
             }
@@ -145,12 +148,13 @@ public class DeckBuilderUI : MonoBehaviour
         {
             if (cardNo == outGameCardList.No)
             {
-                card.RefreshCardView(false, cardNo,
+                card.RefreshCardView(true, cardNo,
                 DeckBuilderManager.Instance.deckNum, outGameCardList);
                 break;
             }
         }
 
+        
         if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 0)
         {
             foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
