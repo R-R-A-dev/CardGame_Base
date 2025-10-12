@@ -24,7 +24,6 @@ public class CardListDropZone : MonoBehaviour, IDropHandler
                 OutGameCardList outGameCardList = droppedCard.GetComponent<OutGameCardList>();
                 int cardNum = outGameCardList.No;
                 DeckBuilderManager.Instance.RemoveCardFromDeck(outGameCardList, cardNum);
-
                 //デッキから一覧へドロップ
                 //オブジェクトプール
             }

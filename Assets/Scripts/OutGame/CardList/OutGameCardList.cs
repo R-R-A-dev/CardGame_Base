@@ -149,15 +149,22 @@ public class OutGameCardList : MonoBehaviour
         int deckCardNum = CardListData.Decks[deckNum][No - 1];
         int cardListNum = CardListData.PossessionCard[No - 1];
 
+        
 
         if (isDeck)
         {
+            // OutgameCardList：デッキのカード
             outGameCardList.countText.text = $"×{deckCardNum}";
+            countText.text = $"×{deckCardNum}";
             outGameCardList.selectedText.text = $"編成中\n×{deckCardNum}";
         }
         else
         {
+            // OutgameCardList：所持一覧のカード
             outGameCardList.countText.text = $"×{cardListNum}";
+            countText.text = $"×{deckCardNum}";
+            outGameCardList.selectedText.text = $"編成中\n×{deckCardNum}";
+
         }
     }
 

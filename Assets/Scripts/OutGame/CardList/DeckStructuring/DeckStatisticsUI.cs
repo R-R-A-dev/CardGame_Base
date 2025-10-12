@@ -11,6 +11,11 @@ public class DeckStatisticsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI spellCountText;
     [SerializeField] private TextMeshProUGUI[] costCountTexts;
     [SerializeField] private RectTransform[] costBars;
+
+    /// <summary>
+    /// UI上の集計・統計情報を表示
+    /// </summary>
+    /// <param name="deckNum"></param>
     public void RefreshStatistics(int deckNum)
     {
         List<int> deck = CardListData.Decks[deckNum];

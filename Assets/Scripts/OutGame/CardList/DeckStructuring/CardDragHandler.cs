@@ -33,7 +33,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             if (!isDraggable()) return;
             holdCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
             if (holdCard == null)
-            {//生成時に変数が表示されない
+            {
                 holdCard = Instantiate(gameObject, transform.root);
             }
             else if (holdCard != null)

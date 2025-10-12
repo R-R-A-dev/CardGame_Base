@@ -143,7 +143,7 @@ public class DeckBuilderUI : MonoBehaviour
                 break;
             }
         }
-
+        
         foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
         {
             if (cardNo == outGameCardList.No)
