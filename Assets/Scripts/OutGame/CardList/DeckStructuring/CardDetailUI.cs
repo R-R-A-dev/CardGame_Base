@@ -14,6 +14,7 @@ public class CardDetailUI : MonoBehaviour
 
     [SerializeField] private GameObject detailPanel;
 
+    public bool isOnCard = false;
 
     /// <summary>
     /// カード情報を表示

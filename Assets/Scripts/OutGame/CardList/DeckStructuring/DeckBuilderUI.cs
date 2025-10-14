@@ -29,6 +29,7 @@ public class DeckBuilderUI : MonoBehaviour
         PrepareDeck();
         DeckBuilderManager.Instance.deckStatisticsUI.
             RefreshStatistics(DeckBuilderManager.Instance.deckNum);
+        SortCard();
     }
 
     void Update()
@@ -111,7 +112,26 @@ public class DeckBuilderUI : MonoBehaviour
         }
         else if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 1)
         {
+            int newCardCost = card.Cost;
+
+            // デッキ内のすべてのカードを取得
+            OutGameCardList[] deckCards = deckContent.GetComponentsInChildren<OutGameCardList>();
+
+            int insertIndex = deckCards.Length; // デフォルトは末尾
+
+            // コスト順に挿入位置を探す
+            for (int i = 0; i < deckCards.Length; i++)
+            {
+                if (newCardCost < deckCards[i].Cost)
+                {
+                    insertIndex = i;
+                    break;
+                }
+            }
+            // 指定した位置に Transform を挿入
             card.transform.SetParent(deckContent.transform);
+            card.transform.SetSiblingIndex(insertIndex);
+
             foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
             {
                 if (cardNo == outGameCardList.No)
@@ -186,6 +206,30 @@ public class DeckBuilderUI : MonoBehaviour
     void PrepareDeck()
     {
         cardListItem.PrepareDeck();
+    }
+
+    void SortCard()
+    {
+        // 所持カードリストをソート
+        SortByCost(cardListContent.transform);
+
+        // デッキリストをソート
+        SortByCost(deckContent.transform);
+    }
+
+    void SortByCost(Transform parent)
+    {
+        // 子オブジェクトからOutGameCardListを全部取得
+        List<OutGameCardList> cards = new List<OutGameCardList>(parent.GetComponentsInChildren<OutGameCardList>());
+
+        // Costで昇順ソート
+        cards.Sort((a, b) => a.Cost.CompareTo(b.Cost));
+
+        // 並び替えた順にHierarchy上の位置を更新
+        for (int i = 0; i < cards.Count; i++)
+        {
+            cards[i].transform.SetSiblingIndex(i);
+        }
     }
 
     /// <summary>

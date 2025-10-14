@@ -5,6 +5,7 @@ public class DeckBuilderManager : MonoBehaviour
 {
     [SerializeField] public DeckBuilderUI deckBuilderUI;
     [SerializeField] public DeckStatisticsUI deckStatisticsUI;
+    [SerializeField] public CardDetailUI cardDetailUI;
     public int deckNum = 0;
 
     public static DeckBuilderManager Instance { get; private set; }

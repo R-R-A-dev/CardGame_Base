@@ -12,6 +12,7 @@ public class DeckDropZone : MonoBehaviour, IDropHandler
             GameObject droppedCard = card.GetComponent<CardDragHandler>().GetHoldCard();
             if (droppedCard == null) return;
             cardDragHandler = droppedCard.GetComponent<CardDragHandler>();
+            cardDragHandler.dropSuccess = true;
             if (cardDragHandler != null && cardDragHandler.isDeck == false)
             {
                 //一覧からデッキへドロップ
