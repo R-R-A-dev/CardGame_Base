@@ -500,7 +500,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4074793410940164083
 RectTransform:
   m_ObjectHideFlags: 0
@@ -646,6 +646,7 @@ GameObject:
   - component: {fileID: 3250521729447992486}
   - component: {fileID: 9190347795835390991}
   - component: {fileID: -4972488494579596234}
+  - component: {fileID: 3654153967957143514}
   m_Layer: 5
   m_Name: EditCard
   m_TagString: Untagged
@@ -738,6 +739,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDeck: 0
+  dropSuccess: 0
+--- !u!114 &3654153967957143514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712488482611326971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1019f186151c95e40810499fcd2007f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 3250521729447992486}
+  rectTransform: {fileID: 5733723200314794177}
 --- !u!1 &5263026021843677536
 GameObject:
   m_ObjectHideFlags: 0

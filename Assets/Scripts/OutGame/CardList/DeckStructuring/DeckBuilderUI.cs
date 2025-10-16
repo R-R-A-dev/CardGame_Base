@@ -163,7 +163,7 @@ public class DeckBuilderUI : MonoBehaviour
                 break;
             }
         }
-        
+
         foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
         {
             if (cardNo == outGameCardList.No)
@@ -174,7 +174,7 @@ public class DeckBuilderUI : MonoBehaviour
             }
         }
 
-        
+
         if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 0)
         {
             foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
@@ -264,4 +264,72 @@ public class DeckBuilderUI : MonoBehaviour
         card.transform.SetParent(cardPool.transform);
     }
 
+    public Vector3 GetCardPosToDeck(int cardNo, int cost)
+    {
+        //既にデッキにあるカードならその位置を返す 
+        Vector3 movePos = Vector3.zero;
+        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+        {
+            if (cardNo == outGameCardList.No)
+            {
+                movePos = outGameCardList.transform.position;
+                return movePos;
+            }
+        }
+
+        float x = 110;
+        float y = 673.5f;
+        float interval = 220;
+        //0番目の位置 x:110 y:673.5
+        //間の距離 220
+
+        //デッキ内にないカードならコスト順に挿入位置を探す
+        OutGameCardList[] deckCards = deckContent.GetComponentsInChildren<OutGameCardList>();
+
+        int insertIndex = deckCards.Length; // デフォルトは末尾
+        if (deckCards.Length != 0)
+        {
+            // コスト順に挿入位置を探す
+            for (int i = 0; i < deckCards.Length; i++)
+            {
+                if (cost < deckCards[i].Cost)
+                {
+                    insertIndex = i;
+                    return movePos = deckCards[i].transform.position;
+                }
+            }
+        }
+
+        //デッキにカードが一枚もない場合、またはコストが一番高い場合は最後尾に追加
+        if (movePos == Vector3.zero && deckCards.Length != 0)
+        {
+            movePos = deckCards[deckCards.Length - 1].transform.position;
+            movePos = new Vector2(movePos.x + interval, movePos.y);
+            return movePos;
+        }
+
+        // 指定した位置に Transform を挿入
+        //card.transform.SetParent(deckContent.transform);
+        //card.transform.SetSiblingIndex(insertIndex);
+        //インデックスから場所を取得して目的地を出す
+        if (movePos == Vector3.zero && deckCards.Length == 0)
+        {
+            movePos = new Vector2(x, y);
+        }
+        return movePos;
+    }
+
+    public Vector3 GetCardPosToList(int cardNo)
+    {
+        Vector3 movePos = Vector3.zero;
+        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
+        {
+            if (cardNo == outGameCardList.No)
+            {
+                movePos = outGameCardList.transform.position;
+                return movePos;
+            }
+        }
+        return movePos;
+    }
 }

@@ -21,10 +21,11 @@ public class CardListDropZone : MonoBehaviour, IDropHandler
             }
             else if (cardDragHandler != null && cardDragHandler.isDeck == true)
             {
-                DeckBuilderManager.Instance.deckBuilderUI.PoolCard(droppedCard);
+                //DeckBuilderManager.Instance.deckBuilderUI.PoolCard(droppedCard);
                 OutGameCardList outGameCardList = droppedCard.GetComponent<OutGameCardList>();
                 int cardNum = outGameCardList.No;
                 DeckBuilderManager.Instance.RemoveCardFromDeck(outGameCardList, cardNum);
+                cardDragHandler.isDeck = false;
                 //デッキから一覧へドロップ
                 //オブジェクトプール
             }

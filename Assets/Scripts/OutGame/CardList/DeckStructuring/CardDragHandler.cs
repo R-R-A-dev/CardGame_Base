@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
-    IEndDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    IEndDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler,
+    IPointerDownHandler
 {
     GameObject holdCard;
     GameObject clickedCard;
@@ -22,30 +24,27 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     private void Update()
     {
-        //右クリックでカード詳細を非表示
-        if (Input.GetMouseButtonUp(1) && !DeckBuilderManager.Instance.cardDetailUI.isOnCard)
-        {
+        //左クリックでカード詳細を非表示
+        if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(0) && !DeckBuilderManager.Instance.cardDetailUI.isOnCard)
             DeckBuilderManager.Instance.cardDetailUI.Hide();
-        }
-
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (eventData.button == PointerEventData.InputButton.Right)
         {
-/*            // ScrollRectをドラッグ対象に
-            scrollRect = GetComponentInParent<ScrollRect>();
-            eventData.pointerDrag = scrollRect.gameObject;
-            EventSystem.current.SetSelectedGameObject(scrollRect.gameObject);
+            /*            // ScrollRectをドラッグ対象に
+                        scrollRect = GetComponentInParent<ScrollRect>();
+                        eventData.pointerDrag = scrollRect.gameObject;
+                        EventSystem.current.SetSelectedGameObject(scrollRect.gameObject);
 
-            // ScrollRect側でドラッグの初期化
-            scrollRect.OnInitializePotentialDrag(eventData);
-            scrollRect.OnBeginDrag(eventData);*/
-            
+                        // ScrollRect側でドラッグの初期化
+                        scrollRect.OnInitializePotentialDrag(eventData);
+                        scrollRect.OnBeginDrag(eventData);*/
+
             //
 
         }
-        if (eventData.button == PointerEventData.InputButton.Right)
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
             dropSuccess = false;
             DeckBuilderManager.Instance.cardDetailUI.Hide();
@@ -71,22 +70,22 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     }
     public void OnDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (eventData.button == PointerEventData.InputButton.Right)
         {
             //scrollRect.OnDrag(eventData);
         }
-        if (eventData.button == PointerEventData.InputButton.Right && holdCard != null)
+        if (eventData.button == PointerEventData.InputButton.Left && holdCard != null)
         {
             holdCard.transform.position = eventData.position;
         }
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (eventData.button == PointerEventData.InputButton.Right)
         {
             //scrollRect.OnEndDrag(eventData);
         }
-        if (eventData.button == PointerEventData.InputButton.Right)
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (holdCard != null)
             {
@@ -130,15 +129,6 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            OutGameCardList card = GetComponent<OutGameCardList>();
-            if (card == null) return;
-
-            DeckBuilderManager.Instance.cardDetailUI.ShowCardDetail(
-                CardListData.Entities[card.No - 1]
-            );
-        }
 
     }
 
@@ -173,6 +163,130 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     public void OnPointerExit(PointerEventData eventData)
     {
         DeckBuilderManager.Instance.cardDetailUI.isOnCard = false;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            OutGameCardList card = GetComponent<OutGameCardList>();
+            if (card == null) return;
+
+            DeckBuilderManager.Instance.cardDetailUI.ShowCardDetail(
+                CardListData.Entities[card.No - 1]
+            );
+        }
+
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            DeckBuilderManager.Instance.cardDetailUI.Hide();
+            //生成からデッキ編成、所持一覧への移動、アニメーション
+            if (!isDraggable()) return;
+            holdCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
+            if (holdCard == null)
+                holdCard = Instantiate(gameObject, transform.root);
+
+
+            holdCard.transform.position = transform.position;
+            //クリックしたオブジェクトからholdCardに情報をコピー
+            holdCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
+            holdCard.GetComponent<CardDragHandler>().isDeck = isDeck;
+            holdCard.SetActive(true);
+
+            holdCard.GetComponent<OutGameCardList>().PanelOff();
+
+            //カードの移動
+            OutGameCardList outGameCardList = holdCard.GetComponent<OutGameCardList>();
+            int cardNum = outGameCardList.No;
+            CardDragHandler cardDragHandler = holdCard.GetComponent<CardDragHandler>();
+            CardAnimationController cardAnimationController = holdCard.GetComponent<CardAnimationController>();
+
+            if (cardDragHandler != null && cardDragHandler.isDeck == false)
+            {
+                //movePosがnullの場合は新しい場所を探すよう追記
+                Vector3 movePos = DeckBuilderManager.Instance.deckBuilderUI.GetCardPosToDeck(cardNum, outGameCardList.Cost);
+                if (movePos != null)
+                {
+                    StartCoroutine(CardEffectToDeck(movePos, cardAnimationController, outGameCardList, cardNum, cardDragHandler));
+                }
+                cardDragHandler.isDeck = true;
+            }
+            else if (cardDragHandler != null && cardDragHandler.isDeck == true)
+            {
+                DeckBuilderManager.Instance.deckBuilderUI.PoolCard(holdCard);
+                Vector3 movePos = DeckBuilderManager.Instance.deckBuilderUI.GetCardPosToList(cardNum);
+                if (movePos != null)
+                {
+                    StartCoroutine(CardEffectToList(movePos, outGameCardList, cardNum));
+                }
+                cardDragHandler.isDeck = false;
+            }
+        }
+    }
+
+    IEnumerator CardEffectToDeck(Vector3 movePos, CardAnimationController cardAnimationController,
+        OutGameCardList outGameCardList, int cardNum, CardDragHandler cardDragHandler)
+    {
+        //デッキのアニメーションカード生成　アニメーション
+        GameObject beforeCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
+        if (beforeCard == null)
+            beforeCard = Instantiate(gameObject, transform.root);
+
+        beforeCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
+        beforeCard.transform.position = transform.position;
+        beforeCard.GetComponent<CardAnimationController>().PlayFadeOutAndExpand(0.2f, 1.3f);
+
+        cardAnimationController.PlayMoveTo(movePos, 0.2f);
+
+        yield return new WaitForSeconds(0.2f);
+
+        //一覧のアニメーションカード生成　アニメーション
+        GameObject afterCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
+        if (afterCard == null)
+            afterCard = Instantiate(gameObject, transform.root);
+
+        afterCard.GetComponent<OutGameCardList>().PanelOff();
+        afterCard.transform.position = movePos;
+        afterCard.GetComponent<CardAnimationController>().PlayFadeOutAndExpand(0.2f, 1.3f);
+        afterCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
+
+
+        yield return new WaitForSeconds(0.2f);
+        DeckBuilderManager.Instance.deckBuilderUI.PoolCard(beforeCard);
+        DeckBuilderManager.Instance.deckBuilderUI.PoolCard(afterCard);
+
+        cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
+
+        DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
+    }
+
+
+    IEnumerator CardEffectToList(Vector3 movePos, OutGameCardList outGameCardList, int cardNum)
+    {
+        GameObject beforeCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
+        if (beforeCard == null)
+            beforeCard = Instantiate(gameObject, transform.root);
+
+        beforeCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
+        beforeCard.transform.position = transform.position;
+        beforeCard.GetComponent<CardAnimationController>().PlayFadeOutAndExpand(0.2f, 1.3f);
+
+
+        GameObject afterCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
+        if (afterCard == null)
+            afterCard = Instantiate(gameObject, transform.root);
+
+        afterCard.GetComponent<OutGameCardList>().PanelOff();
+        afterCard.transform.position = movePos;
+        afterCard.GetComponent<CardAnimationController>().PlayFadeOutAndExpand(0.2f, 1.3f);
+        afterCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
+
+
+        yield return new WaitForSeconds(0.2f);
+        DeckBuilderManager.Instance.deckBuilderUI.PoolCard(beforeCard);
+        DeckBuilderManager.Instance.deckBuilderUI.PoolCard(afterCard);
+
+        DeckBuilderManager.Instance.RemoveCardFromDeck(outGameCardList, cardNum);
     }
 }
 

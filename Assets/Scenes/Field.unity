@@ -469,6 +469,7 @@ RectTransform:
   - {fileID: 1857504666}
   - {fileID: 899088735}
   - {fileID: 1461174073}
+  - {fileID: 816163285}
   - {fileID: 1728183045}
   - {fileID: 1347317089}
   m_Father: {fileID: 219342967}
@@ -4871,7 +4872,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0.0008413889, y: 0}
   m_SizeDelta: {x: 0, y: 353}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &766792066
@@ -5166,11 +5167,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1461174073}
+  m_Father: {fileID: 95958316}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -10.561584, y: 280}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &845871968
@@ -5339,7 +5340,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 20
+  m_ScrollSensitivity: 10
   m_Viewport: {fileID: 1561704911}
   m_HorizontalScrollbar: {fileID: 1846304292}
   m_VerticalScrollbar: {fileID: 0}
@@ -8762,13 +8763,12 @@ RectTransform:
   m_Children:
   - {fileID: 1736478337}
   - {fileID: 1592074710}
-  - {fileID: 816163285}
   m_Father: {fileID: 95958316}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 10.561596, y: -280}
-  m_SizeDelta: {x: 1754.0315, y: 360}
+  m_AnchoredPosition: {x: 0, y: -280}
+  m_SizeDelta: {x: 1755, y: 360}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1461174074
 MonoBehaviour:
@@ -8789,7 +8789,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 20
+  m_ScrollSensitivity: 10
   m_Viewport: {fileID: 1736478337}
   m_HorizontalScrollbar: {fileID: 1592074711}
   m_VerticalScrollbar: {fileID: 0}
