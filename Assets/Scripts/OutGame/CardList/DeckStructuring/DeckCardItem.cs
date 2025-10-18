@@ -5,7 +5,7 @@ using UnityEngine;
 public class DeckCardItem : MonoBehaviour
 {
     [SerializeField] GameObject cardObject;
-
+    [SerializeField] private Transform deckContent;
 
     /// <summary>
     /// 表示するデッキのカード情報をセットする
@@ -50,5 +50,21 @@ public class DeckCardItem : MonoBehaviour
     public void ReturnListCard(int cardNo)
     {
         CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1]--;
+    }
+
+    /// <summary>
+    /// デッキフィルター表示非表示処理
+    /// </summary>
+    /// <param name="filter"></param>
+    public void RefreshFiltered(CardFilterSettings filter)
+    {
+        foreach (Transform child in deckContent.transform)
+        {
+            OutGameCardList card = child.GetComponent<OutGameCardList>();
+            if (card == null) continue;
+
+            CardEntity entity = CardListData.Entities[card.No - 1];
+            child.gameObject.SetActive(filter.Matches(entity));
+        }
     }
 }

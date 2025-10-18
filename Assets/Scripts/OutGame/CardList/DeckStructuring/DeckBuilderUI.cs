@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DeckBuilderUI : MonoBehaviour
 {
@@ -19,6 +20,12 @@ public class DeckBuilderUI : MonoBehaviour
     [SerializeField] DeckCardItem deckListItem;
     [SerializeField] GameObject cardPool;
 
+    [Header("フィルター UI")]
+    [SerializeField] private FilterPanelUI filterPanel;
+
+
+    private CardFilterSettings cardListFilter = new CardFilterSettings();
+    private CardFilterSettings deckFilter = new CardFilterSettings();
 
 
     void Start()
@@ -208,6 +215,9 @@ public class DeckBuilderUI : MonoBehaviour
         cardListItem.PrepareDeck();
     }
 
+    /// <summary>
+    /// ソートの実行
+    /// </summary>
     void SortCard()
     {
         // 所持カードリストをソート
@@ -217,6 +227,10 @@ public class DeckBuilderUI : MonoBehaviour
         SortByCost(deckContent.transform);
     }
 
+    /// <summary>
+    /// 初期表示のカードをコスト順にソート
+    /// </summary>
+    /// <param name="parent"></param>
     void SortByCost(Transform parent)
     {
         // 子オブジェクトからOutGameCardListを全部取得
@@ -264,6 +278,12 @@ public class DeckBuilderUI : MonoBehaviour
         card.transform.SetParent(cardPool.transform);
     }
 
+    /// <summary>
+    /// 一覧からデッキに追加する際の目的地をコスト順に探して返す
+    /// </summary>
+    /// <param name="cardNo"></param>
+    /// <param name="cost"></param>
+    /// <returns></returns>
     public Vector3 GetCardPosToDeck(int cardNo, int cost)
     {
         //既にデッキにあるカードならその位置を返す 
@@ -319,6 +339,11 @@ public class DeckBuilderUI : MonoBehaviour
         return movePos;
     }
 
+    /// <summary>
+    /// デッキから一覧に戻す際の目的地を探して返す
+    /// </summary>
+    /// <param name="cardNo"></param>
+    /// <returns></returns>
     public Vector3 GetCardPosToList(int cardNo)
     {
         Vector3 movePos = Vector3.zero;
@@ -332,4 +357,41 @@ public class DeckBuilderUI : MonoBehaviour
         }
         return movePos;
     }
+
+    /// <summary>
+    /// ボタン押下後にカード一覧のフィルターパネルを開く
+    /// </summary>
+    public void OnOpenCardListFilter()
+    {
+        filterPanel.Open(this, false);
+    }
+
+    /// <summary>
+    /// ボタン押下後にデッキのフィルターパネルを開く
+    /// </summary>
+    public void OnOpenDeckFilter()
+    {
+        filterPanel.Open(this, true);
+    }
+
+    /// <summary>
+    /// フィルター結果UI表示の更新
+    /// </summary>
+    /// <param name="newFilter"></param>
+    /// <param name="forDeck"></param>
+    public void ApplyFilter(CardFilterSettings newFilter, bool forDeck)
+    {
+        if (forDeck)
+        {
+            deckFilter = newFilter;
+            deckListItem.RefreshFiltered(deckFilter);
+        }
+        else
+        {
+            cardListFilter = newFilter;
+            cardListItem.RefreshFiltered(cardListFilter);
+        }
+    }
+
+
 }

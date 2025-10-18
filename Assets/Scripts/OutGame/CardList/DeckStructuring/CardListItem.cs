@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class CardListItem : MonoBehaviour
 {
     [SerializeField] GameObject cardObject;
+    [SerializeField] private Transform cardListContent;
 
 
     /// <summary>
@@ -69,6 +70,22 @@ public class CardListItem : MonoBehaviour
             CardListData.PossessionCard[i] -= deck[i];
             if (CardListData.PossessionCard[i] < 0)
                 CardListData.PossessionCard[i] = 0;
+        }
+    }
+
+    /// <summary>
+    /// デッキフィルター表示非表示処理
+    /// </summary>
+    /// <param name="filter"></param>
+    public void RefreshFiltered(CardFilterSettings filter)
+    {
+        foreach (Transform child in transform)
+        {
+            OutGameCardList card = child.GetComponent<OutGameCardList>();
+            if (card == null) continue;
+
+            CardEntity entity = CardListData.Entities[card.No - 1];
+            child.gameObject.SetActive(filter.Matches(entity));
         }
     }
 }
