@@ -1,6 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class FilterPanelUI : MonoBehaviour
 {
@@ -21,14 +22,14 @@ public class FilterPanelUI : MonoBehaviour
     public Button selectAllHPButton;
     public TextMeshProUGUI hpButtonText;
 
-    public Toggle[] rarityToggles;
-    public Button selectAllRarityButton;
-    public TextMeshProUGUI rarityButtonText;
-
     [Header("分類トグル")]
     public Toggle[] categoryToggles; // 0 = Follower, 1 = Spell
     public Button selectAllCategoryButton;
     public TextMeshProUGUI categoryButtonText;
+
+    public Toggle[] rarityToggles;
+    public Button selectAllRarityButton;
+    public TextMeshProUGUI rarityButtonText;
 
     [Header("操作ボタン")]
     public Button applyButton;
@@ -42,10 +43,16 @@ public class FilterPanelUI : MonoBehaviour
     /// </summary>
     /// <param name="builderUI"></param>
     /// <param name="deckMode"></param>
-    public void Open(DeckBuilderUI builderUI, bool deckMode)
+    public void Open(DeckBuilderUI builderUI, bool deckMode, CardFilterSettings previousFilter)
     {
         deckBuilderUI = builderUI;
         forDeck = deckMode;
+
+        currentFilter = CloneFilter(previousFilter);
+
+        // UI に反映
+        LoadFilterToUI(currentFilter);
+
         gameObject.SetActive(true);
         UpdateAllButtons();
     }
@@ -75,7 +82,7 @@ public class FilterPanelUI : MonoBehaviour
         {
             bool anyOn = System.Array.Exists(toggles, t => t.isOn);
             foreach (var t in toggles) t.isOn = !anyOn;
-            text.text = anyOn ? "全てオン" : "全てオフ";
+            text.text = anyOn ? "All On" : "All Off";
         });
 
         foreach (var t in toggles)
@@ -102,7 +109,7 @@ public class FilterPanelUI : MonoBehaviour
     void UpdateButtonText(Toggle[] toggles, TextMeshProUGUI text)
     {
         bool anyOn = System.Array.Exists(toggles, t => t.isOn);
-        text.text = anyOn ? "全てオフ" : "全てオン";
+        text.text = anyOn ? "All Off" : "All On";
     }
 
     /// <summary>
@@ -142,5 +149,40 @@ public class FilterPanelUI : MonoBehaviour
 
         deckBuilderUI.ApplyFilter(currentFilter, forDeck);
         gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// フィルター内容 → UIへ反映
+    /// </summary>
+    /// <param name="filter"></param>
+    void LoadFilterToUI(CardFilterSettings filter)
+    {
+        void SetToggles(Toggle[] toggles, int count, Func<int, bool> condition)
+        {
+            for (int i = 0; i < toggles.Length; i++)
+                toggles[i].isOn = condition(i);
+        }
+
+        SetToggles(costToggles, costToggles.Length, i => filter.costFilter.Contains(i + 1));
+        SetToggles(attackToggles, attackToggles.Length, i => filter.attackFilter.Contains(i + 1));
+        SetToggles(hpToggles, hpToggles.Length, i => filter.hpFilter.Contains(i + 1));
+        SetToggles(rarityToggles, rarityToggles.Length, i => filter.rarityFilter.Contains((RARE)i));
+        SetToggles(categoryToggles, categoryToggles.Length, i => filter.categoryFilter.Contains(i));
+    }
+
+    /// <summary>
+    /// フィルター複製（参照共有を防ぐ） ======
+    /// </summary>
+    /// <param name="src"></param>
+    /// <returns></returns>
+    CardFilterSettings CloneFilter(CardFilterSettings src)
+    {
+        var copy = new CardFilterSettings();
+        copy.costFilter.AddRange(src.costFilter);
+        copy.attackFilter.AddRange(src.attackFilter);
+        copy.hpFilter.AddRange(src.hpFilter);
+        copy.rarityFilter.AddRange(src.rarityFilter);
+        copy.categoryFilter.AddRange(src.categoryFilter);
+        return copy;
     }
 }

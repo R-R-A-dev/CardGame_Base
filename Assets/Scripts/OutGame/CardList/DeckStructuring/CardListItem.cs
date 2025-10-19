@@ -79,7 +79,7 @@ public class CardListItem : MonoBehaviour
     /// <param name="filter"></param>
     public void RefreshFiltered(CardFilterSettings filter)
     {
-        foreach (Transform child in transform)
+        foreach (Transform child in cardListContent.transform)
         {
             OutGameCardList card = child.GetComponent<OutGameCardList>();
             if (card == null) continue;

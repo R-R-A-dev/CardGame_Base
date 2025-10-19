@@ -92,7 +92,7 @@ public class DeckBuilderUI : MonoBehaviour
 
 
         //デッキと所持一覧のカードUIを更新
-        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
+        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>(true))
         {
             if (cardNo == outGameCardList.No)
             {
@@ -102,7 +102,7 @@ public class DeckBuilderUI : MonoBehaviour
             }
         }
 
-        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>(true))
         {
             if (cardNo == outGameCardList.No)
             {
@@ -161,7 +161,7 @@ public class DeckBuilderUI : MonoBehaviour
 
 
         //デッキと所持一覧のカードUIを更新
-        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
+        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>(true))
         {
             if (cardNo == outGameCardList.No)
             {
@@ -171,7 +171,7 @@ public class DeckBuilderUI : MonoBehaviour
             }
         }
 
-        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
+        foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>(true))
         {
             if (cardNo == outGameCardList.No)
             {
@@ -347,7 +347,7 @@ public class DeckBuilderUI : MonoBehaviour
     public Vector3 GetCardPosToList(int cardNo)
     {
         Vector3 movePos = Vector3.zero;
-        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>())
+        foreach (OutGameCardList outGameCardList in cardListContent.GetComponentsInChildren<OutGameCardList>(true))
         {
             if (cardNo == outGameCardList.No)
             {
@@ -363,7 +363,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void OnOpenCardListFilter()
     {
-        filterPanel.Open(this, false);
+        filterPanel.Open(this, false,cardListFilter);
     }
 
     /// <summary>
@@ -371,7 +371,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void OnOpenDeckFilter()
     {
-        filterPanel.Open(this, true);
+        filterPanel.Open(this, true,deckFilter);
     }
 
     /// <summary>
