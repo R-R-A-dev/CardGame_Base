@@ -3,6 +3,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -51,6 +52,8 @@ public class GameManager : MonoBehaviour
     // 時間管理
     public int timeCount;
 
+    [SerializeField] TextMeshProUGUI effectText;
+
     // シングルトン化（どこからでもアクセスできるようにする）
     public static GameManager instance;
     private void Awake()
@@ -63,6 +66,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         StartGame();
+
     }
 
     private void Update()
@@ -296,7 +300,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountDown()
     {
-        timeCount = 50;
+        timeCount = 20;
         uiManager.UpdateTime(timeCount);
 
         while (timeCount > 0)
@@ -440,13 +444,15 @@ public class GameManager : MonoBehaviour
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
 
         isPlayerTurn = !isPlayerTurn;
+        if (isPlayerTurn)
+            StartCoroutine(TurnChangeAnimateText("Player Turn"));
+        else
+            StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
+
         isSummoning = true;
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(2f);
         isSummoning = false;
         //ターン変更演出
-
-
-
 
         CardController[] playerFieldCardList = playerFieldTransform.GetComponentsInChildren<CardController>();
         SettingCanAttackView(playerFieldCardList, false);
@@ -465,6 +471,7 @@ public class GameManager : MonoBehaviour
             DrawCard(enemy.deck, enemyHandTransform);
         }
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+        yield return new WaitForSeconds(1.3f);
         TurnCalc();
     }
 
@@ -686,6 +693,71 @@ public class GameManager : MonoBehaviour
         selectingPanel.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// ターン変更時のテキストアニメーション
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator TurnChangeAnimateText(string text)
+    {
+        if (effectText == null) yield break;
+
+        effectText.text = text;
+        // 初期状態取得
+        float startFontSize = effectText.fontSize;
+        Color color = effectText.color;
+        float startAlpha = color.a;
+
+        // --- (1) 1.5秒で fontsize=100, alpha=190 ---
+        float duration1 = 0.3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration1)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration1);
+
+            effectText.fontSize = Mathf.Lerp(startFontSize, 100f, t);
+            color.a = Mathf.Lerp(startAlpha, 190f / 255f, t);
+            effectText.color = color;
+
+            yield return null;
+        }
+
+        // --- (2) 0.5秒で fontsize=130, alpha=255 ---
+        float duration2 = 1.4f;
+        elapsed = 0f;
+
+        while (elapsed < duration2)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration2);
+
+            effectText.fontSize = Mathf.Lerp(100f, 130f, t);
+            color.a = Mathf.Lerp(190f / 255f, 1f, t);
+            effectText.color = color;
+
+            yield return null;
+        }
+
+        float duration3 = 0.3f;
+        elapsed = 0f;
+
+        while (elapsed < duration3)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration3);
+
+            color.a = Mathf.Lerp(1f, 0f, t);
+            effectText.color = color;
+
+            yield return null;
+        }
+
+        // 完全に非表示に
+        color.a = 0f;
+        effectText.color = color;
+    }
+
 }
 
 /* 追加機能リスト
@@ -713,6 +785,19 @@ public class GameManager : MonoBehaviour
  *  デッキ作成
  *  カード購入
  *  別の遊び方
- * 
+ *  
+ *  タイムアップ処理
+ *  ターン終了ボタン押下orタイムアップでターン終了
+ *  ↓
+ *  敵のターン開始演出
+ *  ↓
+ *  ドロー　時間Maxになる　
+ *  行動完了
+ *  ↓
+ *  自ターン演出
+ *  ↓
+ *  ドロー
+ *  ↓
+ *  行動可能
  * 
 */

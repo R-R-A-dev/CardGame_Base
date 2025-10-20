@@ -1679,4 +1679,8 @@ public class CardController : MonoBehaviour
  * エフェクトと共に場に出る
  * カードの効果発動
  * 
+ * 
+ * 
+ * 
+ * 
 */

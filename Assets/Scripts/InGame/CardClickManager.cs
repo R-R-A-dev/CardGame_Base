@@ -88,7 +88,8 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     public void TimeUpSelect()
     {
-        if (dropped == null) return;
+        if (DropPlace.droppedCard == null) return;
+        dropped = DropPlace.droppedCard;
         dropped.view.SetActiveSelectablePanel(false);
         dropped.model.isFieldCard = false;
         dropped.movement.PlayerSelectMoveOff(dropped);
