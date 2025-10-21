@@ -292,7 +292,11 @@ public class CardController : MonoBehaviour
                 {
                     summonEffect(model.summonEffect, transform);
                 }*/
-        gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
+        //if (!model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY) ||
+        //    !model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND))
+            gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
+
+
         model.isFieldCard = true;
         OnFiledAbilities();
     }
@@ -385,6 +389,25 @@ public class CardController : MonoBehaviour
             model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
         {
             transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
+            DG.Tweening.Sequence seq = DOTween.Sequence();
+
+            seq.Append(transform
+                .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+                .OnUpdate(() =>
+                {
+                    float y = transform.localEulerAngles.y;
+                    // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                    if (y >= 90 && y <= 270)
+                    {
+                        view.maskPanel.SetActive(true);  // 裏面
+                    }
+                    else
+                    {
+                        view.maskPanel.SetActive(false); // 表面
+                    }
+                })
+            );
+            seq.Play();
             for (int i = 0; i < targets.Length; i++)
             {
                 AbilityEffect(targets[i], true);
@@ -1036,7 +1059,25 @@ public class CardController : MonoBehaviour
 
     public void attackEffect(CardController target, bool isDefense)
     {
-        transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        seq.Append(transform
+            .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+            .OnUpdate(() =>
+            {
+                float y = transform.localEulerAngles.y;
+                // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                if (y >= 90 && y <= 270)
+                {
+                    view.maskPanel.SetActive(true);  // 裏面
+                }
+                else
+                {
+                    view.maskPanel.SetActive(false); // 表面
+                }
+            })
+        );
+        seq.Play();
         Transform trans = effect.AttackEffect(model.attackEffect, transform);
         switch (model.attackType)
         {
@@ -1219,8 +1260,25 @@ public class CardController : MonoBehaviour
 
     public void attackEffectHero(Transform target, bool isDefense)
     {
-        transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
-        Transform trans = effect.AttackEffect(model.attackEffect, transform);
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        seq.Append(transform
+            .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+            .OnUpdate(() =>
+            {
+                float y = transform.localEulerAngles.y;
+                // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                if (y >= 90 && y <= 270)
+                {
+                    view.maskPanel.SetActive(true);  // 裏面
+                }
+                else
+                {
+                    view.maskPanel.SetActive(false); // 表面
+                }
+            })
+        );
+        seq.Play(); Transform trans = effect.AttackEffect(model.attackEffect, transform);
         switch (model.attackType)
         {
             case ATTACKTYPE.THROW:
@@ -1327,8 +1385,25 @@ public class CardController : MonoBehaviour
     //スペルでのヒーローへの攻撃
     public void attackSpellEffectHero(Transform target, bool isDefense)
     {
-        transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
-        Transform trans = effect.AttackEffect(model.attackEffect, transform);
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        seq.Append(transform
+            .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+            .OnUpdate(() =>
+            {
+                float y = transform.localEulerAngles.y;
+                // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                if (y >= 90 && y <= 270)
+                {
+                    view.maskPanel.SetActive(true);  // 裏面
+                }
+                else
+                {
+                    view.maskPanel.SetActive(false); // 表面
+                }
+            })
+        );
+        seq.Play(); Transform trans = effect.AttackEffect(model.attackEffect, transform);
         switch (model.attackType)
         {
             case ATTACKTYPE.THROW:

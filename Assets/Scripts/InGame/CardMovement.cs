@@ -49,7 +49,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             return;
         }
-        if(DropPlace.droppedCard == null)
+        if (DropPlace.droppedCard == null)
         {
             DropPlace.droppedCard = card;
         }
@@ -136,7 +136,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
             transform.SetSiblingIndex(handSiblingIndex);
         }
         GetComponent<CanvasGroup>().blocksRaycasts = true;
-        if(DropPlace.droppedCard != null)
+        if (DropPlace.droppedCard != null)
         {
             DropPlace.droppedCard = null;
         }
@@ -199,7 +199,25 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         GameManager.instance.isSummoning = true;
         //拡大しながら中央へ移動
         RectTransform rectTransform = GetComponent<RectTransform>();
-        rectTransform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        seq.Append(rectTransform
+            .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+            .OnUpdate(() =>
+            {
+                float y = rectTransform.localEulerAngles.y;
+                // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                if (y >= 90 && y <= 270)
+                {
+                    summonCard.view.maskPanel.SetActive(true);  // 裏面
+                }
+                else
+                {
+                    summonCard.view.maskPanel.SetActive(false); // 表面
+                }
+            })
+        );
+        seq.Play();
         rectTransform.DOScale(2f, 0.3f);
         yield return rectTransform.DOAnchorPos(new Vector2(960, -540), 0.3f).WaitForCompletion();
         GameManager.instance.ScaleYSummonLightCenterOn();
@@ -231,11 +249,11 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         summonCard.summonEffect(summonCard.model.summonEffect, transform);
         GameManager.instance.isSummoning = false;
     }
-
+    public Tweener moveTween;
     public IEnumerator PlayerSelectMoveOn()
     {
         RectTransform rectTransform = GetComponent<RectTransform>();
-        rectTransform.DOAnchorPos(new Vector2(160, -140), 0.2f);
+        moveTween = rectTransform.DOAnchorPos(new Vector2(160, -140), 0.2f);
         GameManager.instance.SelectingPanelOn();
         yield return null;
     }
@@ -280,7 +298,25 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     {
         GameManager.instance.isSummoning = true;
         RectTransform rectTransform = GetComponent<RectTransform>();
-        rectTransform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        seq.Append(rectTransform
+            .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+            .OnUpdate(() =>
+            {
+                float y = rectTransform.localEulerAngles.y;
+                // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                if (y >= 90 && y <= 270)
+                {
+                    summonCard.view.maskPanel.SetActive(true);  // 裏面
+                }
+                else
+                {
+                    summonCard.view.maskPanel.SetActive(false); // 表面
+                }
+            })
+        );
+        seq.Play();
         //rectTransform.DOScale(2f, 0.3f);
         yield return rectTransform.DOAnchorPos(new Vector2(160, -140), 0.3f).WaitForCompletion();
         GameManager.instance.ScaleYSummonLightLeftOn();

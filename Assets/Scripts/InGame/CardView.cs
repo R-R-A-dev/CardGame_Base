@@ -12,7 +12,7 @@ public class CardView : MonoBehaviour
     [SerializeField] Image iconImage;
     [SerializeField] GameObject selectablePanel;
     [SerializeField] GameObject shieldPanel;
-    [SerializeField] GameObject maskPanel;
+    [SerializeField] public GameObject maskPanel;
     [SerializeField] CanvasGroup canvasGroup;
 
     public void SetCard(CardModel cardModel)

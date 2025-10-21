@@ -1,4 +1,5 @@
-﻿using DG.Tweening.Core.Easing;
+﻿using DG.Tweening;
+using DG.Tweening.Core.Easing;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -18,6 +19,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
         if (dropped == null) return;
         if (GameManager.instance.isEffectSelectPhase && !GameManager.instance.isOnCard && Input.GetMouseButtonDown(0))
         {
+            dropped.movement.moveTween.Kill();
             dropped.view.SetActiveSelectablePanel(false);
             dropped.model.isFieldCard = false;
             dropped.movement.PlayerSelectMoveOff(dropped);
@@ -64,8 +66,8 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 else
                 {
                     //TODO: エラー
-                    dropped.view.SetActiveSelectablePanel(false);
-                    dropped.model.isFieldCard = false;
+                    droppedCard.view.SetActiveSelectablePanel(false);
+                    droppedCard.model.isFieldCard = false;
                     droppedCard.movement.PlayerSelectMoveOff(droppedCard);
                     CancelSelect();
                 }
@@ -110,6 +112,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
     void CancelSelect()
     {
         dropped = null;
+        GameManager.instance.ReduceManaCost(-droppedCard.model.cost, droppedCard.model.isPlayerCard);
         GameManager.instance.SelectingPanelOff();
         GameManager.instance.isEffectSelectPhase = false;
         GameManager.instance.EnableButtonCards();
