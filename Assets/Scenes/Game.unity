@@ -324,6 +324,8 @@ MonoBehaviour:
   isOnCard: 0
   showDescriptionClicked: 0
   timeCount: 0
+  isCardChange: 1
+  changedCardList: 
   effectText: {fileID: 2001885910}
 --- !u!4 &138320883
 Transform:
@@ -5203,6 +5205,18 @@ MonoBehaviour:
       - m_Target: {fileID: 138320882}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: OnClickTurnEndButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 138320882}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: ChangeHandCards
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

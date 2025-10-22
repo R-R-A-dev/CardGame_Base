@@ -52,6 +52,9 @@ public class GameManager : MonoBehaviour
     // 時間管理
     public int timeCount;
 
+    public bool isCardChange = true;
+    public List<CardController> changedCardList = new List<CardController>();
+
     [SerializeField] TextMeshProUGUI effectText;
 
     // シングルトン化（どこからでもアクセスできるようにする）
@@ -66,7 +69,6 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         StartGame();
-
     }
 
     private void Update()
@@ -101,8 +103,43 @@ public class GameManager : MonoBehaviour
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
         SettingInitHand();
+
+    }
+
+    /// <summary>
+    /// 選択されたカードを破棄して新しいカードを引く（破棄したものをリストへ追加）
+    /// </summary>
+    /// <param name="selectedCards"></param>
+    public void ChangeHandCards()
+    {
+        if (isCardChange)
+        {
+            for (int i = 0; i < changedCardList.Count; i++)
+            {
+                ChangeDrawCard(player.deck, playerHandTransform);
+                Destroy(changedCardList[i].gameObject);
+            }
+            foreach (CardController card in changedCardList)
+                player.deck.Add(card.model.no);
+
+            changedCardList.Clear();
+            isCardChange = false;
+
+            showDescriptionClicked = false;
+            StartCoroutine(WaitStartTurn());
+        }
+    }
+
+    IEnumerator WaitStartTurn()
+    {
+        yield return new WaitForSeconds(1.5f);
+        bool startTurn = true;
+        if (startTurn)
+            StartCoroutine(TurnChangeAnimateText("Player Turn"));
+        else
+            StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
+        yield return new WaitForSeconds(2f);
         isPlayerTurn = true;
-        showDescriptionClicked = false;
         TurnCalc();
     }
 
@@ -139,7 +176,6 @@ public class GameManager : MonoBehaviour
         {
             Destroy(card.gameObject);
         }
-
 
         // デッキを生成
         player.deck = new List<int>() { 3, 1, 2, 2, 3 };
@@ -200,6 +236,16 @@ public class GameManager : MonoBehaviour
         }
         int cardID = deck[0];
         deck.RemoveAt(0);
+        CreateCardEffect(cardID, hand);
+    }
+
+    void ChangeDrawCard(List<int> deck, Transform hand)
+    {
+        if (deck.Count == 0)
+        {
+            return;
+        }
+        int cardID = deck[0];
         CreateCardEffect(cardID, hand);
     }
 
@@ -419,6 +465,8 @@ public class GameManager : MonoBehaviour
 
     public void OnClickTurnEndButton()
     {
+        if (isCardChange) return;
+
         if (isPlayerTurn)
         {
             StartCoroutine(WaitAndChangeTurn());
@@ -449,6 +497,7 @@ public class GameManager : MonoBehaviour
         else
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
 
+        IsDraggFlgOff();
         isSummoning = true;
         yield return new WaitForSeconds(2f);
         isSummoning = false;
@@ -758,6 +807,14 @@ public class GameManager : MonoBehaviour
         effectText.color = color;
     }
 
+    void IsDraggFlgOff()
+    {
+        foreach (CardMovement card in playerHandTransform.GetComponentsInChildren<CardMovement>())
+        {
+            card.isDraggable = false;
+        }
+    }
+
 }
 
 /* 追加機能リスト
@@ -799,5 +856,11 @@ public class GameManager : MonoBehaviour
  *  ドロー
  *  ↓
  *  行動可能
+ *  
+ *  次にやること
+ *  手札交換時間
+ *  コスト
+ *  勝敗処理
+ *  不具合探し
  * 
 */
