@@ -102,8 +102,8 @@ public class GameManager : MonoBehaviour
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
-        SettingInitHand();
-
+        StartCoroutine(SettingInitHand());
+        StartCoroutine(CountDownChangeCard());
     }
 
     /// <summary>
@@ -130,7 +130,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator WaitStartTurn()
+    IEnumerator CountDownChangeCard()
+    {
+        yield return new WaitForSeconds(1.5f);
+        timeCount = 50;
+        uiManager.UpdateTime(timeCount);
+
+        while (timeCount > 0)
+        {
+            yield return new WaitForSeconds(1);
+            timeCount--;
+            uiManager.UpdateTime(timeCount);
+        }
+        ChangeHandCards();
+    }
+        IEnumerator WaitStartTurn()
     {
         yield return new WaitForSeconds(1.5f);
         bool startTurn = true;
@@ -208,14 +222,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void SettingInitHand()
+    IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
         for (int i = 0; i < 3; i++)
         {
-            GiveCardToHand(player.deck, playerHandTransform);
-            GiveCardToHand(enemy.deck, enemyHandTransform);
+            //GiveCardToHand(player.deck, playerHandTransform);
+            //GiveCardToHand(enemy.deck, enemyHandTransform);
+            DrawCard(player.deck, playerHandTransform);
+            DrawCard(enemy.deck, enemyHandTransform);
         }
+        yield return new WaitForSeconds(1.5f);
+        TurnEndButton.GetComponent<Button>().interactable = true;
     }
     void GiveCardToHand(List<int> deck, Transform hand)
     {
@@ -858,8 +876,8 @@ public class GameManager : MonoBehaviour
  *  行動可能
  *  
  *  次にやること
- *  手札交換時間
- *  コスト
+ *  手札交換時間*
+ *  コスト*
  *  勝敗処理
  *  不具合探し
  * 

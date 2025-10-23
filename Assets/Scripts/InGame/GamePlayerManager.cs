@@ -20,6 +20,10 @@ public class GamePlayerManager : MonoBehaviour
     public void IncreaseManaCost()
     {
         defaultManaCost++;
+        if(defaultManaCost > 10)
+        {
+            defaultManaCost = 10;
+        }
         manaCost = defaultManaCost;
     }
 }
