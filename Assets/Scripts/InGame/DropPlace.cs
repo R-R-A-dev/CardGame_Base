@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DG.Tweening.Core.Easing;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class DropPlace : MonoBehaviour, IDropHandler
@@ -23,10 +24,18 @@ public class DropPlace : MonoBehaviour, IDropHandler
             {
                 return;
             }
-
+            CardController[] cards = GameManager.instance.GetFriendFieldCards(true);
+            if (cards.Length != 0)
+            {
+                foreach (CardController c in cards)
+                {
+                    c.GetComponent<CanvasGroup>().blocksRaycasts = true;
+                }
+            }
             if (card.IsSpell)
             {
                 droppedCard = card;
+                GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
                 return;
             }
             if (card.model.isFieldCard)

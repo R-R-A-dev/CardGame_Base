@@ -22,6 +22,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         if (!GameManager.instance.isPlayerTurn) return;
         if (GameManager.instance.isSummoning) return;
         if (GameManager.instance.isEffectSelectPhase) return;
+        if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
+        if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE) return;
 
         //　カードのコストとPlayerのManaコストを比較して、ドラッグ可能かどうかを判断
         CardController card = GetComponent<CardController>();
@@ -53,6 +55,15 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             DropPlace.droppedCard = card;
         }
+
+        CardController[] cards = GameManager.instance.GetFriendFieldCards(true);
+        if (cards.Length != 0)
+        {
+            foreach (CardController c in cards)
+            {
+                c.GetComponent<CanvasGroup>().blocksRaycasts = false;
+            }
+        }
         defaultParent = transform.parent;
         handSiblingIndex = transform.GetSiblingIndex();
         transform.SetParent(defaultParent.parent);
@@ -65,7 +76,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             if (GameManager.instance.isSummoning) return;
             if (GameManager.instance.isEffectSelectPhase) return;
-
+            if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
+            if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE) return;
             // ドラッグ中にプレイヤーのターンでない場合は元の手札に戻る
             if (isDraggable)
             {
@@ -95,6 +107,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         if (!GameManager.instance.isPlayerTurn) return;
         if (GameManager.instance.isSummoning) return;
         if (GameManager.instance.isEffectSelectPhase) return;
+        if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
+        if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE) return;
+
         if (!isDraggable)
         {
             BezierArrows.Instance.Hide();

@@ -691,6 +691,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selected: 0
   canvasGroup: {fileID: 3250521729447992486}
+  card: {fileID: -4390397048053376548}
 --- !u!1 &5263026021843677536
 GameObject:
   m_ObjectHideFlags: 0

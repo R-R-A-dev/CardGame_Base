@@ -97,8 +97,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 3, 4, 3, 2, 3, 3, 1, 1 });
-        enemy.Init(new List<int>() { 2, 3, 3, 3, 3, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 2, 2, 2, 2, 4, 1, 1 });
+        enemy.Init(new List<int>() { 2, 2, 2, 2, 2, 2, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -144,7 +144,7 @@ public class GameManager : MonoBehaviour
         }
         ChangeHandCards();
     }
-        IEnumerator WaitStartTurn()
+    IEnumerator WaitStartTurn()
     {
         yield return new WaitForSeconds(1.5f);
         bool startTurn = true;
@@ -530,15 +530,25 @@ public class GameManager : MonoBehaviour
         if (isPlayerTurn)
         {
             player.IncreaseManaCost();
-            DrawCard(player.deck, playerHandTransform);
+            // 手札が3枚未満ならドロー
+            if (GetFriendHandTransform(true).Length < 3)
+                DrawCard(player.deck, playerHandTransform);
+
         }
         else
         {
             enemy.IncreaseManaCost();
-            DrawCard(enemy.deck, enemyHandTransform);
+            // 手札が3枚未満ならドロー
+            if (GetEnemyHandTransform(true).Length < 3)
+                DrawCard(enemy.deck, enemyHandTransform);
         }
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
-        yield return new WaitForSeconds(1.3f);
+        if (isPlayerTurn && GetFriendHandTransform(true).Length < 3 ||
+            !isPlayerTurn && GetEnemyHandTransform(true).Length < 3)
+        {
+            yield return new WaitForSeconds(1.3f);
+        }
+
         TurnCalc();
     }
 
@@ -879,6 +889,11 @@ public class GameManager : MonoBehaviour
  *  手札交換時間*
  *  コスト*
  *  勝敗処理
+ *  場に出せるカードの上限設定*
  *  不具合探し
- * 
+ *  手札上限*
+ *  ドロップ時にカードの上からでもできるようにする*
+ *  山札が無いときの処理*
+ *  スペルの挙動
+ *  
 */

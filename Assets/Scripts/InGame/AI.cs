@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.Rendering.GPUSort;
 
 public class AI : MonoBehaviour
@@ -29,11 +30,12 @@ public class AI : MonoBehaviour
         /* 場にカードをだす */
         // 手札のカードリストを取得
         CardController[] handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
+        CardController[] fieldCardList = gameManager.GetEnemyFieldCards(true);
 
         // コスト以下のカードがあれば、カードをフィールドに出し続ける
         // 条件：モンスターカードならコストのみ
         // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
-        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0)//CanUseSpell()
+        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0 )
         {
             while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
             {
@@ -43,8 +45,15 @@ public class AI : MonoBehaviour
 
             // コスト以下のカードリストを取得
             CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells())));//CanUseSpell()
-            // 場に出すカードを選択
-            CardController selectCard = selectableHandCardList[0];
+                                                                                                                                                                                                       // 場に出すカードを選択
+            CardController selectCard = Array.Find(
+                selectableHandCardList,
+                card => !(gameManager.GetEnemyFieldCards(true).Length > 4 && card.model.spells == SPELLS.NONE)
+            );
+            
+            if(selectCard == null) break;
+            
+
             //　カードを表にする
             selectCard.Show();
             // スペルカードなら使用する
@@ -65,6 +74,9 @@ public class AI : MonoBehaviour
                     yield return new WaitForSeconds(2);
                 }
             }
+            if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+                yield break;
+
             yield return new WaitForSeconds(2);
             handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
         }
@@ -74,7 +86,7 @@ public class AI : MonoBehaviour
         yield return new WaitForSeconds(1);
         /* 攻撃 */
         // フィールドのカードリストを取得
-        CardController[] fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
+        fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
 
 
         //攻撃可能カードがあれば攻撃を繰り返す
@@ -122,6 +134,8 @@ public class AI : MonoBehaviour
                 gameManager.AttackToHero(attacker);
                 yield return new WaitForSeconds(0.25f);
                 gameManager.CheckHeroHP();
+                if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+                    yield break;
             }
             fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
             yield return new WaitForSeconds(2);

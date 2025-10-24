@@ -5,10 +5,11 @@ public class CardClickHandler : MonoBehaviour, IPointerDownHandler
 {
     public bool selected = false;
     [SerializeField] CanvasGroup canvasGroup;
+    [SerializeField] CardController card;
     public void OnPointerDown(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left &&
-            GameManager.instance.isCardChange)
+            GameManager.instance.isCardChange && card.model.isPlayerCard)
         {
             //手札交換の処理
             if (!selected)

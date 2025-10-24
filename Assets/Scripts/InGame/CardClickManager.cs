@@ -65,15 +65,14 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 }
                 else
                 {
-                    //TODO: エラー
                     droppedCard.view.SetActiveSelectablePanel(false);
                     droppedCard.model.isFieldCard = false;
                     droppedCard.movement.PlayerSelectMoveOff(droppedCard);
                     CancelSelect();
                 }
             }
-            else if (droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_FRIEND) && clickedCard.model.isPlayerCard ||
-                    droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY) && !clickedCard.model.isPlayerCard)
+            else if (droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_FRIEND) && clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard ||
+                    droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY) && !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard)
             {
                 //droppedCard.UseSpellTo(selectedCard);
                 StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
@@ -83,7 +82,10 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             }
             else
             {
-
+                droppedCard.view.SetActiveSelectablePanel(false);
+                droppedCard.model.isFieldCard = false;
+                droppedCard.movement.PlayerSelectMoveOff(droppedCard);
+                CancelSelect();
             }
         }
     }
