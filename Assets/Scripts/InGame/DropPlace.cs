@@ -35,7 +35,7 @@ public class DropPlace : MonoBehaviour, IDropHandler
             if (card.IsSpell)
             {
                 droppedCard = card;
-                GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
+                //GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
                 return;
             }
             if (card.model.isFieldCard)

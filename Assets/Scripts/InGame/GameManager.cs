@@ -56,6 +56,8 @@ public class GameManager : MonoBehaviour
     public List<CardController> changedCardList = new List<CardController>();
 
     [SerializeField] TextMeshProUGUI effectText;
+    [SerializeField] GameObject textPool;
+    [SerializeField] TextMeshProUGUI damageText;
 
     // シングルトン化（どこからでもアクセスできるようにする）
     public static GameManager instance;
@@ -97,8 +99,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 2, 2, 2, 2, 2, 4, 1, 1 });
-        enemy.Init(new List<int>() { 2, 2, 2, 2, 2, 2, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 2, 2, 2, 2, 1, 1, 1 });
+        enemy.Init(new List<int>() { 2, 2, 2, 2, 2, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -152,7 +154,10 @@ public class GameManager : MonoBehaviour
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
         else
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
-        yield return new WaitForSeconds(2f);
+        
+
+        
+        yield return new WaitForSeconds(2.3f);
         isPlayerTurn = true;
         TurnCalc();
     }
@@ -225,7 +230,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 6; i++)
         {
             //GiveCardToHand(player.deck, playerHandTransform);
             //GiveCardToHand(enemy.deck, enemyHandTransform);
@@ -508,16 +513,17 @@ public class GameManager : MonoBehaviour
     {
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
-
-        isPlayerTurn = !isPlayerTurn;
-        if (isPlayerTurn)
+        isSummoning = true;
+        
+        if (!isPlayerTurn)
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
         else
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
 
         IsDraggFlgOff();
-        isSummoning = true;
-        yield return new WaitForSeconds(2f);
+
+        yield return new WaitForSeconds(2.35f);
+        isPlayerTurn = !isPlayerTurn;
         isSummoning = false;
         //ターン変更演出
 
@@ -776,7 +782,6 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator TurnChangeAnimateText(string text)
     {
-        if (effectText == null) yield break;
 
         effectText.text = text;
         // 初期状態取得
@@ -843,6 +848,30 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void GenDamageText(GameObject text,int damage,Transform cardTransform)
+    {
+
+        Instantiate(text, cardTransform.position + new Vector3(0, 50, 0), Quaternion.identity).GetComponent<TextMeshProUGUI>().text = damage.ToString();
+    }
+
+
+    public GameObject GetTextPool ()
+    {
+        if (textPool.transform.childCount == 0)
+            return null;
+
+        for (int i = 0; i < textPool.transform.childCount; i++)
+        {
+            GameObject child = textPool.transform.GetChild(i).gameObject;
+            // 非アクティブならそれを返す
+            if (!child.activeSelf)
+            {
+                return child;
+            }
+        }
+        return null;
+    }
+
 }
 
 /* 追加機能リスト
@@ -894,6 +923,9 @@ public class GameManager : MonoBehaviour
  *  手札上限*
  *  ドロップ時にカードの上からでもできるようにする*
  *  山札が無いときの処理*
- *  スペルの挙動
- *  
+ *  スペルの挙動*
+ *  召喚や奪取時のフィールド上限
+ *  ドラッグアンドドロップがおかしい*
+ *      ターンが始まるより前にドロップできてしまうから
+ *  ドラッグ時に矢印がおかしい
 */

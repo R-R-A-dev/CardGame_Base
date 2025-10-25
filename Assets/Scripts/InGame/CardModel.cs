@@ -1,6 +1,7 @@
-﻿using JetBrains.Annotations;
-using UnityEngine;
+﻿using DG.Tweening.Core.Easing;
+using JetBrains.Annotations;
 using System.Collections;
+using UnityEngine;
 
 public class CardModel
 {
@@ -165,6 +166,11 @@ public class CardModel
         {
             card.isPlayerCard = isPlayer;
             GameManager.instance.EffectSummonCard(hand, card,baseCard);
+            CardController[] friendCards = GameManager.instance.GetFriendFieldCards(isPlayer);
+            if(friendCards.Length > 4)
+            {
+                break;
+            }
         }
     }
 

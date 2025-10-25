@@ -113,8 +113,11 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     void CancelSelect()
     {
+        if (!droppedCard.IsSpell)
+        {
+            GameManager.instance.ReduceManaCost(-droppedCard.model.cost, droppedCard.model.isPlayerCard);
+        }
         dropped = null;
-        GameManager.instance.ReduceManaCost(-droppedCard.model.cost, droppedCard.model.isPlayerCard);
         GameManager.instance.SelectingPanelOff();
         GameManager.instance.isEffectSelectPhase = false;
         GameManager.instance.EnableButtonCards();

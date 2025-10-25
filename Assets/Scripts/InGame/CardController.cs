@@ -294,7 +294,7 @@ public class CardController : MonoBehaviour
                 }*/
         //if (!model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY) ||
         //    !model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND))
-            gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
+        gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
 
 
         model.isFieldCard = true;
@@ -611,8 +611,7 @@ public class CardController : MonoBehaviour
     {
         bool canUse = false;
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS) ||
-            model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD) ||
-            model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
+            model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
@@ -653,9 +652,14 @@ public class CardController : MonoBehaviour
                 return false;
             }
         }
-        if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
+        if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT) && model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
         {
-            canUse = true;
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            if (enemyCards.Length > 0 && friendCards.Length <= 4)
+            {
+                canUse = true;
+            }
         }
         if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
         {
@@ -697,13 +701,7 @@ public class CardController : MonoBehaviour
                 canUse = true;
             }
         }
-        if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
-        {
-            if (model.targetCards != null && model.targetCards.Length > 0)
-            {
-                canUse = true;
-            }
-        }
+        
 
         if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
         {
@@ -964,8 +962,7 @@ public class CardController : MonoBehaviour
     {
         bool canUse = false;
         if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS)
-            || model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD)
-            || model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
+            || model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
@@ -973,6 +970,16 @@ public class CardController : MonoBehaviour
                 canUse = true;
             }
         }
+        if (model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || model.spells.HasFlag(SPELLS.SUMMON_SPECIFIC_UNIT))
+        {
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            if (enemyCards.Length > 0 && friendCards.Length <= 4)
+            {
+                canUse = true;
+            }
+        }
+
         if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) || model.spells.HasFlag(SPELLS.DRAW_CARDS))
         {
             canUse = true;
@@ -984,10 +991,6 @@ public class CardController : MonoBehaviour
             {
                 canUse = true;
             }
-        }
-        if (model.spells.HasFlag(SPELLS.SUMMON_SPECIFIC_UNIT))
-        {
-            canUse = true;
         }
         if (model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
         {

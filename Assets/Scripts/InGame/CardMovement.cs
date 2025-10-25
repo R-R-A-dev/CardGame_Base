@@ -23,7 +23,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         if (GameManager.instance.isSummoning) return;
         if (GameManager.instance.isEffectSelectPhase) return;
         if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
-        if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE) return;
+        if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE
+            && !GetComponent<CardController>().model.isFieldCard) return;
 
         //　カードのコストとPlayerのManaコストを比較して、ドラッグ可能かどうかを判断
         CardController card = GetComponent<CardController>();
@@ -77,7 +78,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
             if (GameManager.instance.isSummoning) return;
             if (GameManager.instance.isEffectSelectPhase) return;
             if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
-            if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE) return;
+            if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE
+                && !GetComponent<CardController>().model.isFieldCard) return;
             // ドラッグ中にプレイヤーのターンでない場合は元の手札に戻る
             if (isDraggable)
             {
@@ -108,7 +110,8 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         if (GameManager.instance.isSummoning) return;
         if (GameManager.instance.isEffectSelectPhase) return;
         if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
-        if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE) return;
+        if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE
+            && !GetComponent<CardController>().model.isFieldCard) return;
 
         if (!isDraggable)
         {
