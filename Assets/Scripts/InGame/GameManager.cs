@@ -99,8 +99,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 2, 2, 2, 2, 2, 1, 1, 1 });
-        enemy.Init(new List<int>() { 2, 2, 2, 2, 2, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 4, 2, 2, 2, 1, 1, 1 });
+        enemy.Init(new List<int>() { 2, 4, 2, 2, 2, 4, 4, 4, 1 });
 
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
@@ -154,10 +154,10 @@ public class GameManager : MonoBehaviour
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
         else
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
-        
 
-        
-        yield return new WaitForSeconds(2.3f);
+
+
+        yield return new WaitForSeconds(3.0f);
         isPlayerTurn = true;
         TurnCalc();
     }
@@ -514,7 +514,7 @@ public class GameManager : MonoBehaviour
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
         isSummoning = true;
-        
+
         if (!isPlayerTurn)
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
         else
@@ -522,7 +522,7 @@ public class GameManager : MonoBehaviour
 
         IsDraggFlgOff();
 
-        yield return new WaitForSeconds(2.35f);
+        yield return new WaitForSeconds(3.0f);
         isPlayerTurn = !isPlayerTurn;
         isSummoning = false;
         //ターン変更演出
@@ -848,14 +848,41 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GenDamageText(GameObject text,int damage,Transform cardTransform)
+    public IEnumerator GenDamageText(GameObject text, int damage, Transform cardTransform)
     {
+        if (text == null)
+        {
+             text = Instantiate(damageText.gameObject);
+        }
+        text.transform.SetParent(textPool.transform);
+        text.transform.position = cardTransform.position;
+        text.GetComponent<TextMeshProUGUI>().text = damage.ToString();
+        text.SetActive(true);
+        //0.5秒後に消えてtextPoolの子オブジェクトに戻る
+        yield return new WaitForSeconds(0.5f);
+        text.SetActive(false);
+        
+    }
 
-        Instantiate(text, cardTransform.position + new Vector3(0, 50, 0), Quaternion.identity).GetComponent<TextMeshProUGUI>().text = damage.ToString();
+    public IEnumerator GenHealText(GameObject text, int damage, Transform cardTransform)
+    {
+        if (text == null)
+        {
+            text = Instantiate(damageText.gameObject);
+        }
+        text.transform.SetParent(textPool.transform);
+        text.transform.position = cardTransform.position;
+        text.GetComponent<TextMeshProUGUI>().text = damage.ToString();
+        text.GetComponent<TextMeshProUGUI>().color = Color.green;
+        text.SetActive(true);
+        //0.5秒後に消えてtextPoolの子オブジェクトに戻る
+        yield return new WaitForSeconds(0.5f);
+        text.SetActive(false);
+
     }
 
 
-    public GameObject GetTextPool ()
+    public GameObject GetTextPool()
     {
         if (textPool.transform.childCount == 0)
             return null;
@@ -927,5 +954,7 @@ public class GameManager : MonoBehaviour
  *  召喚や奪取時のフィールド上限
  *  ドラッグアンドドロップがおかしい*
  *      ターンが始まるより前にドロップできてしまうから
- *  ドラッグ時に矢印がおかしい
+ *  ドラッグ時に矢印がおかしい*
+ *  ターン交代の挙動
+ *  ダメージの表示
 */

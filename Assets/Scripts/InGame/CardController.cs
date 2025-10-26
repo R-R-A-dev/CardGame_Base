@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -701,7 +702,7 @@ public class CardController : MonoBehaviour
                 canUse = true;
             }
         }
-        
+
 
         if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
         {
@@ -1060,6 +1061,11 @@ public class CardController : MonoBehaviour
         return canUse;
     }
 
+    /// <summary>
+    /// 敵への攻撃エフェクト
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="isDefense"></param>
     public void attackEffect(CardController target, bool isDefense)
     {
         DG.Tweening.Sequence seq = DOTween.Sequence();
@@ -1107,6 +1113,9 @@ public class CardController : MonoBehaviour
         model.Attack(enemy);
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+        GameObject textObj = GameManager.instance.GetTextPool();
+        StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
+
     }
 
     public void DirectAttack(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
@@ -1120,6 +1129,8 @@ public class CardController : MonoBehaviour
                 model.Attack(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+                GameObject textObj = GameManager.instance.GetTextPool();
+                StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, endPos));
             });
     }
     public void StartThrow(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
@@ -1150,6 +1161,8 @@ public class CardController : MonoBehaviour
                     model.Attack(enemyCC);
                     enemyCC.RefreshView();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
+                    GameObject textObj = GameManager.instance.GetTextPool();
+                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
                 }
                 yield break;
             }
@@ -1206,6 +1219,13 @@ public class CardController : MonoBehaviour
         UseAbilitiesTo(enemy);
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+        if (model.effectDmg != 0)
+        {
+            GameObject textObj = GameManager.instance.GetTextPool();
+            StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
+        }
+
+
     }
     public void DirectAttackAbility(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
     {
@@ -1218,6 +1238,11 @@ public class CardController : MonoBehaviour
                 UseAbilitiesTo(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+                if (model.effectDmg != 0)
+                {
+                    GameObject textObj = GameManager.instance.GetTextPool();
+                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
+                }
             });
     }
     public void StartThrowAbility(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
@@ -1248,6 +1273,11 @@ public class CardController : MonoBehaviour
                     UseAbilitiesTo(enemyCC);
                     enemyCC.RefreshView();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
+                    if (model.effectDmg != 0)
+                    {
+                        GameObject textObj = GameManager.instance.GetTextPool();
+                        StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
+                    }
                 }
                 yield break;
             }
@@ -1312,6 +1342,15 @@ public class CardController : MonoBehaviour
         {
             gameManager.player.heroHp -= model.at;
         }
+        Transform targetHero = null;
+        if (model.isPlayerCard)
+            targetHero = gameManager.enemyHero;
+        else
+            targetHero = gameManager.playerHero;
+
+        GameObject textObj = GameManager.instance.GetTextPool();
+        StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetHero));
+
         gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
         GameManager.instance.CheckHeroHP();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
@@ -1333,6 +1372,16 @@ public class CardController : MonoBehaviour
                 {
                     gameManager.player.heroHp -= model.at;
                 }
+                Transform targetHero = null;
+                if (model.isPlayerCard)
+                    targetHero = gameManager.enemyHero;
+                else
+                    targetHero = gameManager.playerHero;
+
+
+                GameObject textObj = GameManager.instance.GetTextPool();
+                StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetHero));
+
                 gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                 GameManager.instance.CheckHeroHP();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
@@ -1371,6 +1420,14 @@ public class CardController : MonoBehaviour
                     {
                         gameManager.player.heroHp -= model.at;
                     }
+                    Transform targetHero = null;
+                    if (model.isPlayerCard)
+                        targetHero = gameManager.enemyHero;
+                    else
+                        targetHero = gameManager.playerHero;
+
+                    GameObject textObj = GameManager.instance.GetTextPool();
+                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetHero));
                     gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                     GameManager.instance.CheckHeroHP();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
@@ -1451,6 +1508,15 @@ public class CardController : MonoBehaviour
                 gameManager.enemy.heroHp += model.effectDmg;
             }
         }
+        Transform targetHero = null;
+        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard ||
+                       model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard)
+            targetHero = gameManager.playerHero;
+        else
+            targetHero = gameManager.enemyHero;
+
+        GameObject textObj = GameManager.instance.GetTextPool();
+        GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
 
         gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
         GameManager.instance.CheckHeroHP();
@@ -1492,6 +1558,16 @@ public class CardController : MonoBehaviour
                         gameManager.enemy.heroHp += model.effectDmg;
                     }
                 }
+                Transform targetHero = null;
+                if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard ||
+                       model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard)
+                    targetHero = gameManager.playerHero;
+                else
+                    targetHero = gameManager.enemyHero;
+
+                GameObject textObj = GameManager.instance.GetTextPool();
+                GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
+
                 gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                 GameManager.instance.CheckHeroHP();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
@@ -1551,6 +1627,16 @@ public class CardController : MonoBehaviour
                             gameManager.enemy.heroHp += model.effectDmg;
                         }
                     }
+                    Transform targetHero = null;
+                    if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard ||
+                        model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard)
+                        targetHero = gameManager.playerHero;
+                    else
+                        targetHero = gameManager.enemyHero;
+
+                    GameObject textObj = GameManager.instance.GetTextPool();
+                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
+
                     gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                     GameManager.instance.CheckHeroHP();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
@@ -1570,6 +1656,7 @@ public class CardController : MonoBehaviour
         }
     }
 
+    //スペルエフェクト
     public void spellEffect(CardController target, bool isDefense)
     {
         GameManager.instance.isAttacking = true;
@@ -1606,6 +1693,11 @@ public class CardController : MonoBehaviour
                 UseSpellTo(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+                if (model.effectDmg != 0)
+                {
+                    GameObject textObj = GameManager.instance.GetTextPool();
+                    GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
+                }
             });
     }
 
@@ -1617,10 +1709,14 @@ public class CardController : MonoBehaviour
         //model.Attack(enemy);
         UseSpellTo(enemy);
         CheckAttackParticle(effect);
+        if (model.effectDmg != 0)
+        {
+            GameObject textObj = GameManager.instance.GetTextPool();
+            GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
+        }
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
     }
-
 
     public void hitEffect(Transform target)
     {

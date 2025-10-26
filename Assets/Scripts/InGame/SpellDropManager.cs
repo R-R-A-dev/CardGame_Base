@@ -89,7 +89,7 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
     {
         yield return new WaitForSeconds(0.9f);
         GameManager.instance.AttackToHeroSpell(card);
-        card.spellEffect(card, true);
+        //card.spellEffect(card, true);
     }
 
     private IEnumerator AllDestroy(CardController card)

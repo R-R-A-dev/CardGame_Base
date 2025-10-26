@@ -36,6 +36,6 @@ MonoBehaviour:
   rare: 3
   ability: 0
   spell: 0
-  spells: 4224
-  abilities: 33280
+  spells: 32
+  abilities: 0
   targetCardID: 
