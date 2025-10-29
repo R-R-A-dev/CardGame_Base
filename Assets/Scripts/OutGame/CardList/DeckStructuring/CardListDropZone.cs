@@ -7,18 +7,19 @@ public class CardListDropZone : MonoBehaviour, IDropHandler
     public void OnDrop(PointerEventData eventData)
     {
         OutGameCardList card = eventData.pointerDrag.GetComponent<OutGameCardList>();
-
         if (card != null)
         {
-            if (card.GetComponent<CardDragHandler>().test)
+            if (card.GetComponent<CardDragHandler>().leftMove)
             {
-                card.GetComponent<CardDragHandler>().test = false;
+                Debug.Log("Left Move Detected - Drop Cancelled");
+                card.GetComponent<CardDragHandler>().leftMove = false;
                 return;
             }
             GameObject droppedCard = card.GetComponent<CardDragHandler>().GetHoldCard();
             if (droppedCard == null) return;
             cardDragHandler = droppedCard.GetComponent<CardDragHandler>();
             cardDragHandler.dropSuccess = true;
+
             if (cardDragHandler != null && cardDragHandler.isDeck == false)
             {
                 //一覧から一覧へドロップ

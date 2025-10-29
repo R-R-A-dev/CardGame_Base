@@ -25,7 +25,8 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     bool isLeft;
     bool isRight;
 
-    public bool test;
+
+    public bool leftMove;
 
     private void Update()
     {
@@ -45,7 +46,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (Input.GetMouseButtonUp(1))
         {
             isRight = false;
-           
+            leftMove = false;
         }
     }
     public void OnBeginDrag(PointerEventData eventData)
@@ -110,7 +111,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             //DeckBuilderManager.Instance.DragCardOn();
-            
+
             if (holdCard != null)
             {
                 CanvasGroup cg = holdCard.GetComponent<CanvasGroup>();
@@ -138,7 +139,9 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
                         break;
                     }
                 }
-
+                //Debug.Log("isOverValidDropZone: " + isOverValidDropZone);
+                //Debug.Log("dropSuccess: " + holdCard.GetComponent<CardDragHandler>().dropSuccess);
+                //Debug.Log("leftMove: " + leftMove);
                 // DropZoneで処理されなかった場合（自分の上など）→ 消す
                 if (!isOverValidDropZone || !holdCard.GetComponent<CardDragHandler>().dropSuccess)
                 {
@@ -215,7 +218,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
             eventData.button != PointerEventData.InputButton.Left)
         {
             //DeckBuilderManager.Instance.OffDropZone();
-            test = true;
+            leftMove = true;
             //DeckBuilderManager.Instance.cardDetailUI.Hide();
             if (isLeft) return;
             //生成からデッキ編成、所持一覧への移動、アニメーション
@@ -265,6 +268,9 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     IEnumerator CardEffectToDeck(Vector3 movePos, CardAnimationController cardAnimationController,
         OutGameCardList outGameCardList, int cardNum, CardDragHandler cardDragHandler)
     {
+        holdCard = null;
+        DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
+
         //デッキのアニメーションカード生成　アニメーション
         GameObject beforeCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
         if (beforeCard == null)
@@ -279,9 +285,9 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         cardAnimationController.PlayMoveTo(movePos, 0.2f);
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = false;
 
+
         yield return new WaitForSeconds(0.2f);
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
-
 
 
         //一覧のアニメーションカード生成　アニメーション
@@ -302,12 +308,12 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
         beforeCard.GetComponent<CanvasGroup>().blocksRaycasts = true;
         GetComponent<CanvasGroup>().blocksRaycasts = true;
-        DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
     }
 
 
     IEnumerator CardEffectToList(Vector3 movePos, OutGameCardList outGameCardList, int cardNum)
     {
+        holdCard = null;
         GameObject beforeCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
         if (beforeCard == null)
             beforeCard = Instantiate(gameObject, transform.root);
@@ -339,7 +345,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        
+
     }
 }
 
@@ -357,7 +363,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
  * ドラッグアンドドロップからリストへの追加と削除を行う
  * 
  *不具合
- * 右クリック素早く二回押せる（演出のカードを押してる）
+ * 右を押してすぐ左を押しながらドラッグするとおかしくなる
  * 
  * 
 */

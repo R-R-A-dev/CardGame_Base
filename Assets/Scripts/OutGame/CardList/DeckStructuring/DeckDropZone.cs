@@ -10,9 +10,10 @@ public class DeckDropZone : MonoBehaviour, IDropHandler
         OutGameCardList card = eventData.pointerDrag.GetComponent<OutGameCardList>();
         if (card != null)
         {
-            if (card.GetComponent<CardDragHandler>().test)
+            if (card.GetComponent<CardDragHandler>().leftMove)
             {
-                card.GetComponent<CardDragHandler>().test = false;
+                Debug.Log("Left Move Detected - Drop Cancelled");
+                card.GetComponent<CardDragHandler>().leftMove = false;
                 return;
             }
             GameObject droppedCard = card.GetComponent<CardDragHandler>().GetHoldCard();
@@ -36,4 +37,5 @@ public class DeckDropZone : MonoBehaviour, IDropHandler
 
         }
     }
+
 }
