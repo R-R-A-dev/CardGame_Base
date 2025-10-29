@@ -19,6 +19,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        
+        //右クリックはreturn
+        if (eventData.button == PointerEventData.InputButton.Right) return;
+
         if (!GameManager.instance.isPlayerTurn) return;
         if (GameManager.instance.isSummoning) return;
         if (GameManager.instance.isEffectSelectPhase) return;
@@ -102,10 +106,14 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             return;
         }
+        if (eventData.button == PointerEventData.InputButton.Right) return;
+
         transform.position = eventData.position;
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (eventData.button == PointerEventData.InputButton.Right) return;
+
         if (!GameManager.instance.isPlayerTurn) return;
         if (GameManager.instance.isSummoning) return;
         if (GameManager.instance.isEffectSelectPhase) return;

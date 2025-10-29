@@ -4,11 +4,17 @@ using UnityEngine.EventSystems;
 public class DeckDropZone : MonoBehaviour, IDropHandler
 {
     CardDragHandler cardDragHandler;
+
     public void OnDrop(PointerEventData eventData)
     {
         OutGameCardList card = eventData.pointerDrag.GetComponent<OutGameCardList>();
         if (card != null)
         {
+            if (card.GetComponent<CardDragHandler>().test)
+            {
+                card.GetComponent<CardDragHandler>().test = false;
+                return;
+            }
             GameObject droppedCard = card.GetComponent<CardDragHandler>().GetHoldCard();
             if (droppedCard == null) return;
             cardDragHandler = droppedCard.GetComponent<CardDragHandler>();

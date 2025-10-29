@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DeckBuilderManager : MonoBehaviour
 {
@@ -49,5 +50,27 @@ public class DeckBuilderManager : MonoBehaviour
             CardListData.Entities.Add(entitys[i]);
         }
     }
+
+    public void OnDropZone()
+    {
+        deckBuilderUI.OnDropZone();
+    }
+
+    public void OffDropZone()
+    {
+        deckBuilderUI.OffDropZone();
+    }
+
+    public void GameStart()
+    {
+        GameSession.SelectedDeck = deckBuilderUI.GetDeck();
+        for(int i = 0; i < GameSession.SelectedDeck.Count; i++)
+        {
+            //Debug.Log(GameSession.SelectedDeck[i]);
+        }
+        SceneManager.LoadScene(1);
+    }
+
+
 }
 

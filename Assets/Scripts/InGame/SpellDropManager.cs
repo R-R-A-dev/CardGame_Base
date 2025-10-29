@@ -13,10 +13,10 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
         CardController spellCard = eventData.pointerDrag.GetComponent<CardController>();
         CardController target = GetComponent<CardController>();
 
-        if (spellCard == null)
-        {
+        if (spellCard.gameObject.GetComponent<CanvasGroup>().blocksRaycasts == true)
             return;
-        }
+        if (spellCard == null) return;
+        if (GameManager.instance.isSummoning) return;
         if (spellCard.CanUseSpells())
         {
             if (!GameManager.instance.isPlayerTurn) return;

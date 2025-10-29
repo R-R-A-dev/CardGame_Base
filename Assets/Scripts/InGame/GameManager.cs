@@ -99,9 +99,10 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 2, 4, 2, 2, 2, 1, 1, 1 });
-        enemy.Init(new List<int>() { 2, 4, 2, 2, 2, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 4, 4, 4, 4, 4, 2, 1, 1 });
+        enemy.Init(new List<int>() { 4, 4, 2, 2, 2, 4, 4, 4, 1 });
 
+        //player.deck = GameSession.SelectedDeck;
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
         StartCoroutine(SettingInitHand());
@@ -148,8 +149,10 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator WaitStartTurn()
     {
+        EnemyTurnZone();
         yield return new WaitForSeconds(1.5f);
         bool startTurn = true;
+        isSummoning = true;
         if (startTurn)
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
         else
@@ -157,8 +160,10 @@ public class GameManager : MonoBehaviour
 
 
 
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(2.5f);
         isPlayerTurn = true;
+        PlayerTurnZone();
+        isSummoning = false;
         TurnCalc();
     }
 
@@ -225,6 +230,22 @@ public class GameManager : MonoBehaviour
         {
             card.blocksRaycasts = true;
         }
+    }
+
+    public void EnemyTurnZone()
+    {
+        TurnEndButton.interactable = false;
+        //spelldropzoneのオブジェクトのRaycastTargetをfalseにする
+        playerFieldTransform.GetComponent<Image>().raycastTarget = false;
+        enemyFieldTransform.GetComponent<Image>().raycastTarget = false;
+    }
+
+    void PlayerTurnZone()
+    {
+        TurnEndButton.interactable = true;
+        playerFieldTransform.GetComponent<Image>().raycastTarget = true;
+        enemyFieldTransform.GetComponent<Image>().raycastTarget = true;
+
     }
 
     IEnumerator SettingInitHand()
@@ -514,7 +535,7 @@ public class GameManager : MonoBehaviour
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
         isSummoning = true;
-
+        EnemyTurnZone();
         if (!isPlayerTurn)
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
         else
@@ -522,9 +543,10 @@ public class GameManager : MonoBehaviour
 
         IsDraggFlgOff();
 
-        yield return new WaitForSeconds(3.0f);
-        isPlayerTurn = !isPlayerTurn;
+        yield return new WaitForSeconds(2.5f);
+        
         isSummoning = false;
+        PlayerTurnZone();
         //ターン変更演出
 
         CardController[] playerFieldCardList = playerFieldTransform.GetComponentsInChildren<CardController>();
@@ -834,7 +856,7 @@ public class GameManager : MonoBehaviour
 
             yield return null;
         }
-
+        isPlayerTurn = !isPlayerTurn;
         // 完全に非表示に
         color.a = 0f;
         effectText.color = color;
@@ -852,7 +874,7 @@ public class GameManager : MonoBehaviour
     {
         if (text == null)
         {
-             text = Instantiate(damageText.gameObject);
+            text = Instantiate(damageText.gameObject);
         }
         text.transform.SetParent(textPool.transform);
         text.transform.position = cardTransform.position;
@@ -861,7 +883,7 @@ public class GameManager : MonoBehaviour
         //0.5秒後に消えてtextPoolの子オブジェクトに戻る
         yield return new WaitForSeconds(0.5f);
         text.SetActive(false);
-        
+
     }
 
     public IEnumerator GenHealText(GameObject text, int damage, Transform cardTransform)
@@ -897,6 +919,13 @@ public class GameManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    List<int> GetDeck()
+    {
+        List<int> deck = new List<int>();
+
+        return deck;
     }
 
 }

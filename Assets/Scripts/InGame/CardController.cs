@@ -297,7 +297,6 @@ public class CardController : MonoBehaviour
         //    !model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND))
         gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
 
-
         model.isFieldCard = true;
         OnFiledAbilities();
     }
@@ -1571,11 +1570,12 @@ public class CardController : MonoBehaviour
                 gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                 GameManager.instance.CheckHeroHP();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+                Destroy(this.gameObject);
                 if (model.abilities.HasFlag(ABILITIES.NONE))
                 {
                     return;
                 }
-                Destroy(this.gameObject);
+
             });
     }
     public void StartSpellThrowHero(Transform target, float height, Vector3 start, Vector3 end, float duration, bool isDefense, bool destroyOnComplete = true)

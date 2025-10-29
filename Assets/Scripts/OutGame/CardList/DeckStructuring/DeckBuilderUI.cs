@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -363,7 +364,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void OnOpenCardListFilter()
     {
-        filterPanel.Open(this, false,cardListFilter);
+        filterPanel.Open(this, false, cardListFilter);
     }
 
     /// <summary>
@@ -371,7 +372,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void OnOpenDeckFilter()
     {
-        filterPanel.Open(this, true,deckFilter);
+        filterPanel.Open(this, true, deckFilter);
     }
 
     /// <summary>
@@ -393,5 +394,60 @@ public class DeckBuilderUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ドロップゾーンのコンポーネントを切り替え
+    /// </summary>
+    public void OnDropZone()
+    {
+        cardListDropZone.enabled = true;
+        deckDropZone.enabled = true;
+    }
 
+    /// <summary>
+    /// ドロップゾーンのコンポーネントを切り替え
+    /// </summary>
+    public void OffDropZone()
+    {
+        cardListDropZone.enabled = false;
+        deckDropZone.enabled = false;
+    }
+
+
+    /// <summary>
+    /// デッキの一覧からデッキ情報を取得して返す
+    /// </summary>
+    public List<int> GetDeck()
+    {
+        List<int> deck = new List<int>();
+
+        //インスペクター上のデッキ内カード一覧を取得
+        OutGameCardList[] cardLists = deckContent.GetComponentsInChildren<OutGameCardList>(true);
+
+        //リストの初期化 カードNo取得用
+        int[] cardNum = new int[CardListData.Decks[DeckBuilderManager.Instance.deckNum].Count];
+        
+        // 例: デッキデータを代入
+        for (int i = 0; i < cardNum.Length; i++)
+            cardNum[i] = CardListData.Decks[DeckBuilderManager.Instance.deckNum][i];
+
+        // 要素が 0 より大きいものだけを抽出して新しい配列に
+        int[] filtered = cardNum.Where(num => num > 0).ToArray();     
+
+        //カードNoと枚数情報からデッキリストを作成して返す
+        for (int i = 0; i < filtered.Length; i++)
+        {
+            for (int j = 0; j < filtered[i]; j++)
+            {
+                deck.Add(cardLists[i].No);
+            }
+        }
+        Debug.Log(filtered[0]);
+
+        return deck;
+    }
 }
+/*
+    ドラッグアンドドロップじに数が合わなくなる時がある
+    左右クリックをするとraycasttargetがおかしくなる
+    フィルターパネル表示時に他の操作ができてしまう
+*/

@@ -17,6 +17,7 @@ public class DropPlace : MonoBehaviour, IDropHandler
         {
             return;
         }
+        if (GameManager.instance.isSummoning) return;
         CardController card = eventData.pointerDrag.GetComponent<CardController>();
         if (card != null)
         {

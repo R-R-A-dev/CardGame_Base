@@ -291,6 +291,7 @@ public class AI : MonoBehaviour
             yield return new WaitForSeconds(0.9f);
             movePosition = gameManager.playerHero;
             card.attackSpellEffectHero(movePosition, true);
+            gameManager.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
             yield break;
         }
         else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
@@ -299,6 +300,7 @@ public class AI : MonoBehaviour
             yield return new WaitForSeconds(0.9f);
             movePosition = gameManager.enemyHero;
             card.attackSpellEffectHero(movePosition, true);
+            gameManager.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
             yield break;
         }
         else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS))

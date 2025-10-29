@@ -6,8 +6,9 @@ using UnityEngine.UI;
 
 public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     IEndDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler,
-    IPointerDownHandler
+    IPointerDownHandler, IPointerUpHandler
 {
+
     GameObject holdCard;
     GameObject clickedCard;
     private ScrollRect scrollRect;
@@ -21,31 +22,51 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public bool dropSuccess = false;
 
+    bool isLeft;
+    bool isRight;
+
+    public bool test;
 
     private void Update()
     {
         //左クリックでカード詳細を非表示
         if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(0) && !DeckBuilderManager.Instance.cardDetailUI.isOnCard)
             DeckBuilderManager.Instance.cardDetailUI.Hide();
+
+        if (Input.GetMouseButtonDown(0))
+            isLeft = true;
+
+        if (Input.GetMouseButtonDown(1))
+            isRight = true;
+
+
+        if (Input.GetMouseButtonUp(0))
+            isLeft = false;
+        if (Input.GetMouseButtonUp(1))
+        {
+            isRight = false;
+           
+        }
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            /*            // ScrollRectをドラッグ対象に
-                        scrollRect = GetComponentInParent<ScrollRect>();
-                        eventData.pointerDrag = scrollRect.gameObject;
-                        EventSystem.current.SetSelectedGameObject(scrollRect.gameObject);
+        //if (eventData.button == PointerEventData.InputButton.Right)
+        //{
+        //    /*            // ScrollRectをドラッグ対象に
+        //                scrollRect = GetComponentInParent<ScrollRect>();
+        //                eventData.pointerDrag = scrollRect.gameObject;
+        //                EventSystem.current.SetSelectedGameObject(scrollRect.gameObject);
 
-                        // ScrollRect側でドラッグの初期化
-                        scrollRect.OnInitializePotentialDrag(eventData);
-                        scrollRect.OnBeginDrag(eventData);*/
+        //                // ScrollRect側でドラッグの初期化
+        //                scrollRect.OnInitializePotentialDrag(eventData);
+        //                scrollRect.OnBeginDrag(eventData);*/
 
-            //
-
-        }
+        //    //
+        //}
         if (eventData.button == PointerEventData.InputButton.Left)
         {
+            //DeckBuilderManager.Instance.DragCardOff();
+            if (isRight) return;
             dropSuccess = false;
             DeckBuilderManager.Instance.cardDetailUI.Hide();
             if (!isDraggable()) return;
@@ -70,10 +91,10 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     }
     public void OnDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            //scrollRect.OnDrag(eventData);
-        }
+        //if (eventData.button == PointerEventData.InputButton.Right)
+        //{
+        //    //scrollRect.OnDrag(eventData);
+        //}
         if (eventData.button == PointerEventData.InputButton.Left && holdCard != null)
         {
             holdCard.transform.position = eventData.position;
@@ -81,12 +102,15 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             //scrollRect.OnEndDrag(eventData);
         }
         if (eventData.button == PointerEventData.InputButton.Left)
         {
+            //DeckBuilderManager.Instance.DragCardOn();
+            
             if (holdCard != null)
             {
                 CanvasGroup cg = holdCard.GetComponent<CanvasGroup>();
@@ -126,6 +150,12 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         }
     }
 
+    IEnumerator t()
+    {
+        yield return null;
+        DeckBuilderManager.Instance.OnDropZone();
+    }
+
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -157,11 +187,13 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (isRight) return;
         DeckBuilderManager.Instance.cardDetailUI.isOnCard = true;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (isRight) return;
         DeckBuilderManager.Instance.cardDetailUI.isOnCard = false;
     }
 
@@ -177,9 +209,15 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
             );
         }
 
-        if (eventData.button == PointerEventData.InputButton.Right)
+
+
+        if (eventData.button == PointerEventData.InputButton.Right &&
+            eventData.button != PointerEventData.InputButton.Left)
         {
-            DeckBuilderManager.Instance.cardDetailUI.Hide();
+            //DeckBuilderManager.Instance.OffDropZone();
+            test = true;
+            //DeckBuilderManager.Instance.cardDetailUI.Hide();
+            if (isLeft) return;
             //生成からデッキ編成、所持一覧への移動、アニメーション
             if (!isDraggable()) return;
             holdCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
@@ -235,10 +273,16 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         beforeCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
         beforeCard.transform.position = transform.position;
         beforeCard.GetComponent<CardAnimationController>().PlayFadeOutAndExpand(0.2f, 1.3f);
+        beforeCard.GetComponent<CanvasGroup>().blocksRaycasts = false;
+        GetComponent<CanvasGroup>().blocksRaycasts = false;
 
         cardAnimationController.PlayMoveTo(movePos, 0.2f);
+        cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = false;
 
         yield return new WaitForSeconds(0.2f);
+        cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
+
+
 
         //一覧のアニメーションカード生成　アニメーション
         GameObject afterCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
@@ -256,7 +300,8 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         DeckBuilderManager.Instance.deckBuilderUI.PoolCard(afterCard);
 
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
-
+        beforeCard.GetComponent<CanvasGroup>().blocksRaycasts = true;
+        GetComponent<CanvasGroup>().blocksRaycasts = true;
         DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
     }
 
@@ -270,7 +315,8 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         beforeCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
         beforeCard.transform.position = transform.position;
         beforeCard.GetComponent<CardAnimationController>().PlayFadeOutAndExpand(0.2f, 1.3f);
-
+        beforeCard.GetComponent<CanvasGroup>().blocksRaycasts = false;
+        GetComponent<CanvasGroup>().blocksRaycasts = false;
 
         GameObject afterCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
         if (afterCard == null)
@@ -283,14 +329,21 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
 
         yield return new WaitForSeconds(0.2f);
+        GetComponent<CanvasGroup>().blocksRaycasts = true;
+        beforeCard.GetComponent<CanvasGroup>().blocksRaycasts = true;
         DeckBuilderManager.Instance.deckBuilderUI.PoolCard(beforeCard);
         DeckBuilderManager.Instance.deckBuilderUI.PoolCard(afterCard);
 
         DeckBuilderManager.Instance.RemoveCardFromDeck(outGameCardList, cardNum);
     }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        
+    }
 }
 
-/*追加事項
+/*追加
  * ドラッグアンドドラッグで追加と削除
  * 表示させるカードはオブジェクトプールを使用
  * クリックかつドラッグしたカードを生成
@@ -304,7 +357,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
  * ドラッグアンドドロップからリストへの追加と削除を行う
  * 
  *不具合
- * ドロップの受付場所
+ * 右クリック素早く二回押せる（演出のカードを押してる）
  * 
  * 
 */
