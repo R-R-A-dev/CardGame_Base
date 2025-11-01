@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     public Transform enemyHero;
 
     [SerializeField] Button TurnEndButton;
+    [SerializeField] TextMeshProUGUI TurnEndButtonText;
 
     public RectTransform summonLight;
     [SerializeField] UIParticle UIParticleObj;
@@ -99,12 +100,13 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 4, 4, 4, 4, 4, 2, 1, 1 });
-        enemy.Init(new List<int>() { 4, 4, 2, 2, 2, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 2, 3, 4, 3, 2, 1, 1 });
+        enemy.Init(new List<int>() { 2, 2, 3, 3, 4, 4, 4, 4, 1 });
 
         //player.deck = GameSession.SelectedDeck;
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+        TurnEndButtonText.text = "Decide";
         StartCoroutine(SettingInitHand());
         StartCoroutine(CountDownChangeCard());
     }
@@ -117,13 +119,13 @@ public class GameManager : MonoBehaviour
     {
         if (isCardChange)
         {
+            foreach (CardController card in changedCardList)
+                player.deck.Add(card.model.no);
             for (int i = 0; i < changedCardList.Count; i++)
             {
                 ChangeDrawCard(player.deck, playerHandTransform);
                 Destroy(changedCardList[i].gameObject);
             }
-            foreach (CardController card in changedCardList)
-                player.deck.Add(card.model.no);
 
             changedCardList.Clear();
             isCardChange = false;
@@ -149,15 +151,21 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator WaitStartTurn()
     {
+        TurnEndButtonText.text = "Turn End";
         EnemyTurnZone();
         yield return new WaitForSeconds(1.5f);
         bool startTurn = true;
         isSummoning = true;
         if (startTurn)
+        {
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
+            TurnEndButton.interactable = true;
+        }
         else
+        {
+            TurnEndButton.interactable = false;
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
-
+        }
 
 
         yield return new WaitForSeconds(2.5f);
@@ -242,7 +250,7 @@ public class GameManager : MonoBehaviour
 
     void PlayerTurnZone()
     {
-        TurnEndButton.interactable = true;
+        //TurnEndButton.interactable = true;
         playerFieldTransform.GetComponent<Image>().raycastTarget = true;
         enemyFieldTransform.GetComponent<Image>().raycastTarget = true;
 
@@ -290,6 +298,7 @@ public class GameManager : MonoBehaviour
             return;
         }
         int cardID = deck[0];
+        deck.RemoveAt(0);
         CreateCardEffect(cardID, hand);
     }
 
@@ -537,14 +546,19 @@ public class GameManager : MonoBehaviour
         isSummoning = true;
         EnemyTurnZone();
         if (!isPlayerTurn)
+        {
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
+            TurnEndButton.interactable = true;
+        }
         else
+        {
+            TurnEndButton.interactable = false;
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
-
+        }
         IsDraggFlgOff();
 
         yield return new WaitForSeconds(2.5f);
-        
+
         isSummoning = false;
         PlayerTurnZone();
         //ターン変更演出
@@ -986,4 +1000,6 @@ public class GameManager : MonoBehaviour
  *  ドラッグ時に矢印がおかしい*
  *  ターン交代の挙動
  *  ダメージの表示
+ *  カード入れ替えの挙動
+ *  
 */

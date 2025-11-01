@@ -58,6 +58,7 @@ public class CardController : MonoBehaviour
         if (!model.isAlive) return;
         if (model.isDestroyer)
         {
+            attackEffect(enemyCard, false);
             Destroys(enemyCard);
         }
         else
@@ -137,6 +138,9 @@ public class CardController : MonoBehaviour
 
     public void Defense(CardController enemyCard)
     {
+        if (model.isDestroyer)
+            Destroys(enemyCard);
+
         attackEffect(enemyCard, true);
         //model.Attack(enemyCard);
         SetCanAttack(false);
@@ -270,6 +274,10 @@ public class CardController : MonoBehaviour
     public void AttackDebuff(CardController card, CardController target)
     {
         target.model.at -= card.model.effectDmg;
+        if (target.model.at < 1)
+        {
+            target.model.at = 1;
+        }
     }
     public void AttackBuff(CardController card, CardController target)
     {
@@ -308,6 +316,7 @@ public class CardController : MonoBehaviour
         {
             if (model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY))
             {
+                Debug.Log(CanUseAbilities());
                 if (CanUseAbilities())
                 {
                     gameManager.isEffectSelectPhase = true;
@@ -388,7 +397,6 @@ public class CardController : MonoBehaviour
             model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND) ||
             model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
         {
-            transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
             DG.Tweening.Sequence seq = DOTween.Sequence();
 
             seq.Append(transform
@@ -416,10 +424,48 @@ public class CardController : MonoBehaviour
         else if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY) || model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND) ||
                  model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) || model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
         {
+            DG.Tweening.Sequence seq = DOTween.Sequence();
+
+            seq.Append(transform
+                .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+                .OnUpdate(() =>
+                {
+                    float y = transform.localEulerAngles.y;
+                    // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                    if (y >= 90 && y <= 270)
+                    {
+                        view.maskPanel.SetActive(true);  // 裏面
+                    }
+                    else
+                    {
+                        view.maskPanel.SetActive(false); // 表面
+                    }
+                })
+            );
+            seq.Play();
             AbilityEffect(target, true);
         }
         else if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS) || model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
+            DG.Tweening.Sequence seq = DOTween.Sequence();
+
+            seq.Append(transform
+                .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+                .OnUpdate(() =>
+                {
+                    float y = transform.localEulerAngles.y;
+                    // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                    if (y >= 90 && y <= 270)
+                    {
+                        view.maskPanel.SetActive(true);  // 裏面
+                    }
+                    else
+                    {
+                        view.maskPanel.SetActive(false); // 表面
+                    }
+                })
+            );
+            seq.Play();
             UseAbilitiesTo(this);
         }
     }
@@ -523,18 +569,7 @@ public class CardController : MonoBehaviour
             Destroys(target);
             target.CheckAlive();
         }
-        if (model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
-        {
-            if (target == null)
-            {
-                return;
-            }
-            if (target.model.isPlayerCard == model.isPlayerCard)
-            {
-                return;
-            }
-            Steal(target);
-        }
+
         if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
             DrawCard(this);
@@ -652,7 +687,7 @@ public class CardController : MonoBehaviour
                 return false;
             }
         }
-        if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT) && model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
+        if (model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
@@ -661,10 +696,18 @@ public class CardController : MonoBehaviour
                 canUse = true;
             }
         }
+        if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
+        {
+            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            if (friendCards.Length <= 4)
+            {
+                canUse = true;
+            }
+        }
         if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
         {
             CardController[] handCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
-            if (handCards.Length > 0)
+            if (handCards.Length > 1)
             {
                 canUse = true;
             }
@@ -995,7 +1038,7 @@ public class CardController : MonoBehaviour
         if (model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
         {
             CardController[] handCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
-            if (handCards.Length > 0)
+            if (handCards.Length > 1)
             {
                 canUse = true;
             }
@@ -1558,10 +1601,11 @@ public class CardController : MonoBehaviour
                     }
                 }
                 Transform targetHero = null;
-                if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard ||
-                       model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard)
+                if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard ||
+                    model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && !model.isPlayerCard)
                     targetHero = gameManager.playerHero;
-                else
+                else if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && !model.isPlayerCard ||
+                    model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && model.isPlayerCard)
                     targetHero = gameManager.enemyHero;
 
                 GameObject textObj = GameManager.instance.GetTextPool();
@@ -1628,10 +1672,11 @@ public class CardController : MonoBehaviour
                         }
                     }
                     Transform targetHero = null;
-                    if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard ||
-                        model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard)
+                    if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard ||
+                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && !model.isPlayerCard)
                         targetHero = gameManager.playerHero;
-                    else
+                    else if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && !model.isPlayerCard ||
+                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && model.isPlayerCard)
                         targetHero = gameManager.enemyHero;
 
                     GameObject textObj = GameManager.instance.GetTextPool();

@@ -112,7 +112,7 @@ public class CardModel
         this.isPlayerCard = isPlayerCard;
     }//効果召喚用のフォルダからmodelに代入するようにする
 
-    public  CardModel()
+    public CardModel()
     {
     }
 
@@ -151,7 +151,7 @@ public class CardModel
         card.model.Damage(card.model.hp);
     }
 
-    public void CardToHand(CardModel[] cards ,Transform hand,bool isPlayer)
+    public void CardToHand(CardModel[] cards, Transform hand, bool isPlayer)
     {
         foreach (CardModel card in cards)
         {
@@ -160,14 +160,14 @@ public class CardModel
         }
     }
 
-    public void SummonCard(CardModel[] cards, Transform hand, bool isPlayer,CardController baseCard)
+    public void SummonCard(CardModel[] cards, Transform hand, bool isPlayer, CardController baseCard)
     {
         foreach (CardModel card in cards)
         {
             card.isPlayerCard = isPlayer;
-            GameManager.instance.EffectSummonCard(hand, card,baseCard);
+            GameManager.instance.EffectSummonCard(hand, card, baseCard);
             CardController[] friendCards = GameManager.instance.GetFriendFieldCards(isPlayer);
-            if(friendCards.Length > 4)
+            if (friendCards.Length > 4)
             {
                 break;
             }
@@ -184,15 +184,19 @@ public class CardModel
     public void ReduceHandCost(CardController card)
     {
         card.model.cost -= effectDmg;
-        if (cost - effectDmg < 0)
+        if (card.model.cost < 0)
         {
-            cost = 0;
+            card.model.cost = 0;
         }
     }
 
     public void IncreaseEnemyHandCost(CardController card)
     {
         card.model.cost += effectDmg;
+        if (card.model.cost >= 11)
+        {
+            card.model.cost = 10;
+        }
     }
 
     void RecoveryHP(int point)

@@ -194,7 +194,10 @@ public class AI : MonoBehaviour
         }
         else if (card.model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
+            card.transform.DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd);
             GameManager.instance.isAttacking = true;
+            card.UseAbilitiesTo(card);
+            yield break;
         }
 
         if (card.model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || card.model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
@@ -212,7 +215,10 @@ public class AI : MonoBehaviour
             targets = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
 
         if (card.model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
-            target = gameManager.GetEnemyHandTransform(card.model.isPlayerCard)[0];
+        {
+            CardController[] enemyCards = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
+            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+        }
 
         if (card.model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
         {
@@ -224,8 +230,8 @@ public class AI : MonoBehaviour
             {
                 targets[index] = hand[i];
                 index++;
-            }
-            target = targets[0];
+            }  
+            target = targets[UnityEngine.Random.Range(0, targets.Length - 1)];
         }
 
         if (card.model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY))
@@ -338,7 +344,8 @@ public class AI : MonoBehaviour
         }
         if (card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND))
         {
-            target = gameManager.GetEnemyHandTransform(card.model.isPlayerCard)[0];
+            CardController[] enemyCards = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
+            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
         }
         if (card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND))
         {

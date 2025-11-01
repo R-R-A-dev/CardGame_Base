@@ -310,6 +310,7 @@ MonoBehaviour:
   playerHero: {fileID: 1723306815}
   enemyHero: {fileID: 529008219}
   TurnEndButton: {fileID: 2019606412}
+  TurnEndButtonText: {fileID: 1159080309}
   summonLight: {fileID: 7110737167040287920}
   UIParticleObj: {fileID: 8480964048141866627, guid: eba3a28ea3b76cd4186fd5e6c22a8b92, type: 3}
   summonTrail: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
@@ -7130,8 +7131,8 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
-  - {fileID: 895268303}
   - {fileID: 1003028660}
+  - {fileID: 895268303}
   - {fileID: 976151357}
   - {fileID: 138320883}
   - {fileID: 1880323371}

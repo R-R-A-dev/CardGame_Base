@@ -106,6 +106,25 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
         yield return new WaitForSeconds(1f);
         Transform abilityEffect = droppedCard.effect.AbilityEffect(droppedCard.model.summonAbilityEffect, droppedCard.transform);
         droppedCard.effect.StartThrow(abilityEffect, 3f, droppedCard.transform.position, selectedCard.transform.position, 20f);
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        seq.Append(droppedCard.transform
+            .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+            .OnUpdate(() =>
+            {
+                float y = droppedCard.transform.localEulerAngles.y;
+                // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                if (y >= 90 && y <= 270)
+                {
+                    droppedCard.view.maskPanel.SetActive(true);  // 裏面
+                }
+                else
+                {
+                    droppedCard.view.maskPanel.SetActive(false); // 表面
+                }
+            })
+        );
+        seq.Play();
         yield return new WaitForSeconds(0.3f);
         droppedCard.UseAbilitiesTo(selectedCard);
         droppedCard.hitEffect(selectedCard.transform);
