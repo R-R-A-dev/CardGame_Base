@@ -25,6 +25,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
         if (!GameManager.instance.isPlayerTurn) return;
         if (GameManager.instance.isSummoning) return;
+        if (GameManager.instance.isAttacking) return;
         if (GameManager.instance.isEffectSelectPhase) return;
         if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
         if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE

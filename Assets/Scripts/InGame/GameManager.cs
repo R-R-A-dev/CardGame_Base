@@ -7,6 +7,7 @@ using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
@@ -53,6 +54,7 @@ public class GameManager : MonoBehaviour
     // 時間管理
     public int timeCount;
 
+    [SerializeField] GameObject cardChangePanel;
     public bool isCardChange = true;
     public List<CardController> changedCardList = new List<CardController>();
 
@@ -100,8 +102,8 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
-        player.Init(new List<int>() { 2, 2, 3, 4, 3, 2, 1, 1 });
-        enemy.Init(new List<int>() { 2, 2, 3, 3, 4, 4, 4, 4, 1 });
+        player.Init(new List<int>() { 2, 3, 3, 4, 3, 2, 1, 1 });
+        enemy.Init(new List<int>() { 2, 3, 3, 3, 4, 4, 4, 4, 1 });
 
         //player.deck = GameSession.SelectedDeck;
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
@@ -130,6 +132,7 @@ public class GameManager : MonoBehaviour
             changedCardList.Clear();
             isCardChange = false;
 
+            cardChangePanel.SetActive(false);
             showDescriptionClicked = false;
             StartCoroutine(WaitStartTurn());
         }
@@ -216,6 +219,11 @@ public class GameManager : MonoBehaviour
         StartGame();
     }
 
+    public void MoveDeckEdit()
+    {
+        SceneManager.LoadScene(0);
+    }
+
     public void DisableButtonCards()
     {
         //選択以外の操作をできないようにする
@@ -267,6 +275,7 @@ public class GameManager : MonoBehaviour
             DrawCard(enemy.deck, enemyHandTransform);
         }
         yield return new WaitForSeconds(1.5f);
+        cardChangePanel.SetActive(true);
         TurnEndButton.GetComponent<Button>().interactable = true;
     }
     void GiveCardToHand(List<int> deck, Transform hand)
@@ -1001,5 +1010,8 @@ public class GameManager : MonoBehaviour
  *  ターン交代の挙動
  *  ダメージの表示
  *  カード入れ替えの挙動
+ *  
+ *  アビリティ使用時にカードが移動できてしまう
+ *  テキスト設定
  *  
 */

@@ -339,6 +339,8 @@ public class CardController : MonoBehaviour
 
     IEnumerator ActAbility()
     {
+
+        GameManager.instance.isAttacking = true;
         yield return new WaitForSeconds(1.5f);
         CardController target = null;
         CardController[] targets = null;
@@ -1111,7 +1113,7 @@ public class CardController : MonoBehaviour
     public void attackEffect(CardController target, bool isDefense)
     {
         DG.Tweening.Sequence seq = DOTween.Sequence();
-
+        GameManager.instance.isAttacking = true;
         seq.Append(transform
             .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
             .OnUpdate(() =>
@@ -1228,6 +1230,7 @@ public class CardController : MonoBehaviour
     public void AbilityEffect(CardController target, bool isDefense)
     {
         Transform trans = null;
+        GameManager.instance.isAttacking = true;
         if (model.attackType != ATTACKTYPE.NONE)
         {
             trans = effect.AttackEffect(model.summonAbilityEffect, transform);
@@ -1336,7 +1339,7 @@ public class CardController : MonoBehaviour
     public void attackEffectHero(Transform target, bool isDefense)
     {
         DG.Tweening.Sequence seq = DOTween.Sequence();
-
+        GameManager.instance.isAttacking = true;
         seq.Append(transform
             .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
             .OnUpdate(() =>
@@ -1488,7 +1491,7 @@ public class CardController : MonoBehaviour
     public void attackSpellEffectHero(Transform target, bool isDefense)
     {
         DG.Tweening.Sequence seq = DOTween.Sequence();
-
+        GameManager.instance.isAttacking = true;
         seq.Append(transform
             .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
             .OnUpdate(() =>
