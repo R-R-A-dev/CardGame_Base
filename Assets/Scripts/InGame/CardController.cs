@@ -164,6 +164,7 @@ public class CardController : MonoBehaviour
 
     public void DrawCard(CardController card)
     {
+        BattleAudioManager.Instance.PlaySE("CardCatch");
         for (int i = 0; i < card.model.effectDmg; i++)
         {
             GameManager.instance.DrawCard(model.isPlayerCard);
@@ -316,7 +317,6 @@ public class CardController : MonoBehaviour
         {
             if (model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY))
             {
-                Debug.Log(CanUseAbilities());
                 if (CanUseAbilities())
                 {
                     gameManager.isEffectSelectPhase = true;
@@ -339,7 +339,6 @@ public class CardController : MonoBehaviour
 
     IEnumerator ActAbility()
     {
-
         GameManager.instance.isAttacking = true;
         yield return new WaitForSeconds(1.5f);
         CardController target = null;

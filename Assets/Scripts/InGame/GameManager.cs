@@ -62,6 +62,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject textPool;
     [SerializeField] TextMeshProUGUI damageText;
 
+
+    [SerializeField] BattleAudioManager globalAudioManager;
+
+
+
     // シングルトン化（どこからでもアクセスできるようにする）
     public static GameManager instance;
     private void Awake()
@@ -103,7 +108,7 @@ public class GameManager : MonoBehaviour
     {
         uiManager.HideResultPanel();
         player.Init(new List<int>() { 2, 3, 3, 4, 3, 2, 1, 1 });
-        enemy.Init(new List<int>() { 2, 3, 3, 3, 4, 4, 4, 4, 1 });
+        enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
 
         //player.deck = GameSession.SelectedDeck;
         uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
@@ -121,6 +126,8 @@ public class GameManager : MonoBehaviour
     {
         if (isCardChange)
         {
+            if (changedCardList.Count != 0)
+                BattleAudioManager.Instance.PlaySE("CardCatch");
             foreach (CardController card in changedCardList)
                 player.deck.Add(card.model.no);
             for (int i = 0; i < changedCardList.Count; i++)
@@ -128,7 +135,6 @@ public class GameManager : MonoBehaviour
                 ChangeDrawCard(player.deck, playerHandTransform);
                 Destroy(changedCardList[i].gameObject);
             }
-
             changedCardList.Clear();
             isCardChange = false;
 
@@ -159,6 +165,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         bool startTurn = true;
         isSummoning = true;
+        BattleAudioManager.Instance.PlaySE("TurnChange");
         if (startTurn)
         {
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
@@ -267,13 +274,14 @@ public class GameManager : MonoBehaviour
     IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 2; i++)
         {
             //GiveCardToHand(player.deck, playerHandTransform);
             //GiveCardToHand(enemy.deck, enemyHandTransform);
             DrawCard(player.deck, playerHandTransform);
             DrawCard(enemy.deck, enemyHandTransform);
         }
+        BattleAudioManager.Instance.PlaySE("CardCatch");
         yield return new WaitForSeconds(1.5f);
         cardChangePanel.SetActive(true);
         TurnEndButton.GetComponent<Button>().interactable = true;
@@ -338,7 +346,6 @@ public class GameManager : MonoBehaviour
             card.Init(cardID, false);
             card.transform.SetParent(enemyDeck);
         }
-
         card.transform.localPosition = Vector3.zero;
         card.transform.localEulerAngles = Vector3.zero;
         card.transform.SetParent(card.transform.parent.parent);
@@ -565,7 +572,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
         }
         IsDraggFlgOff();
-
+        BattleAudioManager.Instance.PlaySE("TurnChange");
         yield return new WaitForSeconds(2.5f);
 
         isSummoning = false;
@@ -580,10 +587,14 @@ public class GameManager : MonoBehaviour
 
         if (isPlayerTurn)
         {
+
             player.IncreaseManaCost();
             // 手札が3枚未満ならドロー
             if (GetFriendHandTransform(true).Length < 3)
+            {
+                BattleAudioManager.Instance.PlaySE("CardCatch");
                 DrawCard(player.deck, playerHandTransform);
+            }
 
         }
         else
@@ -591,7 +602,10 @@ public class GameManager : MonoBehaviour
             enemy.IncreaseManaCost();
             // 手札が3枚未満ならドロー
             if (GetEnemyHandTransform(true).Length < 3)
+            {
+                BattleAudioManager.Instance.PlaySE("CardCatch");
                 DrawCard(enemy.deck, enemyHandTransform);
+            }
         }
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
         if (isPlayerTurn && GetFriendHandTransform(true).Length < 3 ||
@@ -1011,7 +1025,11 @@ public class GameManager : MonoBehaviour
  *  ダメージの表示
  *  カード入れ替えの挙動
  *  
- *  アビリティ使用時にカードが移動できてしまう
+ *  
  *  テキスト設定
+ *  
+ *  ゲーム内の音とメニュー画面などのアウトゲームの音の管理方法
+ *  遊び方の追加方法
+ *  
  *  
 */

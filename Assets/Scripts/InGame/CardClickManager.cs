@@ -31,10 +31,14 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             CardController descriptionCard = GetComponent<CardController>();
+            //敵の手札のカードは説明表示できない
+            if (!descriptionCard.model.isPlayerCard && !descriptionCard.model.isFieldCard)
+                return;
+
             GameManager.instance.showDescriptionClicked = true;
 
             GameManager.instance.uiManager.ShowDescriptionPanel(descriptionCard);
-
+            BattleAudioManager.Instance.PlaySE("CursorSet");
             //GameManager.instance.uiManager.CloseDescriptionPanel();
         }
 
@@ -78,6 +82,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
                 GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
                 droppedCard.spellEffect(selectedCard, true);
+                BattleAudioManager.Instance.PlaySE("Summon_Effect1");
                 CancelSelect();
             }
             else

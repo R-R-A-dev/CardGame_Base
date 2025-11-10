@@ -70,6 +70,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
                 c.GetComponent<CanvasGroup>().blocksRaycasts = false;
             }
         }
+        BattleAudioManager.Instance.PlaySE("CardCatch");
         defaultParent = transform.parent;
         handSiblingIndex = transform.GetSiblingIndex();
         transform.SetParent(defaultParent.parent);
@@ -255,6 +256,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         GameManager.instance.ScaleYSummonLightFadeOut();
         yield return new WaitForSeconds(0.3f);
         summonCard.CardDisappearEffect(GameManager.instance.summonEffect, transform);
+        BattleAudioManager.Instance.PlaySE("Summon_Effect1");
 
         //トレールを表示しながら出現場所へ移動
         ParticleSystem trail = GameManager.instance.SummonTrailOn();
@@ -275,6 +277,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         //出現エフェクトを表示
         summonCard.summonEffect(summonCard.model.summonEffect, transform);
         GameManager.instance.isSummoning = false;
+        BattleAudioManager.Instance.PlaySE("Summon_Effect2");
     }
     public Tweener moveTween;
     public IEnumerator PlayerSelectMoveOn()
@@ -355,6 +358,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         yield return new WaitForSeconds(0.3f);
         summonCard.CardDisappearEffect(GameManager.instance.summonEffect, transform);
         GameManager.instance.isSummoning = false;
+        BattleAudioManager.Instance.PlaySE("Summon_Effect1");
     }
 
     public IEnumerator UseSpellEffect(CardController summonCard)
