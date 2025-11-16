@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   no: 3
   name: test3
-  hp: 5
+  hp: 10
   at: 1
   cost: 5
   effectDmg: 1
@@ -23,7 +23,7 @@ MonoBehaviour:
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
-  hitAudio: {fileID: 0}
+  hitAudio: {fileID: 8300000, guid: 77c58426eee82cc4187d4ca13d55a21c, type: 3}
   destroyAudio: {fileID: 0}
   summonEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   summonAbilityEffect: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
@@ -37,5 +37,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 67108864
+  abilities: 0
   targetCardID: 

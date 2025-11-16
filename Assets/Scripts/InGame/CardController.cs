@@ -21,6 +21,7 @@ public class CardController : MonoBehaviour
     public CardMovement movement;  // 移動(movement)に関することを操作
     public EffectController effect;// エフェクト(effect)に関することを操作
 
+    [SerializeField] public AudioSource audioSource;
     GameManager gameManager;
 
     public bool IsAbilities
@@ -392,7 +393,6 @@ public class CardController : MonoBehaviour
             CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
             target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
         }
-
 
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS) ||
             model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND) ||
@@ -1158,7 +1158,8 @@ public class CardController : MonoBehaviour
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
         GameObject textObj = GameManager.instance.GetTextPool();
         StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
-
+        if (model.hitAudio != null)
+            audioSource.PlayOneShot(model.hitAudio);
     }
 
     public void DirectAttack(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
@@ -1174,6 +1175,8 @@ public class CardController : MonoBehaviour
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
                 GameObject textObj = GameManager.instance.GetTextPool();
                 StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, endPos));
+                if (model.hitAudio != null)
+                    audioSource.PlayOneShot(model.hitAudio);
             });
     }
     public void StartThrow(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
@@ -1198,6 +1201,9 @@ public class CardController : MonoBehaviour
 
                 if (destroyOnComplete)
                 {
+                    if (model.hitAudio != null)
+                        audioSource.PlayOneShot(model.hitAudio);
+
                     hitEffect(targetPos);
                     GameManager.instance.isAttacking = !isDefense;
                     CheckAttackParticle(target);
@@ -1268,7 +1274,8 @@ public class CardController : MonoBehaviour
             GameObject textObj = GameManager.instance.GetTextPool();
             StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
         }
-
+        if (model.hitAudio != null)
+            audioSource.PlayOneShot(model.hitAudio);
 
     }
     public void DirectAttackAbility(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
@@ -1287,6 +1294,8 @@ public class CardController : MonoBehaviour
                     GameObject textObj = GameManager.instance.GetTextPool();
                     StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
                 }
+                if (model.hitAudio != null)
+                    audioSource.PlayOneShot(model.hitAudio);
             });
     }
     public void StartThrowAbility(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
@@ -1322,6 +1331,8 @@ public class CardController : MonoBehaviour
                         GameObject textObj = GameManager.instance.GetTextPool();
                         StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
                     }
+                    if (model.hitAudio != null)
+                        audioSource.PlayOneShot(model.hitAudio);
                 }
                 yield break;
             }
@@ -1392,6 +1403,8 @@ public class CardController : MonoBehaviour
         else
             targetHero = gameManager.playerHero;
 
+        if (model.hitAudio != null)
+            audioSource.PlayOneShot(model.hitAudio);
         GameObject textObj = GameManager.instance.GetTextPool();
         StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetHero));
 
@@ -1422,7 +1435,8 @@ public class CardController : MonoBehaviour
                 else
                     targetHero = gameManager.playerHero;
 
-
+                if (model.hitAudio != null)
+                    audioSource.PlayOneShot(model.hitAudio);
                 GameObject textObj = GameManager.instance.GetTextPool();
                 StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetHero));
 
@@ -1470,6 +1484,8 @@ public class CardController : MonoBehaviour
                     else
                         targetHero = gameManager.playerHero;
 
+                    if (model.hitAudio != null)
+                        audioSource.PlayOneShot(model.hitAudio);
                     GameObject textObj = GameManager.instance.GetTextPool();
                     StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetHero));
                     gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
@@ -1559,6 +1575,8 @@ public class CardController : MonoBehaviour
         else
             targetHero = gameManager.enemyHero;
 
+        if (model.hitAudio != null)
+            audioSource.PlayOneShot(model.hitAudio);
         GameObject textObj = GameManager.instance.GetTextPool();
         GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
 
@@ -1610,6 +1628,8 @@ public class CardController : MonoBehaviour
                     model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && model.isPlayerCard)
                     targetHero = gameManager.enemyHero;
 
+                if (model.hitAudio != null)
+                    audioSource.PlayOneShot(model.hitAudio);
                 GameObject textObj = GameManager.instance.GetTextPool();
                 GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
 
@@ -1681,6 +1701,8 @@ public class CardController : MonoBehaviour
                         model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && model.isPlayerCard)
                         targetHero = gameManager.enemyHero;
 
+                    if (model.hitAudio != null)
+                        audioSource.PlayOneShot(model.hitAudio);
                     GameObject textObj = GameManager.instance.GetTextPool();
                     StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
 
@@ -1745,6 +1767,8 @@ public class CardController : MonoBehaviour
                     GameObject textObj = GameManager.instance.GetTextPool();
                     GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
                 }
+                if (model.hitAudio != null)
+                    audioSource.PlayOneShot(model.hitAudio);
             });
     }
 
@@ -1761,6 +1785,8 @@ public class CardController : MonoBehaviour
             GameObject textObj = GameManager.instance.GetTextPool();
             GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
         }
+        if (model.hitAudio != null)
+            audioSource.PlayOneShot(model.hitAudio);
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
     }

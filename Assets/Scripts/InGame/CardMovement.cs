@@ -1,12 +1,13 @@
-﻿using DG.Tweening;
+﻿using config;
+using DG.Tweening;
+using DG.Tweening;
 using System.Collections;
+using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.XR;
-using DG.Tweening;
 using UnityEngine.UI;
-using Unity.Jobs;
+using UnityEngine.XR;
 
 public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
@@ -15,6 +16,29 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public bool isDraggable;
     public CardController draggCard;
     int handSiblingIndex = 0;
+
+    #region
+    // CardWrapperと同じコード
+    private const float EPS = 0.01f;
+
+    public float targetRotation;
+    public Vector2 targetPosition;
+    public float targetVerticalDisplacement;
+    public int uiLayer;
+
+    private RectTransform rectTransform;
+    private Canvas canvas;
+
+    public ZoomConfig zoomConfig;
+    public AnimationSpeedConfig animationSpeedConfig;
+    public CardContainer container;
+
+    private bool isHovered;
+    private bool isDragged;
+    private Vector2 dragStartPos;
+    public EventsConfig eventsConfig;
+    public bool preventCardInteraction;
+    #endregion
 
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -214,6 +238,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     {
         BezierArrows.Instance.Hide();
         defaultParent = transform.parent;
+        canvas = GetComponent<Canvas>();
     }
 
     public IEnumerator ExpandThisCard(Transform moveTarget)
@@ -422,4 +447,28 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
             GameManager.instance.isSummoning = false;
         }));
     }
+
+    // CardWrapperと同じコード
+
+    public float width
+    {
+        get => rectTransform.rect.width * rectTransform.localScale.x;
+    }
+
+    private void Awake()
+    {
+        rectTransform = GetComponent<RectTransform>();
+    }
+
+
+
 }
+/*このクラスに足すコード
+ * CardWrapper
+ * CardContainerはカードの親クラスにつける
+ * CardContainer内でカードにCardWrapperをつける処理がある
+ * GameManagerでドロー時にCardContainerを使う
+ * 
+ * 
+ * 
+*/

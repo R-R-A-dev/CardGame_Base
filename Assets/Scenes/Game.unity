@@ -291,7 +291,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 138320881}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 25d893b51b83f0540b5f04d07f579fd2, type: 3}
   m_Name: 
@@ -2639,6 +2639,7 @@ MonoBehaviour:
   view: {fileID: 0}
   movement: {fileID: 0}
   effect: {fileID: 0}
+  audioSource: {fileID: 0}
 --- !u!222 &922796003
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4868,6 +4869,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 77c58426eee82cc4187d4ca13d55a21c, type: 3}
   - {fileID: 8300000, guid: 2b26cbea232414fcfab41a84fc7a1c55, type: 3}
   - {fileID: 8300000, guid: cdfae31f0b58546d3ac1015effc38f01, type: 3}
+  - {fileID: 8300000, guid: a652877b012108e41871f867ada9f176, type: 3}
 --- !u!4 &1826141636
 Transform:
   m_ObjectHideFlags: 0
@@ -6765,6 +6767,7 @@ MonoBehaviour:
   view: {fileID: 0}
   movement: {fileID: 0}
   effect: {fileID: 0}
+  audioSource: {fileID: 0}
 --- !u!1 &1921605454957893048
 GameObject:
   m_ObjectHideFlags: 0
