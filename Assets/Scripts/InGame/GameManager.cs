@@ -107,6 +107,19 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
+
+        if (ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
+        {
+
+        }
+        else if (ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
+        {
+
+        }
+        else if (ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
+        {
+
+        }
         player.Init(new List<int>() { 2, 3, 3, 4, 3, 2, 1, 1 });
         enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
 

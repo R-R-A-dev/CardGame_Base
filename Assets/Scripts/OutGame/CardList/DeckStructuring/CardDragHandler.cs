@@ -22,7 +22,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public bool dropSuccess = false;
 
-    bool isLeft;
+    public bool isLeft;
     bool isRight;
 
 
@@ -217,6 +217,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (eventData.button == PointerEventData.InputButton.Right &&
             eventData.button != PointerEventData.InputButton.Left)
         {
+            Debug.Log("test");
             //DeckBuilderManager.Instance.OffDropZone();
             leftMove = true;
             //DeckBuilderManager.Instance.cardDetailUI.Hide();
@@ -227,7 +228,8 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
             if (holdCard == null)
                 holdCard = Instantiate(gameObject, transform.root);
 
-
+            
+            Debug.Log(holdCard);
             holdCard.transform.position = transform.position;
             //クリックしたオブジェクトからholdCardに情報をコピー
             holdCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
@@ -346,6 +348,11 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     public void OnPointerUp(PointerEventData eventData)
     {
 
+    }
+
+    private void OnDisable()
+    {
+        isLeft = false;
     }
 }
 

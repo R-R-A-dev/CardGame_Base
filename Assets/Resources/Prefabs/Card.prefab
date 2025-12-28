@@ -1090,6 +1090,7 @@ GameObject:
   - component: {fileID: 6882532642272154876}
   - component: {fileID: 578968496634913431}
   - component: {fileID: 8648674137324467910}
+  - component: {fileID: 4816848346760877170}
   m_Layer: 5
   m_Name: SelectablePanel
   m_TagString: Untagged
@@ -1154,6 +1155,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4816848346760877170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5263026021843677536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 749afacc11e02404b90e33e4ca6556fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rippleImage: {fileID: 8648674137324467910}
+  duration: 0.8
+  startScale: 1
+  endScale: 1.05
 --- !u!1 &6334785213062475228
 GameObject:
   m_ObjectHideFlags: 0
