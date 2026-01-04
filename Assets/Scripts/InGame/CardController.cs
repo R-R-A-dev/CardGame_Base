@@ -54,6 +54,7 @@ public class CardController : MonoBehaviour
         view.SetCard(effectModel);
     }
 
+
     public void Attack(CardController enemyCard)
     {
         if (!model.isAlive) return;

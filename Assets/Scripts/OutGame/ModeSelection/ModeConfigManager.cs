@@ -4,6 +4,7 @@ using UnityEngine;
 public class ModeConfigManager : MonoBehaviour
 {
     public static ModeConfigManager Instance { get; private set; }
+    public int LethalPuzzleIndex { get => lethalPuzzleIndex; set => lethalPuzzleIndex = value; }
 
     [Header("現在のゲームモード")]
     public GameMode currentGameMode = GameMode.NONE;
@@ -16,6 +17,9 @@ public class ModeConfigManager : MonoBehaviour
 
     [Header("ローグライクデータリスト")]
     public List<RoguelikeData> roguelikeList = new List<RoguelikeData>();
+
+    int lethalPuzzleIndex = 0;
+
 
     private void Awake()
     {

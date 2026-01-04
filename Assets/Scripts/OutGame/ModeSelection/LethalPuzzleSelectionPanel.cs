@@ -41,13 +41,13 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
         //ÉVÅ[ÉìïœçX
         ConfirmPanel.SetActive(true);
         selectNum = number;
-        Debug.Log("Selected Puzzle Number: " + selectNum);
+        ModeConfigManager.Instance.LethalPuzzleIndex = selectNum;
     }
 
     public void StartLethalPuzzle()
     {
 
         ModeConfigManager.Instance.ChangeMode(GameMode.LETHAL_PUZZLE);
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Battle");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 }

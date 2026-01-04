@@ -18,7 +18,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        
+
         //右クリックはreturn
         if (eventData.button == PointerEventData.InputButton.Right) return;
 
@@ -36,6 +36,12 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         if (card.model.isPlayerCard && GameManager.instance.isPlayerTurn && !card.model.isFieldCard && card.model.cost <= GameManager.instance.player.manaCost)
         {
             isDraggable = true;
+            if (!card.model.isFieldCard && !card.movement.isHand)
+            {
+                //isDraggable = false;
+                //card.model.isFieldCard = true;
+            }
+
         }
         else if (card.model.isPlayerCard && GameManager.instance.isPlayerTurn && card.model.isFieldCard && card.model.canAttack)
         {
@@ -121,7 +127,6 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
         if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE
             && !GetComponent<CardController>().model.isFieldCard) return;
-
         if (!isDraggable)
         {
             BezierArrows.Instance.Hide();
@@ -424,12 +429,3 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
 
 
 }
-/*このクラスに足すコード
- * CardWrapper
- * CardContainerはカードの親クラスにつける
- * CardContainer内でカードにCardWrapperをつける処理がある
- * GameManagerでドロー時にCardContainerを使う
- * 
- * 
- * 
-*/

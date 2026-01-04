@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
     public int timeCount;
 
     [SerializeField] GameObject cardChangePanel;
-    public bool isCardChange = true;
+    public bool isCardChange = false;
     public List<CardController> changedCardList = new List<CardController>();
 
     [SerializeField] TextMeshProUGUI effectText;
@@ -110,7 +111,7 @@ public class GameManager : MonoBehaviour
 
         if (ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
-
+            ApplyLethalPuzzle();
         }
         else if (ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
@@ -120,16 +121,47 @@ public class GameManager : MonoBehaviour
         {
 
         }
-        player.Init(new List<int>() { 2, 3, 3, 4, 3, 2, 1, 1 });
-        enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
+        else
+        {
+            player.Init(new List<int>() { 2, 3, 3, 4, 3, 2, 1, 1 });
+            enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
 
-        //player.deck = GameSession.SelectedDeck;
-        uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
-        uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
-        TurnEndButtonText.text = "Decide";
-        StartCoroutine(SettingInitHand());
-        StartCoroutine(CountDownChangeCard());
+            //player.deck = GameSession.SelectedDeck;
+            uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+            uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+            TurnEndButtonText.text = "Decide";
+            StartCoroutine(SettingInitHand());
+            StartCoroutine(CountDownChangeCard());
+        }
+        
+        StartCoroutine(WaitStartTurn());
     }
+
+    void ApplyLethalPuzzle()
+    {
+        //手札、フィールド、HP、コスト等をSOから取得して設定
+        //ModeConfigManager.Instance.twoPickList
+        int selectNum = ModeConfigManager.Instance.LethalPuzzleIndex;
+        LethalPuzzleData lethalPuzzleData = ModeConfigManager.Instance.lethalPuzzleList[selectNum];
+        GenerateCard(lethalPuzzleData.playerInitialHand, lethalPuzzleData.playerInitialField, lethalPuzzleData.enemyInitialField);
+
+        player.Init(lethalPuzzleData.playerDeck);
+        enemy.Init(lethalPuzzleData.playerDeck);
+
+        uiManager.ShowHeroHP(lethalPuzzleData.playerInitialHP, lethalPuzzleData.enemyInitialHP);
+        uiManager.ShowManaCost(lethalPuzzleData.playerInitialMana, enemy.manaCost);
+    }
+
+    void ApplyTwoPick()
+    {
+        //選択画面の作成が必要
+    }
+
+    void ApplyRogueolike()
+    {
+
+    }
+
 
     /// <summary>
     /// 選択されたカードを破棄して新しいカードを引く（破棄したものをリストへ追加）
@@ -296,7 +328,7 @@ public class GameManager : MonoBehaviour
         }
         BattleAudioManager.Instance.PlaySE("CardCatch");
         yield return new WaitForSeconds(1.5f);
-        cardChangePanel.SetActive(true);
+        //cardChangePanel.SetActive(true);
         TurnEndButton.GetComponent<Button>().interactable = true;
     }
     void GiveCardToHand(List<int> deck, Transform hand)
@@ -408,6 +440,27 @@ public class GameManager : MonoBehaviour
                     card.UseAbilitiesTo();
                 }
             }
+        }
+    }
+
+    void GenerateCard(List<int> playerHand, List<int> playerField, List<int> enemyField)
+    {
+        for (int i = 0; i < playerHand.Count; i++)
+            CreateCard(playerHand[i], playerHandTransform);
+
+        for (int i = 0; i < playerField.Count; i++)
+        {
+            CardController card = Instantiate(cardPrefab, playerFieldTransform, false);
+            card.movement.isHand = false;
+            card.Init(playerField[i], true);
+            card.model.isFieldCard = true;
+        }
+        for (int i = 0; i < enemyField.Count; i++)
+        {
+            CardController card = Instantiate(cardPrefab, enemyFieldTransform, false);
+            card.movement.isHand = false;
+            card.Init(enemyField[i], false);
+            card.model.isFieldCard = true;
         }
     }
 
@@ -574,6 +627,12 @@ public class GameManager : MonoBehaviour
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
         isSummoning = true;
         EnemyTurnZone();
+
+        if(ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
+        {
+            //詰将棋モードの場合、ゲームオーバー処理
+            Debug.Log("Lethal Puzzle Mode: Game Over on Turn Change");
+        }
         if (!isPlayerTurn)
         {
             StartCoroutine(TurnChangeAnimateText("Player Turn"));

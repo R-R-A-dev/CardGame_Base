@@ -326,7 +326,7 @@ MonoBehaviour:
   showDescriptionClicked: 0
   timeCount: 0
   cardChangePanel: {fileID: 1352762210}
-  isCardChange: 1
+  isCardChange: 0
   changedCardList: []
   effectText: {fileID: 2001885910}
   textPool: {fileID: 592624784}
