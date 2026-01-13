@@ -3,6 +3,8 @@ using UnityEngine;
 public class TwoPickSelectionPanel : MonoBehaviour
 {
     [SerializeField] GameObject ConfirmPanel;
+    [SerializeField] private GameObject modeSelectPanel;
+    [SerializeField] private GameObject twoPickPanel;
     public void StartPanelOpen()
     {
         ConfirmPanel.SetActive(true);
@@ -16,6 +18,11 @@ public class TwoPickSelectionPanel : MonoBehaviour
     public void StartTwoPick()
     {
         ModeConfigManager.Instance.currentGameMode = GameMode.TWO_PICK;
+        ConfirmPanel.SetActive(false);
+
+        modeSelectPanel.SetActive(false);
+        twoPickPanel.SetActive(true);
+        TwoPickModeManager.Instance?.StartPick();
         //ÉVÅ[ÉìïœçX
         //UnityEngine.SceneManagement.SceneManager.LoadScene("Battle");
     }

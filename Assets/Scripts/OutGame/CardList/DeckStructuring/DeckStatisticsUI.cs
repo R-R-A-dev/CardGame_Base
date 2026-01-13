@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class DeckStatisticsUI : MonoBehaviour
 {
     [Header("UI参照")]
+    [SerializeField] private TextMeshProUGUI pickCountText;
     [SerializeField] private TextMeshProUGUI totalCountText;
     [SerializeField] private TextMeshProUGUI unitCountText;
     [SerializeField] private TextMeshProUGUI spellCountText;
@@ -21,6 +22,7 @@ public class DeckStatisticsUI : MonoBehaviour
         List<int> deck = CardListData.Decks[deckNum];
         List<CardEntity> allCards = CardListData.Entities;
 
+        int pickCount = 0;
         int totalCount = 0;
         int unitCount = 0;
         int spellCount = 0;
@@ -42,6 +44,8 @@ public class DeckStatisticsUI : MonoBehaviour
             int cost = Mathf.Clamp(entity.cost, 1, 10);
             costCounts[cost - 1] += count;
         }
+        if(pickCountText != null)
+            pickCountText.text = pickCount.ToString();
 
         totalCountText.text = totalCount.ToString();
         unitCountText.text = unitCount.ToString();
