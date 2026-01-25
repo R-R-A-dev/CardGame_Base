@@ -17,10 +17,22 @@ public class DeckStatisticsUI : MonoBehaviour
     /// UI上の集計・統計情報を表示
     /// </summary>
     /// <param name="deckNum"></param>
-    public void RefreshStatistics(int deckNum)
+    public void RefreshStatistics(int deckNum, List<int> deck = null, List<CardEntity> twoPickData = null)
     {
-        List<int> deck = CardListData.Decks[deckNum];
+        // デッキ情報が渡されなかった場合、指定されたデッキ番号から取得
+        //TwoPickのデッキが渡された場合はそちらを優先
+        if (deck == null)
+            deck = CardListData.Decks[deckNum];
+
+        // TwoPickのCaredEntityリストを用意が必要
+        // 所持カードリスト取得
+        //TwoPickDataが渡された場合はそちらを優先
         List<CardEntity> allCards = CardListData.Entities;
+        if (twoPickData == null)
+            allCards = CardListData.Entities;
+        else
+            allCards = twoPickData;
+
 
         int pickCount = 0;
         int totalCount = 0;
@@ -44,7 +56,7 @@ public class DeckStatisticsUI : MonoBehaviour
             int cost = Mathf.Clamp(entity.cost, 1, 10);
             costCounts[cost - 1] += count;
         }
-        if(pickCountText != null)
+        if (pickCountText != null)
             pickCountText.text = pickCount.ToString();
 
         totalCountText.text = totalCount.ToString();

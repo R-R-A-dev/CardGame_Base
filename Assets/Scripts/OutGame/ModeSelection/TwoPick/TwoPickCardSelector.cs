@@ -8,7 +8,7 @@ public class TwoPickCardSelector : MonoBehaviour
 
     public TwoPickCardSelector(TwoPickData data)
     {
-        cardPool = new List<int>(data.availableCards);
+        //cardPool = new List<int>(data.availableCards);
         usedCards = new List<int>();
     }
     void Start()

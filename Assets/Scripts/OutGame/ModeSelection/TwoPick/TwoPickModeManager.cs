@@ -11,7 +11,9 @@ public class TwoPickModeManager : MonoBehaviour
 
     [Header("UI参照")]
     [SerializeField] private TwoPickUI twoPickUI;
+    [SerializeField] private DeckStatisticsUI deckStatisticsUI;
 
+    int pickCount = 0;
     private TwoPickCardSelector cardSelector;
     private TwoPickProgress pickProgress;
 
@@ -38,7 +40,17 @@ public class TwoPickModeManager : MonoBehaviour
     {
         //pickProgress.Reset();
         //ShowNextPick();
-        twoPickUI.ShowPickCard();
+        twoPickUI.CreateCard(twoPickData.twoPickCards,pickCount);
+    }
+
+    public void OnLeftButtonClick()
+    {
+
+    }
+
+    public void OnRightButtonClick()
+    {
+
     }
 
     /// <summary>
@@ -65,12 +77,20 @@ public class TwoPickModeManager : MonoBehaviour
 
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
+/*次にすること
+ * カードクリック後に増える数値
+ * 次のカードの表示
+ *  ボタンを押す
+ * 表示されたカードの種類が統計に追加される
+ * 
+ * 
+*/
