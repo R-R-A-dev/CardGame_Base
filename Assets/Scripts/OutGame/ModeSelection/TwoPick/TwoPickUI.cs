@@ -8,14 +8,17 @@ public class TwoPickUI : MonoBehaviour
     [SerializeField] private List<Transform> rightCardParent;  // 右カードの親
     [SerializeField] private CardController cardPrefab;      // カードプレハブ
 
+    [SerializeField] List<GameObject> leftZone;
+    [SerializeField] List<GameObject> rightZone;
+
     List<int> leftCards = new List<int>();
     List<int> rightCards = new List<int>();
     public void ShowPickCard()
     {
-        
+
     }
 
-    public void CreateCard(List<CardGroup> cards,int pickCount)
+    public void CreateCard(List<CardGroup> cards, int pickCount)
     {
         // cards[pickCount].cards のコピーを作成
         List<int> availableCards = new List<int>(cards[pickCount].cards);
@@ -41,28 +44,61 @@ public class TwoPickUI : MonoBehaviour
             int rightCardId = availableCards[rightRandomIndex];
             availableCards.RemoveAt(rightRandomIndex); // 選んだカードを除外
 
-            // カード生成
-            CardController leftCard = Instantiate(cardPrefab, leftCardParent[i]);
-            CardController rightCard = Instantiate(cardPrefab, rightCardParent[i]);
+            //ボタンを押した時の渡すカードを追加
+            leftCards.Add(leftCardId);
+            rightCards.Add(rightCardId);
 
-            // カード情報設定（ランダムに選んだIDを使用）
-            leftCard.Init(leftCardId, false);
-            rightCard.Init(rightCardId, false);
+            CardController leftCard = null;
+            CardController rightCard = null;
+
+            //既にカードがあれば生成しない
+            //登場アニメーション
+            if (leftZone[0].transform.childCount == 0 || leftZone[1].transform.childCount == 0)
+            {
+                Debug.Log("カード生成");
+                // カード生成
+                leftCard = Instantiate(cardPrefab, leftCardParent[i]);
+                rightCard = Instantiate(cardPrefab, rightCardParent[i]);
+
+                // カード情報設定（ランダムに選んだIDを使用）
+                leftCard.Init(leftCardId, false);
+                rightCard.Init(rightCardId, false);
+            }
+            else
+            {
+                CardController leftChild = leftZone[i].transform.GetChild(0).GetComponent<CardController>();
+                CardController rightChild = rightZone[i].transform.GetChild(0).GetComponent<CardController>();
+
+                leftChild.Init(leftCardId, false);
+                rightChild.Init(rightCardId, false);
+
+                Debug.Log("既にカード生成");
+            }
+
+
+
         }
     }
 
     public void OnLeftButtonClick()
     {
+        DisableButtons();
+        //選択されたカードを進捗に追加
+        TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(leftCards);
+        TwoPickModeManager.Instance.PickCountUp();
         TwoPickModeManager.Instance.OnLeftButtonClick();
     }
 
     public void OnRightButtonClick()
     {
-
+        DisableButtons();
+        //選択されたカードを進捗に追加
+        TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(rightCards);
+        TwoPickModeManager.Instance.PickCountUp();
         TwoPickModeManager.Instance.OnRightButtonClick();
     }
 
-    void DisableButton()
+    void DisableButtons()
     {
 
     }
@@ -76,11 +112,22 @@ public class TwoPickUI : MonoBehaviour
 
     void Start()
     {
-        
+
     }
 
     void Update()
     {
-        
+
     }
 }
+/*左右ボタンを押す（エフェクト）
+ * 追加値を増やす
+ * カードが更新
+ * UI更新
+ * 選択されたカードを足す
+ * 選択後UIの増加
+ * カードクリック時に効果が表示
+ * 
+ * 
+ * 
+*/

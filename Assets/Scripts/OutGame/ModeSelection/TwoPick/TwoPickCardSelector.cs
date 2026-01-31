@@ -1,10 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TwoPickCardSelector : MonoBehaviour
+public class TwoPickCardSelector 
 {
     private List<int> cardPool; // 使用可能なカード全体
     private List<int> usedCards; // 今回のピックで出現したカード（重複制御用）
+
+    public TwoPickCardSelector()
+    {
+
+    }
 
     public TwoPickCardSelector(TwoPickData data)
     {

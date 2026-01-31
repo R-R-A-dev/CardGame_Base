@@ -14,8 +14,8 @@ public class TwoPickModeManager : MonoBehaviour
     [SerializeField] private DeckStatisticsUI deckStatisticsUI;
 
     int pickCount = 0;
-    private TwoPickCardSelector cardSelector;
-    private TwoPickProgress pickProgress;
+    public TwoPickCardSelector cardSelector;
+    public TwoPickProgress pickProgress;
 
     private void Awake()
     {
@@ -29,8 +29,8 @@ public class TwoPickModeManager : MonoBehaviour
         }
 
         // 各システムを初期化
-        //cardSelector = new TwoPickCardSelector(twoPickData);
-        //pickProgress = new TwoPickProgress(totalPicks);
+        cardSelector = new TwoPickCardSelector();
+        pickProgress = new TwoPickProgress();
     }
 
     /// <summary>
@@ -40,17 +40,29 @@ public class TwoPickModeManager : MonoBehaviour
     {
         //pickProgress.Reset();
         //ShowNextPick();
-        twoPickUI.CreateCard(twoPickData.twoPickCards,pickCount);
+        PickCountReset();
+        //開始時のカード表示と
+        twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
     }
 
     public void OnLeftButtonClick()
     {
-
+        twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
     }
 
     public void OnRightButtonClick()
     {
+        twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
+    }
 
+    public void PickCountUp()
+    {
+        pickCount++;
+    }
+
+    public void PickCountReset()
+    {
+        pickCount = 0;
     }
 
     /// <summary>

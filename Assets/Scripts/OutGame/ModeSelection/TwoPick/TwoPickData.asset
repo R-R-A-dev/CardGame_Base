@@ -19,5 +19,7 @@ MonoBehaviour:
   cardsPerPick: 2
   twoPickCards:
   - cards: 01000000020000000300000004000000
+  - cards: 01000000020000000300000004000000
+  - cards: 01000000020000000300000004000000
   playerInitialHP: 20
   enemyInitialHP: 20

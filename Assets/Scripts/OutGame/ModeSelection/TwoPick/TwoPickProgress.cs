@@ -1,9 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TwoPickProgress : MonoBehaviour
+public class TwoPickProgress 
 {
-    private List<int> selectedCards;
+    private List<int> selectedCards = new List<int>();
+
+    public TwoPickProgress()
+    {
+
+    }
 
     public TwoPickProgress(int total)
     {
@@ -19,6 +24,7 @@ public class TwoPickProgress : MonoBehaviour
     {
         selectedCards = new List<int>();
     }
+
 
 
     void Start()
