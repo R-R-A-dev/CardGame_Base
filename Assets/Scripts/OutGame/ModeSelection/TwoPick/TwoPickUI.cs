@@ -44,9 +44,11 @@ public class TwoPickUI : MonoBehaviour
             int rightCardId = availableCards[rightRandomIndex];
             availableCards.RemoveAt(rightRandomIndex); // 選んだカードを除外
 
+
             //ボタンを押した時の渡すカードを追加
             leftCards.Add(leftCardId);
             rightCards.Add(rightCardId);
+
 
             CardController leftCard = null;
             CardController rightCard = null;
@@ -55,7 +57,8 @@ public class TwoPickUI : MonoBehaviour
             //登場アニメーション
             if (leftZone[0].transform.childCount == 0 || leftZone[1].transform.childCount == 0)
             {
-                Debug.Log("カード生成");
+
+
                 // カード生成
                 leftCard = Instantiate(cardPrefab, leftCardParent[i]);
                 rightCard = Instantiate(cardPrefab, rightCardParent[i]);
@@ -74,28 +77,37 @@ public class TwoPickUI : MonoBehaviour
 
                 Debug.Log("既にカード生成");
             }
-
-
-
         }
+
+
     }
 
     public void OnLeftButtonClick()
     {
         DisableButtons();
-        //選択されたカードを進捗に追加
+
         TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(leftCards);
+        leftCards.Clear();
+
+        //選択されたカードを進捗に追加
         TwoPickModeManager.Instance.PickCountUp();
         TwoPickModeManager.Instance.OnLeftButtonClick();
+        //UI更新
+        //既定回数に達したら終了
     }
 
     public void OnRightButtonClick()
     {
         DisableButtons();
-        //選択されたカードを進捗に追加
+
         TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(rightCards);
+        leftCards.Clear();
+
+        //選択されたカードを進捗に追加
         TwoPickModeManager.Instance.PickCountUp();
         TwoPickModeManager.Instance.OnRightButtonClick();
+        //UI更新
+        //既定回数に達したら終了
     }
 
     void DisableButtons()

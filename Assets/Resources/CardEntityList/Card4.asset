@@ -16,7 +16,7 @@ MonoBehaviour:
   name: SPELL
   hp: 5
   at: 3
-  cost: 1
+  cost: 4
   effectDmg: 1
   effectHeal: 1
   description: spell

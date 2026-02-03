@@ -65,6 +65,11 @@ public class TwoPickModeManager : MonoBehaviour
         pickCount = 0;
     }
 
+    public int GetPickCount()
+    {
+        return pickCount;
+    }
+
     /// <summary>
     /// カードが選択された時
     /// </summary>

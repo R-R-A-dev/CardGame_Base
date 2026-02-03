@@ -16,7 +16,7 @@ MonoBehaviour:
   name: test
   hp: 5
   at: 1
-  cost: 5
+  cost: 1
   effectDmg: 0
   effectHeal: 0
   description: 
