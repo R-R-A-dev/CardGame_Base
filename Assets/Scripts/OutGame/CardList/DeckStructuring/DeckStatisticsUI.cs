@@ -19,7 +19,7 @@ public class DeckStatisticsUI : MonoBehaviour
     /// <param name="deckNum"></param>
     public void RefreshStatistics(int deckNum, List<int> deck = null, List<CardEntity> twoPickData = null)
     {
-        // デッキ情報が渡されなかった場合、指定されたデッキ番号から取得
+        // デッキ情報が渡されなかった場合、指定されたデッキ番号から取得(デッキの所持状況)
         //TwoPickのデッキが渡された場合はそちらを優先
         if (deck == null)
             deck = CardListData.Decks[deckNum];
@@ -27,12 +27,15 @@ public class DeckStatisticsUI : MonoBehaviour
         // TwoPickのCaredEntityリストを用意が必要
         // 所持カードリスト取得
         //TwoPickDataが渡された場合はそちらを優先
-        List<CardEntity> allCards = CardListData.Entities;
-        if (twoPickData == null)
-            allCards = CardListData.Entities;
-        else
-            allCards = twoPickData;
-
+        if (CardListData.Entities.Count == 0)
+        {
+            CardEntity[] entitys = CardDatabase.LoadAllCards();
+            for (int i = 0; i < entitys.Length; i++)
+            {
+                CardListData.Entities.Add(entitys[i]);
+            }
+        }
+            List<CardEntity> allCards = CardListData.Entities;
 
         int pickCount = 0;
         int totalCount = 0;

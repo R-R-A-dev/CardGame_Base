@@ -44,7 +44,6 @@ public class TwoPickUI : MonoBehaviour
             int rightCardId = availableCards[rightRandomIndex];
             availableCards.RemoveAt(rightRandomIndex); // 選んだカードを除外
 
-
             //ボタンを押した時の渡すカードを追加
             leftCards.Add(leftCardId);
             rightCards.Add(rightCardId);
@@ -87,11 +86,12 @@ public class TwoPickUI : MonoBehaviour
         DisableButtons();
 
         TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(leftCards);
-        leftCards.Clear();
-
-        //選択されたカードを進捗に追加
         TwoPickModeManager.Instance.PickCountUp();
-        TwoPickModeManager.Instance.OnLeftButtonClick();
+        //選択されたカードを進捗に追加
+        List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(leftCards);
+        leftCards.Clear();
+        TwoPickModeManager.Instance.OnLeftButtonClick(selectedCards);
+
         //UI更新
         //既定回数に達したら終了
     }
