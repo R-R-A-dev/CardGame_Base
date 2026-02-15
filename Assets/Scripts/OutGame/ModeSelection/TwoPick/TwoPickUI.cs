@@ -80,7 +80,6 @@ public class TwoPickUI : MonoBehaviour
 
 
     }
-
     public void OnLeftButtonClick()
     {
         DisableButtons();
@@ -88,7 +87,8 @@ public class TwoPickUI : MonoBehaviour
         TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(leftCards);
         TwoPickModeManager.Instance.PickCountUp();
         //選択されたカードを進捗に追加
-        List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(leftCards);
+        List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(TwoPickModeManager.Instance.pickProgress.SelectedCards);
+
         leftCards.Clear();
         TwoPickModeManager.Instance.OnLeftButtonClick(selectedCards);
 
