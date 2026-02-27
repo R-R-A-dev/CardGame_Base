@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class TwoPickUI : MonoBehaviour
 {
@@ -11,8 +13,17 @@ public class TwoPickUI : MonoBehaviour
     [SerializeField] List<GameObject> leftZone;
     [SerializeField] List<GameObject> rightZone;
 
+
+    //カード一覧パネル
+    [SerializeField] private GameObject cardsPanel;
+    [SerializeField] CardController[] cardControllers;
+    [SerializeField] TextMeshProUGUI[] cardsNum;
+
     List<int> leftCards = new List<int>();
     List<int> rightCards = new List<int>();
+
+
+
     public void ShowPickCard()
     {
 
@@ -110,6 +121,37 @@ public class TwoPickUI : MonoBehaviour
         //既定回数に達したら終了
     }
 
+    public void ShowCard()
+    {
+        //現在の取得カードのコスト順の一覧を取得
+        //カード情報パネルに表示
+        //リスト内のCardControllerをタップしたときにカード情報パネルをセット
+        cardsPanel.SetActive(true);
+        List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(TwoPickModeManager.Instance.pickProgress.SelectedCards);
+
+        for (int i = 0; i < cardControllers.Length; i++)
+            cardControllers[i].gameObject.SetActive(false);
+
+        int setCount = 0;
+        for (int i = 0; i < selectedCards.Count; i++)
+        {
+
+            if (selectedCards[i] > 0)
+            {
+                cardControllers[setCount].gameObject.SetActive(true);
+                cardsNum[setCount].text = selectedCards[i].ToString();
+                //カードデータセット
+                cardControllers[setCount].Init(i + 1, false);
+                setCount++;
+            }
+        }
+    }
+
+    public void CloseCard()
+    {
+        cardsPanel.SetActive(false);
+    }
+
     void DisableButtons()
     {
 
@@ -131,6 +173,7 @@ public class TwoPickUI : MonoBehaviour
     {
 
     }
+
 }
 /*左右ボタンを押す（エフェクト）
  * 追加値を増やす
@@ -139,7 +182,8 @@ public class TwoPickUI : MonoBehaviour
  * 選択されたカードを足す
  * 選択後UIの増加
  * カードクリック時に効果が表示
+ * 既定の回数で終了
  * 
- * 
- * 
+ * 一覧画面のデータセット
+ * 対戦画面へ
 */

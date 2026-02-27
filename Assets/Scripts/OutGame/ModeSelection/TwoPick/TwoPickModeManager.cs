@@ -13,6 +13,7 @@ public class TwoPickModeManager : MonoBehaviour
     [Header("UIéQè∆")]
     [SerializeField] private TwoPickUI twoPickUI;
     [SerializeField] private DeckStatisticsUI deckStatisticsUI;
+    [SerializeField] private SortCards sortCards;
 
     int pickCount = 0;
     public TwoPickCardSelector cardSelector;
@@ -95,6 +96,8 @@ public class TwoPickModeManager : MonoBehaviour
             ShowNextPick();
         }
     }*/
+
+
 
     void Start()
     {
