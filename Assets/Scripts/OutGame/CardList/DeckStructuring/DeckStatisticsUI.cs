@@ -60,7 +60,7 @@ public class DeckStatisticsUI : MonoBehaviour
             costCounts[cost - 1] += count;
         }
         if (pickCountText != null)
-            pickCountText.text = pickCount.ToString();
+            //pickCountText.text = pickCount.ToString();
 
         totalCountText.text = totalCount.ToString();
         unitCountText.text = unitCount.ToString();

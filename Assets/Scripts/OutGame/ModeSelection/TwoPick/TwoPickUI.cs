@@ -13,6 +13,8 @@ public class TwoPickUI : MonoBehaviour
     [SerializeField] List<GameObject> leftZone;
     [SerializeField] List<GameObject> rightZone;
 
+    [SerializeField] TextMeshProUGUI pickCount;
+
 
     //カード一覧パネル
     [SerializeField] private GameObject cardsPanel;
@@ -22,7 +24,9 @@ public class TwoPickUI : MonoBehaviour
     List<int> leftCards = new List<int>();
     List<int> rightCards = new List<int>();
 
-
+    [SerializeField] GameObject cardParent;
+    [SerializeField] GameObject leftButton;
+    [SerializeField] GameObject rightButton;
 
     public void ShowPickCard()
     {
@@ -101,11 +105,15 @@ public class TwoPickUI : MonoBehaviour
         List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(TwoPickModeManager.Instance.pickProgress.SelectedCards);
 
         leftCards.Clear();
+        pickCount.text = TwoPickModeManager.Instance.GetPickCount().ToString();
+        //最後は生成をせずにする
         TwoPickModeManager.Instance.OnLeftButtonClick(selectedCards);
-
         //UI更新
         //既定回数に達したら終了
+        PickEnd();
     }
+
+
 
     public void OnRightButtonClick()
     {
@@ -119,6 +127,19 @@ public class TwoPickUI : MonoBehaviour
         TwoPickModeManager.Instance.OnRightButtonClick();
         //UI更新
         //既定回数に達したら終了
+    }
+
+    void PickEnd()
+    {
+        if (TwoPickModeManager.Instance.GetPickCount() > 19)
+        {
+            cardParent.SetActive(false);
+            leftButton.SetActive(false);
+            rightButton.SetActive(false);
+            ModeConfigManager.Instance.ChangeMode(GameMode.TWO_PICK);
+            GameSession.SelectedDeck = TwoPickModeManager.Instance.pickProgress.SelectedCards;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        }
     }
 
     public void ShowCard()

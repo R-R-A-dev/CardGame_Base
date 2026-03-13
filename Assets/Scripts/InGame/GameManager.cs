@@ -115,7 +115,13 @@ public class GameManager : MonoBehaviour
         }
         else if (ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
-
+            player.deck = GameSession.SelectedDeck;
+            enemy.deck = GameSession.SelectedDeck;
+            uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+            uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+            TurnEndButtonText.text = "Decide";
+            StartCoroutine(SettingInitHand());
+            StartCoroutine(CountDownChangeCard());
         }
         else if (ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
         {

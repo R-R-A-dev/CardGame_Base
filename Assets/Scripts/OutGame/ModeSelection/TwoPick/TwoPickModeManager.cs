@@ -49,7 +49,9 @@ public class TwoPickModeManager : MonoBehaviour
 
     public void OnLeftButtonClick(List<int> leftCards)
     {
-        twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
+        if (pickCount < 20)
+            twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
+
         //選択したカードの合計を渡す
         //TwoPickModeManager.Instance.pickProgress.SelectedCards
         deckStatisticsUI.RefreshStatistics(0, leftCards);
@@ -74,6 +76,9 @@ public class TwoPickModeManager : MonoBehaviour
     {
         return pickCount;
     }
+
+
+
 
     /// <summary>
     /// カードが選択された時
@@ -109,6 +114,12 @@ public class TwoPickModeManager : MonoBehaviour
     {
 
     }
+
+    public void StartGame()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+    }
+
 }
 /*次にすること
  * カードクリック後に増える数値
