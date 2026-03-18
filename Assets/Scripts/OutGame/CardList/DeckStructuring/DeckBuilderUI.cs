@@ -29,6 +29,7 @@ public class DeckBuilderUI : MonoBehaviour
     private CardFilterSettings deckFilter = new CardFilterSettings();
 
 
+    //設計を聞く
     void Start()
     {
         DisplayDeck();
@@ -38,6 +39,11 @@ public class DeckBuilderUI : MonoBehaviour
         DeckBuilderManager.Instance.deckStatisticsUI.
             RefreshStatistics(DeckBuilderManager.Instance.deckNum);
         SortCard();
+    }
+
+    private void OnEnable()
+    {
+        Debug.Log("DeckBuilderUI OnEnable");
     }
 
     void Update()
@@ -50,6 +56,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void DisplayCardList()
     {
+        //子オブジェクトの数以上なら削除
         cardListItem.CardSetUp(cardListContent.transform);
         //カードの一覧と所持カードのIDを比較して、所持しているカードを表示する
         //パネルと一緒に表示させる
@@ -60,6 +67,7 @@ public class DeckBuilderUI : MonoBehaviour
     /// </summary>
     public void DisplayDeck()
     {
+        //子オブジェクトの数以上なら削除
         deckListItem.CardSetUp(deckContent.transform, DeckBuilderManager.Instance.deckNum);
     }
 

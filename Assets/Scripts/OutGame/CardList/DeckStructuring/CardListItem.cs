@@ -19,7 +19,7 @@ public class CardListItem : MonoBehaviour
         CardEntity[] entitys = CardDatabase.LoadAllCards();
 
         // 例: 総所持数で初期化
-        CardListData.PossessionCard = new List<int>() { 3, 1, 1, 1 };
+        CardListData.PossessionCard = new List<int>() { 1, 1, 1, 1 };
 
 
 
