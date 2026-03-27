@@ -12,7 +12,8 @@ public enum StageType
     TREASURE,       // 宝箱（報酬のみ）
     SHOP,           // ショップ
     EVENT,          // イベント
-    REST            // 休憩（HP回復）
+    REST,           // 休憩（HP回復）
+    RANDOM          // ランダム
 }
 
 // ========================================
@@ -112,3 +113,13 @@ public class StageData : ScriptableObject
     public int treasureCardCount = 1;
 }
 
+/*
+ * ステージ情報
+ * マップ情報
+ * ステージ情報
+ * 敵情報
+ * バフデバフ
+ * 報酬
+ * 
+ * 
+*/

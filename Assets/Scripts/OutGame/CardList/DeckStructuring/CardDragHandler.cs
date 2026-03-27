@@ -217,7 +217,6 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (eventData.button == PointerEventData.InputButton.Right &&
             eventData.button != PointerEventData.InputButton.Left)
         {
-            Debug.Log("test");
             //DeckBuilderManager.Instance.OffDropZone();
             leftMove = true;
             //DeckBuilderManager.Instance.cardDetailUI.Hide();

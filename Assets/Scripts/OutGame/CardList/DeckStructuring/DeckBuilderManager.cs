@@ -9,6 +9,10 @@ public class DeckBuilderManager : MonoBehaviour
     [SerializeField] public CardDetailUI cardDetailUI;
     public int deckNum = 0;
 
+
+
+
+
     public static DeckBuilderManager Instance { get; private set; }
 
     void Awake()
@@ -19,6 +23,11 @@ public class DeckBuilderManager : MonoBehaviour
     private void Start()
     {
 
+    }
+
+    private void OnEnable()
+    {
+        deckBuilderUI.StartDeckEdit(deckNum);
     }
 
     /// <summary>
@@ -64,12 +73,13 @@ public class DeckBuilderManager : MonoBehaviour
     public void GameStart()
     {
         GameSession.SelectedDeck = deckBuilderUI.GetDeck();
-        for(int i = 0; i < GameSession.SelectedDeck.Count; i++)
+        for (int i = 0; i < GameSession.SelectedDeck.Count; i++)
         {
             //Debug.Log(GameSession.SelectedDeck[i]);
         }
         SceneManager.LoadScene(1);
     }
+
 
 
 }

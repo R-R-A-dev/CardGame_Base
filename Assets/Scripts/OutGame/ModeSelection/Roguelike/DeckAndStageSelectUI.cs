@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,15 +9,19 @@ public class DeckAndStageSelectUI : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject stageConfirmPanle;
     [SerializeField] private GameObject deckConfirmPanle;
+    [SerializeField] private GameObject deckEdit;
+    [SerializeField] private GameObject ModeSelectionPanel;
+    [SerializeField] private TextMeshProUGUI selectedDeck;
 
     private int selectedStageIndex = -1;
-    private int selectedDeckId = -1;
+    public int selectedDeckId = 0;
+
 
     private void Start()
     {
         // 通知を受け取るだけ
         stageSelectUI.OnStageSelected += OnStageSelected;
-        deckSelectUI.OnDeckSelected += OnDeckSelected;
+        deckSelectUI.OnDeckSelected += OnDeckSelectedEdit;
     }
 
     private void OnStageSelected(int index)
@@ -26,7 +31,7 @@ public class DeckAndStageSelectUI : MonoBehaviour
 
     }
 
-    private void OnDeckSelected(int deckId)
+    private void OnDeckSelectedEdit(int deckId)
     {
         selectedDeckId = deckId;
         deckConfirmPanle.SetActive(true);
@@ -52,8 +57,10 @@ public class DeckAndStageSelectUI : MonoBehaviour
         //RoguelikeManager.Instance.StartRoguelike(config);
     }
 
+
     public void StartGame()
     {
+        //ローグライク
         UpdateStartButton();
     }
 
@@ -61,6 +68,8 @@ public class DeckAndStageSelectUI : MonoBehaviour
     public void OpenDeckEdit()
     {
         // デッキ編成UIを開く処理
+        deckEdit.SetActive(true);
+        ModeSelectionPanel.SetActive(false);
     }
 
     public void CloseStagePannle()
@@ -71,6 +80,12 @@ public class DeckAndStageSelectUI : MonoBehaviour
     public void CloseDeckPannle()
     {
         deckConfirmPanle.SetActive(false);
+    }
+
+    public void DecideDeck()
+    {
+        deckConfirmPanle.SetActive(false);
+        selectedDeck.text = selectedDeckId.ToString();
     }
 }
 /*ゲームスタート後にitemからstageのデータを取得

@@ -32,6 +32,18 @@ public class DeckBuilderUI : MonoBehaviour
     //設計を聞く
     void Start()
     {
+        //DisplayDeck();
+        //DisplayCardList();
+        //RefreshAllCardUI();
+        //PrepareDeck();
+        //DeckBuilderManager.Instance.deckStatisticsUI.
+        //    RefreshStatistics(DeckBuilderManager.Instance.deckNum);
+        //SortCard();
+    }
+
+    public void StartDeckEdit(int deckNum)
+    {
+        DeckBuilderManager.Instance.deckNum = deckNum;
         DisplayDeck();
         DisplayCardList();
         RefreshAllCardUI();
@@ -39,11 +51,6 @@ public class DeckBuilderUI : MonoBehaviour
         DeckBuilderManager.Instance.deckStatisticsUI.
             RefreshStatistics(DeckBuilderManager.Instance.deckNum);
         SortCard();
-    }
-
-    private void OnEnable()
-    {
-        Debug.Log("DeckBuilderUI OnEnable");
     }
 
     void Update()
