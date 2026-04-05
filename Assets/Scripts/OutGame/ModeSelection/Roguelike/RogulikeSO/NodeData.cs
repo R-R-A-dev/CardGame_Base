@@ -1,16 +1,22 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class NodeData : MonoBehaviour
+[CreateAssetMenu(fileName = "NodeData", menuName = "Roguelike/NodeData")]
+public class NodeData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("基本情報")]
+    public string nodeId;
+    public StageType stageType;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("バフ・デバフ")]
+    public List<ParameterModifier> modifiers;
+
+    [Header("各StageTypeの設定")]
+    public EnemyData enemyData;
+    public RewardData rewardData;
+    public RestData restData;
+    public ShopData shopData;
+    public TreasureData treasureData;
+    public DamageNodeData damageData;
+    public CardLossData cardLossData;
 }

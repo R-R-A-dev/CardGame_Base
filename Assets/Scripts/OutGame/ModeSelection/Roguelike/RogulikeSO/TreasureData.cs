@@ -1,16 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class TreasureData : MonoBehaviour
+[CreateAssetMenu(fileName = "TreasureData", menuName = "Roguelike/TreasureData")]
+public class TreasureData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int cardCount;
+    public List<int> treasureCardPool;
+    public int goldAmount;
 }

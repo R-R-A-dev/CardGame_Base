@@ -1,16 +1,10 @@
 using UnityEngine;
 
-public class CardLossData : MonoBehaviour
+[CreateAssetMenu(fileName = "CardLossData", menuName = "Roguelike/CardLossData")]
+public class CardLossData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int cardLossCount;
+    public bool isPlayerChoice;     // trueならプレイヤーが選んで捨てる
+    [TextArea(1, 2)]
+    public string description;
 }

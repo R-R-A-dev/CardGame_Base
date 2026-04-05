@@ -13,7 +13,8 @@ public enum StageType
     SHOP,           // ショップ
     EVENT,          // イベント
     REST,           // 休憩（HP回復）
-    RANDOM          // ランダム
+    DAMAGE,         // ダメージ
+    CARD_LOSS       // カードロスト
 }
 
 // ========================================

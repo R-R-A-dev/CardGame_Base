@@ -1,16 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyData : MonoBehaviour
+[CreateAssetMenu(fileName = "EnemyData", menuName = "Roguelike/EnemyData")]
+public class EnemyData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("基本情報")]
+    public string enemyName;
+    public Sprite enemySprite;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("ステータス")]
+    public int hp;
+    public int initialMana;
+
+    [Header("デッキ（カードIDのリスト）")]
+    public List<int> enemyDeck;
 }

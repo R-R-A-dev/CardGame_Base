@@ -24,6 +24,8 @@ public class DeckSelectUI : MonoBehaviour
         OnDeckSelected?.Invoke(index); // DeckAndStageSelectUIに通知するだけ
     }
 
+    //ステージも上記と同じように作成する
+
     void Start()
     {
 

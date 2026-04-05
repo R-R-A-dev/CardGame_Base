@@ -16,7 +16,7 @@ public class ModeConfigManager : MonoBehaviour
     public List<TwoPickData> twoPickList = new List<TwoPickData>();
 
     [Header("ローグライクデータリスト")]
-    public List<RoguelikeData> roguelikeList = new List<RoguelikeData>();
+    public List<RoguelikeStageData> roguelikeList = new List<RoguelikeStageData>();
 
     int lethalPuzzleIndex = 0;
 
@@ -55,7 +55,7 @@ public class ModeConfigManager : MonoBehaviour
     /// <summary>
     /// 指定インデックスのローグライクデータを取得
     /// </summary>
-    public RoguelikeData GetRoguelikeData(int index)
+    public RoguelikeStageData GetRoguelikeData(int index)
     {
         if (index >= 0 && index < roguelikeList.Count)
             return roguelikeList[index];

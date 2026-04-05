@@ -1,16 +1,19 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class RoguelikeStageData : MonoBehaviour
+[CreateAssetMenu(fileName = "RoguelikeStageData", menuName = "Roguelike/RoguelikeStageData")]
+public class RoguelikeStageData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("ステージ情報")]
+    public string stageName;
+    public Sprite stageBackground;
+    [TextArea(2, 4)]
+    public string stageDescription;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("マップ一覧（順番に進む）")]
+    public List<MapData> maps;
+
+    [Header("プレイヤー初期設定")]
+    public int playerInitialHP = 20;
+    public int playerInitialMana = 1;
 }

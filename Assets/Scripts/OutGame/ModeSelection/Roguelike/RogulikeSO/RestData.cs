@@ -1,16 +1,11 @@
 using UnityEngine;
 
-public class RestData : MonoBehaviour
+[CreateAssetMenu(fileName = "RestData", menuName = "Roguelike/RestData")]
+public class RestData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int healAmount;
+    public bool isPercentageHeal;
+    public int healPercentage;
+    public bool canUpgradeCard;
+    public bool canRemoveCard;
 }

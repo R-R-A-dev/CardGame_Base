@@ -1,16 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class ShopData : MonoBehaviour
+[CreateAssetMenu(fileName = "ShopData", menuName = "Roguelike/ShopData")]
+public class ShopData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int shopCardCount;
+    public List<int> shopCardList;
+    public int cardPriceMin;
+    public int cardPriceMax;
+    public bool canRemoveCard;
+    public int removeCardCost;
 }

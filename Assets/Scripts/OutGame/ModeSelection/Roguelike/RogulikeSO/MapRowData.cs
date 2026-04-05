@@ -1,16 +1,25 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class MapRowData : MonoBehaviour
+[CreateAssetMenu(fileName = "MapRowData", menuName = "Roguelike/MapRowData")]
+public class MapRowData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("層の情報")]
+    public string rowName;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("候補ノード")]
+    public List<NodeData> candidateNodes;
+
+    [Header("この層に並ぶノード数")]
+    public int nodeCount = 2;
+
+    [Header("次の層への接続（手動設定）")]
+    public List<NodeConnection> connections;
+}
+
+[System.Serializable]
+public class NodeConnection
+{
+    public NodeData fromNode;
+    public List<NodeData> toNodes;
 }

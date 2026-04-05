@@ -16,7 +16,6 @@ public class DeckAndStageSelectUI : MonoBehaviour
     private int selectedStageIndex = -1;
     public int selectedDeckId = 0;
 
-
     private void Start()
     {
         // 通知を受け取るだけ
@@ -28,7 +27,6 @@ public class DeckAndStageSelectUI : MonoBehaviour
     {
         selectedStageIndex = index;
         stageConfirmPanle.SetActive(true);
-
     }
 
     private void OnDeckSelectedEdit(int deckId)
@@ -61,6 +59,14 @@ public class DeckAndStageSelectUI : MonoBehaviour
     public void StartGame()
     {
         //ローグライク
+        RoguelikeStartConfig config = new RoguelikeStartConfig
+        {
+            DeckId = selectedDeckId,
+            StageConfig = new StageConfig { StageId = selectedStageIndex }
+        };
+
+        // Managerに渡す
+        RoguelikeManager.Instance.StartRoguelike(config);
         UpdateStartButton();
     }
 

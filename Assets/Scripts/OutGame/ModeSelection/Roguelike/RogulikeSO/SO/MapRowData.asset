@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9539a2d512e5dae46a517e9809d1afc4, type: 3}
+  m_Name: MapRowData
+  m_EditorClassIdentifier: 
+  rowName: "\u7B2C\uFF11\u5C64"
+  candidateNodes:
+  - {fileID: 11400000, guid: b4170a17e5f77eb4fbea27b35fdf7968, type: 2}
+  - {fileID: 11400000, guid: 7836dcb345788634c84636c14a05f13e, type: 2}
+  nodeCount: 2
+  connections:
+  - fromNode: {fileID: 11400000, guid: 43638fd87c3c316468b9e08be400aa28, type: 2}
+    toNodes:
+    - {fileID: 11400000, guid: d6e4f895108f53a49ae8e6e70e46d9af, type: 2}

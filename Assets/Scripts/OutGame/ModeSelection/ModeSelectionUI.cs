@@ -28,10 +28,10 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     private void ShowModeSelectPanel()
     {
-        modeSelectPanel.SetActive(true);
-        lethalPuzzlePanel.SetActive(false);
-        twoPickPanel.SetActive(false);
-        roguelikePanel.SetActive(false);
+        //modeSelectPanel.SetActive(true);
+        //lethalPuzzlePanel.SetActive(false);
+        //twoPickPanel.SetActive(false);
+        //roguelikePanel.SetActive(false);
     }
 
     /// <summary>

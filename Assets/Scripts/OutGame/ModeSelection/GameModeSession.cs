@@ -8,7 +8,7 @@ public class GameModeSession : MonoBehaviour
     // 選択されたデータ
     public static LethalPuzzleData SelectedPuzzle { get; set; }
     public static TwoPickData SelectedTwoPick { get; set; }
-    public static RoguelikeData SelectedRoguelike { get; set; }
+    public static RoguelikeStageData SelectedRoguelike { get; set; }
 
     // 2Pick/ローグライクで構築されたデッキ
     public static List<int> PlayerDeck { get; set; } = new List<int>();

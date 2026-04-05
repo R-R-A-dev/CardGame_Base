@@ -1,16 +1,11 @@
 using UnityEngine;
 
-public class DamageNodeData : MonoBehaviour
+[CreateAssetMenu(fileName = "DamageNodeData", menuName = "Roguelike/DamageNodeData")]
+public class DamageNodeData : ScriptableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int damageAmount;
+    public bool isPercentageDamage;
+    public int damagePercentage;
+    [TextArea(1, 2)]
+    public string description;
 }
