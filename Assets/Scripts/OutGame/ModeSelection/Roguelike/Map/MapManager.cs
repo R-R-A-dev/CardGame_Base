@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MapManager : MonoBehaviour
 {
-    [SerializeField] private Transform rowParent;
-    [SerializeField] private MapNodeUI nodeUIPrefab;
+    [Header("固定ノードUI")]
+    [SerializeField] private MapNodeUI startNodeUI;
+    [SerializeField] private MapNodeUI bossNodeUI;
+
+    [Header("層ごとのノードUI")]
+    [SerializeField] private List<MapRowUI> rowUIs;
+
     [SerializeField] private MapStatusUI statusUI;
 
     private Dictionary<NodeData, MapNodeUI> nodeUIMap
@@ -19,43 +23,50 @@ public class MapManager : MonoBehaviour
         currentMapData = mapData;
         gameState = state;
 
-        GenerateMap();
+        SetupMap();
         UpdateSelectableNodes();
         statusUI.Refresh(gameState);
     }
 
-    private void GenerateMap()
+    private void SetupMap()
     {
-        foreach (Transform child in rowParent)
-            Destroy(child.gameObject);
         nodeUIMap.Clear();
 
-        CreateRowUI("スタート", new List<NodeData> { currentMapData.startNode });
+        // 全ノードUIを一旦非表示
+        startNodeUI.gameObject.SetActive(false);
+        bossNodeUI.gameObject.SetActive(false);
+        foreach (var row in rowUIs)
+            foreach (var nodeUI in row.nodeUIs)
+                nodeUI.gameObject.SetActive(false);
 
-        foreach (MapRowData row in currentMapData.rows)
+        // startNode設定
+        SetupNodeUI(startNodeUI, currentMapData.startNode);
+
+        // 各層のノードをランダムで選んで割り当て
+        for (int i = 0; i < currentMapData.rows.Count; i++)
         {
-            List<NodeData> selected = SelectRandomNodes(row);
-            CreateRowUI(row.rowName, selected);
+            if (i >= rowUIs.Count) break;
+
+            MapRowData rowData = currentMapData.rows[i];
+            MapRowUI rowUI = rowUIs[i];
+            List<NodeData> selected = SelectRandomNodes(rowData);
+
+            for (int j = 0; j < selected.Count; j++)
+            {
+                if (j >= rowUI.nodeUIs.Count) break;
+                SetupNodeUI(rowUI.nodeUIs[j], selected[j]);
+            }
         }
 
-        CreateRowUI("ボス", new List<NodeData> { currentMapData.bossNode });
+        // bossNode設定
+        SetupNodeUI(bossNodeUI, currentMapData.bossNode);
     }
 
-    private void CreateRowUI(string rowName, List<NodeData> nodes)
+    private void SetupNodeUI(MapNodeUI nodeUI, NodeData nodeData)
     {
-        GameObject rowObject = new GameObject(rowName);
-        rowObject.transform.SetParent(rowParent, false);
-
-        HorizontalLayoutGroup layout = rowObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 50f;
-        layout.childAlignment = TextAnchor.MiddleCenter;
-
-        foreach (NodeData node in nodes)
-        {
-            MapNodeUI nodeUI = Instantiate(nodeUIPrefab, rowObject.transform);
-            nodeUI.Setup(node, false, OnNodeClicked);
-            nodeUIMap[node] = nodeUI;
-        }
+        nodeUI.gameObject.SetActive(true);
+        nodeUI.Setup(nodeData, false, OnNodeClicked);
+        nodeUIMap[nodeData] = nodeUI;
     }
 
     private void UpdateSelectableNodes()
