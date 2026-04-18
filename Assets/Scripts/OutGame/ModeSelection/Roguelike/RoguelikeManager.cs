@@ -55,8 +55,8 @@ public class RoguelikeManager : MonoBehaviour
     // ========================================
     private void OpenMap()
     {
-        MapData currentMap = currentStageData.maps[currentMapIndex];
-        mapUI.Initialize(currentMap, gameState);
+        MapData mapData = currentStageData.maps[currentMapIndex];
+        mapUI.Initialize(currentStageData, mapData, gameState); // stageDataも渡す
     }
 
     // ========================================

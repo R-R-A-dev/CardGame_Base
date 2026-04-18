@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class MapManager : MonoBehaviour
 {
+    [Header("このマップのSOデータ")]
+    [SerializeField] private MapData mapData;       // 対応するMapData.assetをアサイン
+
     [Header("固定ノードUI")]
     [SerializeField] private MapNodeUI startNodeUI;
     [SerializeField] private MapNodeUI bossNodeUI;
@@ -15,12 +18,12 @@ public class MapManager : MonoBehaviour
     private Dictionary<NodeData, MapNodeUI> nodeUIMap
         = new Dictionary<NodeData, MapNodeUI>();
     private List<NodeData> selectableNodes = new List<NodeData>();
-    private MapData currentMapData;
     private RoguelikeGameState gameState;
 
-    public void Initialize(MapData mapData, RoguelikeGameState state)
+    public MapData MapData => mapData;              // MapUIから参照用
+
+    public void Initialize(RoguelikeGameState state)
     {
-        currentMapData = mapData;
         gameState = state;
 
         SetupMap();
@@ -32,22 +35,19 @@ public class MapManager : MonoBehaviour
     {
         nodeUIMap.Clear();
 
-        // 全ノードUIを一旦非表示
         startNodeUI.gameObject.SetActive(false);
         bossNodeUI.gameObject.SetActive(false);
         foreach (var row in rowUIs)
             foreach (var nodeUI in row.nodeUIs)
                 nodeUI.gameObject.SetActive(false);
 
-        // startNode設定
-        SetupNodeUI(startNodeUI, currentMapData.startNode);
+        SetupNodeUI(startNodeUI, mapData.startNode);
 
-        // 各層のノードをランダムで選んで割り当て
-        for (int i = 0; i < currentMapData.rows.Count; i++)
+        for (int i = 0; i < mapData.rows.Count; i++)
         {
             if (i >= rowUIs.Count) break;
 
-            MapRowData rowData = currentMapData.rows[i];
+            MapRowData rowData = mapData.rows[i];
             MapRowUI rowUI = rowUIs[i];
             List<NodeData> selected = SelectRandomNodes(rowData);
 
@@ -58,8 +58,7 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // bossNode設定
-        SetupNodeUI(bossNodeUI, currentMapData.bossNode);
+        SetupNodeUI(bossNodeUI, mapData.bossNode);
     }
 
     private void SetupNodeUI(MapNodeUI nodeUI, NodeData nodeData)
@@ -77,32 +76,23 @@ public class MapManager : MonoBehaviour
         selectableNodes.Clear();
 
         if (gameState.CurrentNode == null)
-        {
-            selectableNodes.Add(currentMapData.startNode);
-        }
+            selectableNodes.Add(mapData.startNode);
         else
-        {
             selectableNodes = GetNextSelectableNodes(gameState.CurrentNode);
-        }
 
         foreach (NodeData node in selectableNodes)
-        {
             if (nodeUIMap.ContainsKey(node))
                 nodeUIMap[node].SetSelectable(true);
-        }
     }
 
     private List<NodeData> GetNextSelectableNodes(NodeData currentNode)
     {
-        foreach (MapRowData row in currentMapData.rows)
-        {
+        foreach (MapRowData row in mapData.rows)
             foreach (NodeConnection connection in row.connections)
-            {
                 if (connection.fromNode == currentNode)
                     return new List<NodeData>(connection.toNodes);
-            }
-        }
-        return new List<NodeData> { currentMapData.bossNode };
+
+        return new List<NodeData> { mapData.bossNode };
     }
 
     private List<NodeData> SelectRandomNodes(MapRowData row)
@@ -132,4 +122,6 @@ public class MapManager : MonoBehaviour
 
         RoguelikeManager.Instance.OnNodeSelected(nodeData);
     }
+
+
 }

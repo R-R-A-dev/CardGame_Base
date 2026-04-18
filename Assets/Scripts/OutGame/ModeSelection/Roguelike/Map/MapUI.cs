@@ -1,13 +1,29 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MapUI : MonoBehaviour
 {
-    [SerializeField] private MapManager mapManager;
+    [SerializeField] private List<RoguelikeStageUI> stageUIs; // 全ステージを登録
+    [SerializeField] private MapStatusUI statusUI;
 
-    public void Initialize(MapData mapData, RoguelikeGameState state)
+    private RoguelikeStageUI currentStageUI;
+
+    public void Initialize(RoguelikeStageData stageData, MapData mapData, RoguelikeGameState state)
     {
-        gameObject.SetActive(true);
-        //mapManager.Initialize(mapData, state);
+        // 全ステージを非アクティブに
+        foreach (var stageUI in stageUIs)
+            stageUI.gameObject.SetActive(false);
+
+        // stageDataに対応するStageUIを探してアクティブ化
+        currentStageUI = stageUIs.Find(s => s.StageData == stageData);
+
+        if (currentStageUI == null)
+        {
+            Debug.LogError($"対応するStageUIが見つかりません: {stageData.stageName}");
+            return;
+        }
+        currentStageUI.gameObject.SetActive(true);
+        currentStageUI.Initialize(mapData, state);
     }
 
     public void Hide()
