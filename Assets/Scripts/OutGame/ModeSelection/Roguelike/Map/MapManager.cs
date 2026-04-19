@@ -109,7 +109,10 @@ public class MapManager : MonoBehaviour
         }
         return selected;
     }
-
+    /// <summary>
+    /// ノードをクリックしたときの処理。選択可能なノードであれば、ゲーム状態を更新し、UIをリフレッシュする。
+    /// </summary>
+    /// <param name="nodeData"></param>
     private void OnNodeClicked(NodeData nodeData)
     {
         if (!selectableNodes.Contains(nodeData)) return;
