@@ -9,6 +9,12 @@ public class RoguelikeManager : MonoBehaviour
     [SerializeField] private MapUI mapUI;
     [SerializeField] private List<RoguelikeStageData> stageData;
 
+    [SerializeField] private RestUI restUI;
+    [SerializeField] private ShopUI shopUI;
+    [SerializeField] private TreasureUI treasureUI;
+    [SerializeField] private EventUI eventUI;
+    [SerializeField] private CardLossUI cardLossUI;
+
     private RoguelikeGameState gameState;
     private RoguelikeStageData currentStageData;
     private int currentMapIndex = 0;
@@ -70,7 +76,7 @@ public class RoguelikeManager : MonoBehaviour
             case StageType.ELITE_BATTLE:
             case StageType.BOSS_BATTLE:
                 // 戦闘画面へ
-                // BattleManager.Instance.StartBattle(nodeData.enemyData, gameState);
+                //BattleManager.Instance.StartBattle(nodeData.enemyData, gameState);
                 mapUI.Hide();
                 break;
 
