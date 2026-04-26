@@ -10,11 +10,17 @@ public class RoguelikeGameState
     public NodeData CurrentNode;
     public List<NodeData> ClearedNodes = new List<NodeData>();
 
+    // シーンをまたぐために追加
+    public RoguelikeStageData CurrentStageData;
+    public int CurrentMapIndex;
+
     public RoguelikeGameState(RoguelikeStartConfig config, RoguelikeStageData stageData)
     {
         MaxHP = stageData.playerInitialHP;
         CurrentHP = MaxHP;
         Gold = 0;
         CurrentDeck = new List<int>(config.DeckId);
+        CurrentStageData = stageData;
+        CurrentMapIndex = 0;
     }
 }

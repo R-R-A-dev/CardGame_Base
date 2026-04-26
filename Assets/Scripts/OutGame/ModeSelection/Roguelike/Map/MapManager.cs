@@ -39,7 +39,7 @@ public class MapManager : MonoBehaviour
         bossNodeUI.gameObject.SetActive(false);
         foreach (var row in rowUIs)
             foreach (var nodeUI in row.nodeUIs)
-                nodeUI.gameObject.SetActive(false);
+                nodeUI.SetSelectable(false);
 
         SetupNodeUI(startNodeUI, mapData.startNode);
 
@@ -116,7 +116,7 @@ public class MapManager : MonoBehaviour
     private void OnNodeClicked(NodeData nodeData)
     {
         if (!selectableNodes.Contains(nodeData)) return;
-
+        //TODO：続き
         gameState.CurrentNode = nodeData;
         gameState.ClearedNodes.Add(nodeData);
 

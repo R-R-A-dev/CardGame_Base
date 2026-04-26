@@ -1110,4 +1110,82 @@ public class GameManager : MonoBehaviour
  *  遊び方の追加方法
  *  
  *  
+ *  
+ *  
+ *  
+ *  以下デバフの適応
+ *  // 戦闘シーン側のBattleManagerで受け取って適用
+private void Start()
+{
+    // バフ・デバフを適用してから戦闘開始
+    if (RoguelikeSession.BattleModifiers != null)
+        ApplyModifiers(RoguelikeSession.BattleModifiers);
+}
+
+private void ApplyModifiers(List<ParameterModifier> modifiers)
+{
+    foreach (ParameterModifier modifier in modifiers)
+    {
+        if (modifier.applyToPlayer)
+            ApplyToPlayer(modifier);
+
+        if (modifier.applyToEnemy)
+            ApplyToEnemy(modifier);
+    }
+}
+
+private void ApplyToPlayer(ParameterModifier modifier)
+{
+    switch (modifier.modifierType)
+    {
+        case ParameterModifierType.HP_BOOST:
+            RoguelikeSession.GameState.MaxHP    += modifier.value;
+            RoguelikeSession.GameState.CurrentHP += modifier.value;
+            break;
+        case ParameterModifierType.HP_REDUCTION:
+            RoguelikeSession.GameState.MaxHP    -= modifier.value;
+            RoguelikeSession.GameState.CurrentHP =
+                Mathf.Min(RoguelikeSession.GameState.CurrentHP,
+                          RoguelikeSession.GameState.MaxHP);
+            break;
+        case ParameterModifierType.MANA_BOOST:
+            // マナ処理
+            break;
+        case ParameterModifierType.MANA_REDUCTION:
+            // マナ処理
+            break;
+        case ParameterModifierType.CARD_DRAW_BOOST:
+            // ドロー枚数処理
+            break;
+        case ParameterModifierType.CARD_DRAW_REDUCTION:
+            // ドロー枚数処理
+            break;
+    }
+}
+
+private void ApplyToEnemy(ParameterModifier modifier)
+{
+    // 敵のステータスに同様に適用
+}
+*/
+
+/*public void OnBattleWin()
+{
+    // 報酬処理などを済ませてからローグライクシーンへ戻る
+    RoguelikeSession.GameState.CurrentDeck = *//* 更新後のデッキ *//*;
+    SceneManager.LoadScene("RoguelikeScene");
+}
+
+public void OnBattleLose()
+{
+    SceneManager.LoadScene("RoguelikeScene");
+    // ローグライクシーン側でGameOver処理
+}*/
+
+
+/*public void OnBattleWin()
+{
+    RoguelikeSession.IsBattleWin = true;
+    SceneManager.LoadScene("RoguelikeScene");
+}
 */

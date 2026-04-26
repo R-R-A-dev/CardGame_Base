@@ -9,7 +9,6 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private ShopCardItem cardItemPrefab;
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private Button closeButton;
-    [SerializeField] private CardDetailPanel detailPanel; // 既存の詳細パネルを流用
 
     private RoguelikeGameState gameState;
     private List<ShopCardItem> spawnedItems = new List<ShopCardItem>();

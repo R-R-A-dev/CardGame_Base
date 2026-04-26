@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RoguelikeManager : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class RoguelikeManager : MonoBehaviour
     [SerializeField] private EventUI eventUI;
     [SerializeField] private CardLossUI cardLossUI;
 
+    [SerializeField] private CardRewardPanel cardRewardPanel;
+
     private RoguelikeGameState gameState;
     private RoguelikeStageData currentStageData;
     private int currentMapIndex = 0;
@@ -29,6 +32,23 @@ public class RoguelikeManager : MonoBehaviour
         // 最初は全て非アクティブ
         //deckAndStageSelectUI.gameObject.SetActive(false);
         //mapUI.Hide();
+        // 戦闘から戻ってきた場合
+        /*        if (RoguelikeSession.GameState != null)
+                {
+                    gameState = RoguelikeSession.GameState;
+                    currentStageData = RoguelikeSession.GameState.CurrentStageData;
+                    currentMapIndex = RoguelikeSession.GameState.CurrentMapIndex;
+
+                    // 勝利か敗北かで分岐
+                    if (RoguelikeSession.IsBattleWin)
+                        OnBattleWin();
+                    else
+                        OnGameOver();
+
+                    // セッションをリセット
+                    RoguelikeSession.Clear();
+                    return;
+                }*/
     }
 
     // ========================================
@@ -39,10 +59,10 @@ public class RoguelikeManager : MonoBehaviour
         deckAndStageSelectUI.gameObject.SetActive(true);
     }
 
-    // ========================================
-    // DeckAndStageSelectUIの開始ボタンから呼ぶ
-    // RoguelikeStartConfigとRoguelikeStageDataを所持しておく
-    // ========================================
+    /// <summary>
+    /// DeckAndStageSelectUIの開始ボタンから呼ぶ
+    /// RoguelikeStartConfigとRoguelikeStageDataを所持しておく</summary>
+    /// <param name="config"></param>
     public void StartRoguelike(RoguelikeStartConfig config)
     {
         currentStageData = stageData[config.StageConfig.StageId];
@@ -56,18 +76,19 @@ public class RoguelikeManager : MonoBehaviour
         OpenMap();
     }
 
-    // ========================================
-    // マップを開く
-    // ========================================
+    /// <summary>
+    /// マップ開く
+    /// </summary>
     private void OpenMap()
     {
         MapData mapData = currentStageData.maps[currentMapIndex];
         mapUI.Initialize(currentStageData, mapData, gameState); // stageDataも渡す
     }
 
-    // ========================================
-    // MapManagerからノード選択時に呼ばれる
-    // ========================================
+    /// <summary>
+    /// MapManagerからノード選択時に呼ばれる
+    /// </summary>
+    /// <param name="nodeData"></param>
     public void OnNodeSelected(NodeData nodeData)
     {
         switch (nodeData.stageType)
@@ -75,44 +96,31 @@ public class RoguelikeManager : MonoBehaviour
             case StageType.NORMAL_BATTLE:
             case StageType.ELITE_BATTLE:
             case StageType.BOSS_BATTLE:
-                // 戦闘画面へ
-                //BattleManager.Instance.StartBattle(nodeData.enemyData, gameState);
-                mapUI.Hide();
+                // 戦闘データをセッションに保存して別シーンへ
+                RoguelikeSession.CurrentNode = nodeData;
+                RoguelikeSession.GameState = gameState;
+                RoguelikeSession.BattleModifiers = nodeData.modifiers;
+                SceneManager.LoadScene("BattleScene");
                 break;
 
             case StageType.REST:
-                // 休憩画面へ
-                // RestUI.Instance.Open(nodeData.restData, gameState);
-                mapUI.Hide();
+                restUI.Open(nodeData.restData, gameState);
                 break;
 
             case StageType.SHOP:
-                // ショップ画面へ
-                // ShopUI.Instance.Open(nodeData.shopData, gameState);
-                mapUI.Hide();
+                shopUI.Open(nodeData.shopData, gameState);
                 break;
 
             case StageType.TREASURE:
-                // 宝箱画面へ
-                // TreasureUI.Instance.Open(nodeData.treasureData, gameState);
-                mapUI.Hide();
-                break;
-
-            case StageType.EVENT:
-                // イベント画面へ
-                // EventUI.Instance.Open(nodeData.eventData, gameState);
-                mapUI.Hide();
+                treasureUI.Open(nodeData.treasureData, gameState);
                 break;
 
             case StageType.DAMAGE:
-                // ダメージ処理（即時適用）
                 ApplyDamage(nodeData.damageData);
                 break;
 
             case StageType.CARD_LOSS:
-                // カード消失処理
-                // CardLossUI.Instance.Open(nodeData.cardLossData, gameState);
-                mapUI.Hide();
+                cardLossUI.Open(nodeData.cardLossData, gameState);
                 break;
         }
     }
@@ -207,4 +215,19 @@ public class RoguelikeManager : MonoBehaviour
     {
         DeckBuilderManager.Instance.deckBuilderUI.gameObject.SetActive(false);
     }
+    public void OnBattleWin()
+    {
+        // 報酬パネルを開く
+        NodeData node = RoguelikeSession.CurrentNode;
+        if (node.rewardData != null)
+        {
+            mapUI.Hide();
+            cardRewardPanel.Open(node.rewardData, gameState);
+        }
+        else
+        {
+            ReturnToMap();
+        }
+    }
+
 }
