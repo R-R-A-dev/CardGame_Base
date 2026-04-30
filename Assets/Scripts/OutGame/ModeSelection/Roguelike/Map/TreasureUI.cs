@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class TreasureUI : MonoBehaviour
 {
-    [SerializeField] private Transform cardListParent;
+    [SerializeField] private GameObject cardRewardPanel;
+    [SerializeField] private List<CardController> cardList;
     [SerializeField] private TextMeshProUGUI goldText;
 
     private RoguelikeGameState gameState;
@@ -26,10 +27,7 @@ public class TreasureUI : MonoBehaviour
             ? data.treasureCardPool
             : GetRandomCards(data.cardCount);
 
-        foreach (int cardId in cards)
-        {
-            // カードUIを生成して表示
-        }
+        CardDisplay(cards);
     }
 
     public void OnCardSelected(int cardId)
@@ -42,5 +40,15 @@ public class TreasureUI : MonoBehaviour
     private List<int> GetRandomCards(int count)
     {
         return new List<int>();
+    }
+
+    private void CardDisplay(List<int> id)
+    {
+        //init関数でidごとに設定
+        for (int i = 0; i < id.Count; i++)
+        {
+            cardList[i].gameObject.SetActive(true);
+            cardList[i].Init(id[i], false);
+        }
     }
 }

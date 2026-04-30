@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: TreasureData
   m_EditorClassIdentifier: 
   cardCount: 2
-  treasureCardPool: 0100000002000000
+  treasureCardPool: 0100000002000000030000000400000004000000040000000400000004000000
   goldAmount: 10

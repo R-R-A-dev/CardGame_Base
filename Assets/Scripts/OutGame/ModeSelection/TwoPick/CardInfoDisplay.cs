@@ -37,3 +37,6 @@ public class CardInfoDisplay : MonoBehaviour, IPointerDownHandler
         cardInfoPanel.SetActive(false);
     }
 }
+// TODO:カードの情報を表示するUI
+//クリックして表示する仕組み
+//別のクラス作る

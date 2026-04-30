@@ -45,6 +45,11 @@ public class CardView : MonoBehaviour
             hpText.gameObject.SetActive(false);
             atText.gameObject.SetActive(false);
         }
+        if (cardModel.spells == SPELLS.NONE)
+        {
+            hpText.gameObject.SetActive(true);
+            atText.gameObject.SetActive(true);
+        }
     }
 
     public void Show()

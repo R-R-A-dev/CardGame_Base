@@ -71,8 +71,6 @@ public class TwoPickUI : MonoBehaviour
             //登場アニメーション
             if (leftZone[0].transform.childCount == 0 || leftZone[1].transform.childCount == 0)
             {
-
-
                 // カード生成
                 leftCard = Instantiate(cardPrefab, leftCardParent[i]);
                 rightCard = Instantiate(cardPrefab, rightCardParent[i]);
@@ -89,11 +87,9 @@ public class TwoPickUI : MonoBehaviour
                 leftChild.Init(leftCardId, false);
                 rightChild.Init(rightCardId, false);
 
-                Debug.Log("既にカード生成");
             }
+
         }
-
-
     }
     public void OnLeftButtonClick()
     {
@@ -105,6 +101,7 @@ public class TwoPickUI : MonoBehaviour
         List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(TwoPickModeManager.Instance.pickProgress.SelectedCards);
 
         leftCards.Clear();
+        rightCards.Clear();
         pickCount.text = TwoPickModeManager.Instance.GetPickCount().ToString();
         //最後は生成をせずにする
         TwoPickModeManager.Instance.OnLeftButtonClick(selectedCards);
@@ -120,13 +117,18 @@ public class TwoPickUI : MonoBehaviour
         DisableButtons();
 
         TwoPickModeManager.Instance.pickProgress.SelectedCards.AddRange(rightCards);
+        TwoPickModeManager.Instance.PickCountUp();
+
+        List<int> selectedCards = TwoPickModeManager.Instance.pickProgress.GetSelectedCardsSortedById(TwoPickModeManager.Instance.pickProgress.SelectedCards);
+
+        rightCards.Clear();
         leftCards.Clear();
+        pickCount.text = TwoPickModeManager.Instance.GetPickCount().ToString();
 
         //選択されたカードを進捗に追加
-        TwoPickModeManager.Instance.PickCountUp();
-        TwoPickModeManager.Instance.OnRightButtonClick();
-        //UI更新
-        //既定回数に達したら終了
+        TwoPickModeManager.Instance.OnRightButtonClick(selectedCards);
+
+        PickEnd();
     }
 
     void PickEnd()

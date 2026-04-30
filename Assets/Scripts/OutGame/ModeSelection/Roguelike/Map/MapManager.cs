@@ -116,7 +116,6 @@ public class MapManager : MonoBehaviour
     private void OnNodeClicked(NodeData nodeData)
     {
         if (!selectableNodes.Contains(nodeData)) return;
-        //TODO：続き
         gameState.CurrentNode = nodeData;
         gameState.ClearedNodes.Add(nodeData);
 
