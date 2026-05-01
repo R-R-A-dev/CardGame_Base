@@ -5,8 +5,10 @@ public class TwoPickSelectionPanel : MonoBehaviour
     [SerializeField] GameObject ConfirmPanel;
     [SerializeField] private GameObject modeSelectPanel;
     [SerializeField] private GameObject twoPickPanel;
+    [SerializeField] private GameObject cardInfoPannel;
     public void StartPanelOpen()
     {
+        cardInfoPannel.SetActive(false);
         ConfirmPanel.SetActive(true);
     }
 

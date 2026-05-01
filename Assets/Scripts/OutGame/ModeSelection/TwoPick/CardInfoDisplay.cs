@@ -18,7 +18,7 @@ public class CardInfoDisplay : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-
+        if (Input.GetKeyDown(KeyCode.Mouse1)) return;
         GameObject clickedObject = eventData.pointerCurrentRaycast.gameObject;
         CardController card = clickedObject.GetComponent<CardController>();
         if (card != null)

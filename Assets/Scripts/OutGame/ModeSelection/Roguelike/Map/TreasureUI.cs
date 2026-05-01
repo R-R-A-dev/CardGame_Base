@@ -7,13 +7,19 @@ public class TreasureUI : MonoBehaviour
     [SerializeField] private GameObject cardRewardPanel;
     [SerializeField] private List<CardController> cardList;
     [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TreasureCardSelectPanel selectPanel;
+    [SerializeField] private TreasureData treasureData; // 選択枚数取得用
 
     private RoguelikeGameState gameState;
 
     public void Open(TreasureData data, RoguelikeGameState state)
     {
+        treasureData = data;
         gameState = state;
         gameObject.SetActive(true);
+
+        // フラグON・選択枚数をSOから取得
+        selectPanel.SetTreasureMode(true, data.cardCount);
 
         // ゴールド獲得
         if (data.goldAmount > 0)
@@ -30,9 +36,23 @@ public class TreasureUI : MonoBehaviour
         CardDisplay(cards);
     }
 
-    public void OnCardSelected(int cardId)
+    // 複数枚対応に変更
+    public void OnCardSelected(List<int> cardIds)
     {
-        gameState.CurrentDeck.Add(cardId);
+        foreach (int cardId in cardIds)
+            gameState.CurrentDeck.Add(cardId);
+
+        Close();
+    }
+
+    private void Close()
+    {
+        foreach (var card in cardList)
+            card.gameObject.SetActive(false);
+
+        // フラグOFF
+        selectPanel.SetTreasureMode(false, 0);
+
         gameObject.SetActive(false);
         RoguelikeManager.Instance.ReturnToMap();
     }
@@ -44,11 +64,16 @@ public class TreasureUI : MonoBehaviour
 
     private void CardDisplay(List<int> id)
     {
-        //init関数でidごとに設定
+        foreach (var card in cardList)
+            card.gameObject.SetActive(false);
+
         for (int i = 0; i < id.Count; i++)
         {
+            if (i >= cardList.Count) break;
             cardList[i].gameObject.SetActive(true);
             cardList[i].Init(id[i], false);
         }
     }
 }
+
+//TODO:生成内容の確認　選択済みのカードの保持方法　デッキリストへの追加configへの追加確認

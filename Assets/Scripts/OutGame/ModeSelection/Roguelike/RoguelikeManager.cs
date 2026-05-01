@@ -18,6 +18,8 @@ public class RoguelikeManager : MonoBehaviour
 
     [SerializeField] private CardRewardPanel cardRewardPanel;
 
+    [SerializeField] private GameObject treasureCardSelectPanel;
+
     private RoguelikeGameState gameState;
     private RoguelikeStageData currentStageData;
     private int currentMapIndex = 0;
@@ -65,6 +67,8 @@ public class RoguelikeManager : MonoBehaviour
     /// <param name="config"></param>
     public void StartRoguelike(RoguelikeStartConfig config)
     {
+        treasureCardSelectPanel.SetActive(false);
+
         currentStageData = stageData[config.StageConfig.StageId];
         currentMapIndex = 0;
 
