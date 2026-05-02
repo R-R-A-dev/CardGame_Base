@@ -8,13 +8,11 @@ public class TreasureUI : MonoBehaviour
     [SerializeField] private List<CardController> cardList;
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private TreasureCardSelectPanel selectPanel;
-    [SerializeField] private TreasureData treasureData; // 選択枚数取得用
 
     private RoguelikeGameState gameState;
 
     public void Open(TreasureData data, RoguelikeGameState state)
     {
-        treasureData = data;
         gameState = state;
         gameObject.SetActive(true);
 
@@ -76,4 +74,4 @@ public class TreasureUI : MonoBehaviour
     }
 }
 
-//TODO:生成内容の確認　選択済みのカードの保持方法　デッキリストへの追加configへの追加確認
+//TODO:押した後にデッキに加算と次のマスが表示

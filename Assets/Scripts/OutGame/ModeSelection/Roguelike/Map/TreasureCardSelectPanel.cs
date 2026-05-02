@@ -49,7 +49,8 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
         GameObject clickedObject = eventData.pointerCurrentRaycast.gameObject;
         CardController card = clickedObject.GetComponent<CardController>();
 
-        if (card == null) return;
+        if (card == null)  return; 
+
 
         // 右クリック：詳細パネル表示（モード問わず）
         if (eventData.button == PointerEventData.InputButton.Right)
@@ -61,25 +62,42 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
         // 左クリック：TreasureModeの時のみカード選択
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (!isTreasureMode) return; // フラグがOFFなら処理しない
+            if (!isTreasureMode) return;
 
-            // 既に選択済みなら選択解除
-            if (selectedCardIds.Contains(card.model.no))
+
+            // 既に選択済みか判定（CardControllerの参照で比較）
+            if (selectedCards.Contains(card))
             {
+                // 選択解除
+                Transform[] allChildren = card.GetComponentsInChildren<Transform>(true);
+                foreach (Transform child in allChildren)
+                {
+                    if (child.name == "SelectedPanel")
+                    {
+                        child.gameObject.SetActive(false);
+                        break;
+                    }
+                }
                 selectedCardIds.Remove(card.model.no);
                 selectedCards.Remove(card);
             }
             else if (selectedCardIds.Count < maxSelectCount)
             {
-                // 上限未満なら選択追加
+                // 選択追加
+                Transform[] allChildren = card.GetComponentsInChildren<Transform>(true);
+                foreach (Transform child in allChildren)
+                {
+                    if (child.name == "SelectedPanel")
+                    {
+                        child.gameObject.SetActive(true);
+                        break;
+                    }
+                }
                 selectedCardIds.Add(card.model.no);
                 selectedCards.Add(card);
-                OpenInfoPanel(card);
             }
 
             UpdateSelectedCountText();
-
-            // 規定枚数選択で確定ボタン有効化
             cardGetButton.interactable = selectedCardIds.Count == maxSelectCount;
         }
     }
