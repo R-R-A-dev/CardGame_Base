@@ -89,7 +89,7 @@ public class MapManager : MonoBehaviour
     {
         foreach (MapRowData row in mapData.rows)
             foreach (NodeConnection connection in row.connections)
-                if (connection.fromNode == currentNode)
+                if (connection.fromNode == currentNode) 
                     return new List<NodeData>(connection.toNodes);
 
         return new List<NodeData> { mapData.bossNode };

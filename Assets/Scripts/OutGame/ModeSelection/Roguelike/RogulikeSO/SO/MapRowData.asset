@@ -20,4 +20,5 @@ MonoBehaviour:
   connections:
   - fromNode: {fileID: 11400000, guid: 43638fd87c3c316468b9e08be400aa28, type: 2}
     toNodes:
-    - {fileID: 11400000, guid: d6e4f895108f53a49ae8e6e70e46d9af, type: 2}
+    - {fileID: 11400000, guid: b4170a17e5f77eb4fbea27b35fdf7968, type: 2}
+    - {fileID: 11400000, guid: 7836dcb345788634c84636c14a05f13e, type: 2}

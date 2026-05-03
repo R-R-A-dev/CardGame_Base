@@ -117,7 +117,7 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
         selectedCountText.text = $"{selectedCardIds.Count} / {maxSelectCount}枚選択中";
     }
 
-    private void OnCardGetButtonClick()
+    public void OnCardGetButtonClick()
     {
         if (selectedCardIds.Count != maxSelectCount) return;
 

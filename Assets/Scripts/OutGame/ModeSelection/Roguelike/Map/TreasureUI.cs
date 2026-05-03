@@ -74,4 +74,4 @@ public class TreasureUI : MonoBehaviour
     }
 }
 
-//TODO:押した後にデッキに加算と次のマスが表示
+//TODO:他のマスを押した結果実装

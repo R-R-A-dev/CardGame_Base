@@ -211700,7 +211700,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1333048931}
         m_TargetAssemblyTypeName: TreasureCardSelectPanel, Assembly-CSharp
-        m_MethodName: DecideCard
+        m_MethodName: OnCardGetButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -283704,12 +283704,6 @@ MonoBehaviour:
     nodeUIs:
     - {fileID: 110864082}
     - {fileID: 302531069}
-  - rowName: 
-    nodeUIs:
-    - {fileID: 351664460}
-  - rowName: 
-    nodeUIs:
-    - {fileID: 89317332}
   statusUI: {fileID: 1408414997}
 --- !u!1 &2052848590
 GameObject:
