@@ -15,16 +15,18 @@ public class RestUI : MonoBehaviour
     {
         restData = data;
         gameState = state;
-        gameObject.SetActive(true);
+        OnRestButtonClick();
 
-        // 回復量表示
-        int healAmount = data.isPercentageHeal
-            ? Mathf.FloorToInt(state.MaxHP * data.healPercentage / 100f)
-            : data.healAmount;
-        healAmountText.text = $"HP {healAmount} 回復";
+        //gameObject.SetActive(true);
 
-        // カード強化ボタンの表示切替
-        upgradeButton.gameObject.SetActive(data.canUpgradeCard);
+        //// 回復量表示
+        //int healAmount = data.isPercentageHeal
+        //    ? Mathf.FloorToInt(state.MaxHP * data.healPercentage / 100f)
+        //    : data.healAmount;
+        //healAmountText.text = $"HP {healAmount} 回復";
+
+        //// カード強化ボタンの表示切替
+        //upgradeButton.gameObject.SetActive(data.canUpgradeCard);
     }
 
     // 休憩ボタン押下
@@ -35,7 +37,7 @@ public class RestUI : MonoBehaviour
             : restData.healAmount;
 
         gameState.CurrentHP = Mathf.Min(gameState.MaxHP, gameState.CurrentHP + heal);
-        Close();
+        //Close();
     }
 
     private void Close()

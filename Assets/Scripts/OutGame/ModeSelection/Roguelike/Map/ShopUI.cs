@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class ShopUI : MonoBehaviour
 {
-    [SerializeField] private Transform cardListParent;
+    [SerializeField] private GameObject shopPanel;
+    [SerializeField] private List<CardController> cardList;
     [SerializeField] private ShopCardItem cardItemPrefab;
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private Button closeButton;
@@ -27,22 +28,22 @@ public class ShopUI : MonoBehaviour
         gameObject.SetActive(true);
         goldText.text = $"G: {state.Gold}";
 
-        foreach (Transform child in cardListParent)
-            Destroy(child.gameObject);
-        spawnedItems.Clear();
+        //foreach (Transform child in cardListParent)
+        //    Destroy(child.gameObject);
+        //spawnedItems.Clear();
 
-        List<int> cards = data.shopCardList.Count > 0
-            ? data.shopCardList
-            : GetRandomCards(data.shopCardCount);
+        //List<int> cards = data.shopCardList.Count > 0
+        //    ? data.shopCardList
+        //    : GetRandomCards(data.shopCardCount);
 
-        foreach (int cardId in cards)
-        {
-            ShopCardItem item = Instantiate(cardItemPrefab, cardListParent);
-            int price = Random.Range(data.cardPriceMin, data.cardPriceMax);
-            item.Setup(cardId, price, OnCardBought, OnDetailRequested);
-            item.RefreshBuyable(state.Gold);
-            spawnedItems.Add(item);
-        }
+        //foreach (int cardId in cards)
+        //{
+        //    ShopCardItem item = Instantiate(cardItemPrefab, cardListParent);
+        //    int price = Random.Range(data.cardPriceMin, data.cardPriceMax);
+        //    item.Setup(cardId, price, OnCardBought, OnDetailRequested);
+        //    item.RefreshBuyable(state.Gold);
+        //    spawnedItems.Add(item);
+        //}
     }
 
     private void OnCardBought(int cardId, int price)
@@ -71,3 +72,6 @@ public class ShopUI : MonoBehaviour
         return new List<int>();
     }
 }
+/*カードの表示　購入処理　何も購入しない処理
+ *戦闘報酬と宝箱の区別
+*/
