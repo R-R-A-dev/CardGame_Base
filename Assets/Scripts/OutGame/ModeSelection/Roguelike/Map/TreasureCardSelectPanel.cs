@@ -49,9 +49,9 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
         GameObject clickedObject = eventData.pointerCurrentRaycast.gameObject;
         CardController card = clickedObject.GetComponent<CardController>();
 
-        if (card == null)  return; 
-
-
+        if (card == null) return;
+        if (!isTreasureMode) return;
+        
         // 右クリック：詳細パネル表示（モード問わず）
         if (eventData.button == PointerEventData.InputButton.Right)
         {
@@ -62,9 +62,6 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
         // 左クリック：TreasureModeの時のみカード選択
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (!isTreasureMode) return;
-
-
             // 既に選択済みか判定（CardControllerの参照で比較）
             if (selectedCards.Contains(card))
             {

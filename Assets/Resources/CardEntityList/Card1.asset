@@ -19,6 +19,7 @@ MonoBehaviour:
   cost: 1
   effectDmg: 0
   effectHeal: 0
+  price: 10
   description: 
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}

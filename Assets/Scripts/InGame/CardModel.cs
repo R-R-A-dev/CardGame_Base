@@ -12,6 +12,7 @@ public class CardModel
     public int effectDmg;
     public int effectHeal;
     public int cost;
+    public int price;
     public string description;
     public float attackTime = 0f;
     public Sprite icon;
@@ -53,6 +54,7 @@ public class CardModel
         effectHeal = cardEntity.effectHeal;
         cost = cardEntity.cost;
         icon = cardEntity.icon;
+        price = cardEntity.price;
         attackTime = cardEntity.attackTime;
         attackType = cardEntity.attackType;
         rare = cardEntity.rare;

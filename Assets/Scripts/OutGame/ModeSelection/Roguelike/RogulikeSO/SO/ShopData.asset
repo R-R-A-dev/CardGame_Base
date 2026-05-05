@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 831fda86c6626794397235ff4c5e7496, type: 3}
   m_Name: ShopData
   m_EditorClassIdentifier: 
-  shopCardCount: 0
+  shopCardCount: 5
   shopCardList: 0100000001000000010000000100000001000000
   cardPriceMin: 0
   cardPriceMax: 0

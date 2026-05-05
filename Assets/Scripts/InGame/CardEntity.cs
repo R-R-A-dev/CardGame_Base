@@ -11,6 +11,7 @@ public class CardEntity : ScriptableObject
     public int cost;
     public int effectDmg;
     public int effectHeal;
+    public int price;
     [TextArea] public string description;
     public AudioClip summonAudio;
     public AudioClip summonAbilityAudio;

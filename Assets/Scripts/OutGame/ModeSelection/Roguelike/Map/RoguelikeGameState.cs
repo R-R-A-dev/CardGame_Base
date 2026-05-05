@@ -18,9 +18,10 @@ public class RoguelikeGameState
     {
         MaxHP = stageData.playerInitialHP;
         CurrentHP = MaxHP;
-        Gold = 0;
+        Gold = 50;
         CurrentDeck = new List<int>(config.DeckId);
         CurrentStageData = stageData;
         CurrentMapIndex = 0;
     }
 }
+

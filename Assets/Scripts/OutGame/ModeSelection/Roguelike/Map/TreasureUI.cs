@@ -73,5 +73,3 @@ public class TreasureUI : MonoBehaviour
         }
     }
 }
-
-//TODO:他のマスを押した結果実装
