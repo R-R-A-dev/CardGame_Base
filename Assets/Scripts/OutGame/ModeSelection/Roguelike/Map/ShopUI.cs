@@ -11,12 +11,8 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private ShopCardSelectPanel selectPanel;
 
     private RoguelikeGameState gameState;
-
-    // カードと価格の対応表
     private Dictionary<CardController, int> cardPriceMap
         = new Dictionary<CardController, int>();
-
-    // 購入済みカードのID一覧
     private List<int> purchasedCardIds = new List<int>();
 
     private void Start()
@@ -24,7 +20,7 @@ public class ShopUI : MonoBehaviour
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonClick);
 
-        // Actionを登録
+        // Actionを複数カード対応に変更
         selectPanel.OnCardBuyConfirmed = OnCardBuyConfirmed;
     }
 
@@ -38,84 +34,79 @@ public class ShopUI : MonoBehaviour
 
         goldText.text = $"G: {gameState.Gold}";
 
-        // カードを非表示にリセット
         foreach (var card in cardList)
             card.gameObject.SetActive(false);
 
-        // 販売カードリストを取得
         List<int> cards = data.shopCardList.Count > 0
             ? data.shopCardList
             : GetRandomCards(data.shopCardCount);
 
-        CardDisplay(cards);
-        selectPanel.SetShopMode(true, cardPriceMap);
-        //// カードを表示して価格を設定
-        //for (int i = 0; i < cards.Count; i++)
-        //{
-        //    if (i >= cardList.Count) break;
+        // カード表示と価格設定
+        for (int i = 0; i < cards.Count; i++)
+        {
+            if (i >= cardList.Count) break;
+            int price = Random.Range(data.cardPriceMin, data.cardPriceMax);
+            cardList[i].gameObject.SetActive(true);
+            cardList[i].Init(cards[i], false);
+            cardPriceMap[cardList[i]] = price;
+        }
 
-        //    int price = Random.Range(data.cardPriceMin, data.cardPriceMax);
-        //    cardList[i].gameObject.SetActive(true);
-        //    cardList[i].Init(cards[i], false);
-        //    cardPriceMap[cardList[i]] = price;
-        //}
-
-        // ShopModeをONに
-        //selectPanel.SetShopMode(true, cardPriceMap);
+        // 所持金も渡す
+        selectPanel.SetShopMode(true, cardPriceMap, gameState.Gold);
     }
 
-    private void OnCardBuyConfirmed(int cardId, int price)
+    // 複数カード購入処理
+    private void OnCardBuyConfirmed(List<int> cardIds, int totalPrice)
     {
-        // ゴールドが足りない場合は処理しない
-        if (gameState.Gold < price)
+        // 所持金チェック
+        if (gameState.Gold < totalPrice)
         {
-            Debug.Log("ゴールドが足りません");
+            Debug.Log("所持金が足りません");
             return;
         }
 
-        // 既に購入済みの場合は処理しない
-        if (purchasedCardIds.Contains(cardId))
-        {
-            Debug.Log("既に購入済みです");
-            return;
-        }
-
-        gameState.Gold -= price;
-        gameState.CurrentDeck.Add(cardId);
-        purchasedCardIds.Add(cardId);
-
+        gameState.Gold -= totalPrice;
         goldText.text = $"G: {gameState.Gold}";
 
-        // 購入済みカードを非表示
-        foreach (var kvp in cardPriceMap)
+        foreach (int cardId in cardIds)
         {
-            if (kvp.Key.model.no == cardId)
+            if (purchasedCardIds.Contains(cardId)) continue;
+
+            gameState.CurrentDeck.Add(cardId);
+            purchasedCardIds.Add(cardId);
+
+            // 購入済みカードを非表示
+            foreach (var kvp in cardPriceMap)
             {
-                kvp.Key.gameObject.SetActive(false);
-                break;
+                if (kvp.Key.model.no == cardId)
+                {
+                    kvp.Key.gameObject.SetActive(false);
+                    break;
+                }
             }
         }
+
+        // 所持金更新をパネルに通知
+        selectPanel.UpdateGold(gameState.Gold);
+        goldText.text = $"G: {gameState.Gold}";
     }
 
-private void OnCloseButtonClick()
-{
-    if (selectPanel.IsInfoPanelOpen)
+    private void OnCloseButtonClick()
     {
-        // 詳細パネルが開いていれば閉じるだけ
-        selectPanel.CloseInfoPanel();
-        return;
+        if (selectPanel.IsInfoPanelOpen)
+        {
+            selectPanel.CloseInfoPanel();
+            return;
+        }
+        Close();
     }
-
-    // 詳細パネルが閉じていればShopUIを閉じてマップへ
-    Close();
-}
 
     private void Close()
     {
         foreach (var card in cardList)
             card.gameObject.SetActive(false);
 
-        selectPanel.SetShopMode(false, null);
+        selectPanel.SetShopMode(false, null, 0);
         gameObject.SetActive(false);
         RoguelikeManager.Instance.ReturnToMap();
     }
@@ -123,18 +114,5 @@ private void OnCloseButtonClick()
     private List<int> GetRandomCards(int count)
     {
         return new List<int>();
-    }
-
-    private void CardDisplay(List<int> id)
-    {
-        foreach (var card in cardList)
-            card.gameObject.SetActive(false);
-
-        for (int i = 0; i < id.Count; i++)
-        {
-            if (i >= cardList.Count) break;
-            cardList[i].gameObject.SetActive(true);
-            cardList[i].Init(id[i], false);
-        }
     }
 }
