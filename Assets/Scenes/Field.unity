@@ -28376,7 +28376,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 830568300}
-  - {fileID: 1162235248}
   m_Father: {fileID: 483261774}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -51211,6 +51210,7 @@ RectTransform:
   - {fileID: 1911176370}
   - {fileID: 1484400865}
   - {fileID: 717131902}
+  - {fileID: 1162235248}
   - {fileID: 805380734}
   m_Father: {fileID: 830568300}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -198729,7 +198729,7 @@ GameObject:
   - component: {fileID: 1162235250}
   - component: {fileID: 1162235249}
   m_Layer: 5
-  m_Name: GoldText
+  m_Name: TotalGoldText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198742,17 +198742,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1162235247}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 158125457}
+  m_Father: {fileID: 296668764}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -361, y: 345}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -233.11237, y: 335.10608}
+  m_SizeDelta: {x: 455.7753, y: 69.7878}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1162235249
 MonoBehaviour:
@@ -228184,6 +228184,7 @@ MonoBehaviour:
   priceText: {fileID: 1014119232}
   cardBuyButton: {fileID: 618799945}
   closeInfoPanelButton: {fileID: 53108622}
+  totalPriceText: {fileID: 1162235249}
 --- !u!1 &1333193288
 GameObject:
   m_ObjectHideFlags: 0

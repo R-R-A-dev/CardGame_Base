@@ -45,11 +45,11 @@ public class ShopUI : MonoBehaviour
         for (int i = 0; i < cards.Count; i++)
         {
             if (i >= cardList.Count) break;
-            int price = Random.Range(data.cardPriceMin, data.cardPriceMax);
             cardList[i].gameObject.SetActive(true);
             cardList[i].Init(cards[i], false);
+            int price = cardList[i].model.price;
             cardPriceMap[cardList[i]] = price;
-        }
+        }//TODO：カードの価格はカードのSOにあるpriceを参照するように変更する
 
         // 所持金も渡す
         selectPanel.SetShopMode(true, cardPriceMap, gameState.Gold);
