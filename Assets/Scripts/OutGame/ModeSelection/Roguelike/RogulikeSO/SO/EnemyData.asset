@@ -16,4 +16,4 @@ MonoBehaviour:
   enemySprite: {fileID: 0}
   hp: 20
   initialMana: 1
-  enemyDeck: 
+  enemyDeck: 02000000020000000200000002000000020000000200000002000000020000000200000002000000

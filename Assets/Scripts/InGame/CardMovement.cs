@@ -274,6 +274,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         Vector3 nextPos = transform.position;
         summonCard.effect.StartThrow(trailTrans, 3f, prevPos, nextPos, 20);
         yield return new WaitForSeconds(0.3f);
+        if (summonCard.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
+            summonCard.SetCanAttack(true);
+        
         //到着したらカードを表示
         summonCard.view.ShowCard();
         //カメラを揺らす

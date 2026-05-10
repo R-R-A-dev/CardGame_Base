@@ -8,9 +8,11 @@ public class CardRewardPanel : MonoBehaviour
     [SerializeField] private Transform cardListParent;
     [SerializeField] private CardRewardItem cardItemPrefab;
     [SerializeField] private TextMeshProUGUI titleText;
-    [SerializeField] private Button confirmButton;          // 選択確定ボタン
+    [SerializeField] private TextMeshProUGUI goldRewardText;    // 獲得ゴールド表示
+    [SerializeField] private TextMeshProUGUI selectedCountText; // 選択枚数表示
+    [SerializeField] private Button confirmButton;
     [SerializeField] private CardRewardDetailPanel detailPanel;
-    [SerializeField] private CardRewardConfirmPanel confirmPanel; // 確認パネル
+    [SerializeField] private CardRewardConfirmPanel confirmPanel;
 
     private RoguelikeGameState gameState;
     private List<CardRewardItem> spawnedItems = new List<CardRewardItem>();
@@ -24,13 +26,32 @@ public class CardRewardPanel : MonoBehaviour
         selectedCardIds.Clear();
         gameObject.SetActive(true);
 
+        // お金を自動入手
+        int goldAmount = 0;
+        if (rewardData.hasGoldReward)
+        {
+            goldAmount = rewardData.isRandomGold
+                ? Random.Range(rewardData.goldMin, rewardData.goldMax)
+                : rewardData.goldFixed;
+
+            gameState.Gold += goldAmount;
+            goldRewardText.text = $"G +{goldAmount} 獲得！";
+            goldRewardText.gameObject.SetActive(true);
+        }
+        else
+        {
+            goldRewardText.gameObject.SetActive(false);
+        }
+
         titleText.text = $"カードを{maxSelectCount}枚選んでください";
         confirmButton.interactable = false;
+        UpdateSelectedCountText();
 
         foreach (Transform child in cardListParent)
             Destroy(child.gameObject);
         spawnedItems.Clear();
 
+        // 報酬カードを抽選して表示
         List<int> rewardCards = GetRewardCards(rewardData);
         foreach (int cardId in rewardCards)
         {
@@ -40,41 +61,33 @@ public class CardRewardPanel : MonoBehaviour
         }
     }
 
-    // カード選択時
     private void OnCardClicked(int cardId, CardRewardItem item)
     {
         if (selectedCardIds.Contains(cardId))
         {
-            // 選択解除
             selectedCardIds.Remove(cardId);
             item.SetSelected(false);
         }
         else if (selectedCardIds.Count < maxSelectCount)
         {
-            // 選択追加
             selectedCardIds.Add(cardId);
             item.SetSelected(true);
         }
 
-        // 規定枚数選択で確定ボタン有効化
         confirmButton.interactable = selectedCardIds.Count == maxSelectCount;
-        titleText.text = $"カードを{maxSelectCount}枚選んでください" +
-                         $"（{selectedCardIds.Count}/{maxSelectCount}）";
+        UpdateSelectedCountText();
     }
 
-    // カード詳細表示
     private void OnCardDetailClicked(int cardId)
     {
         detailPanel.Open(cardId);
     }
 
-    // 確定ボタン押下→確認パネルへ
     public void OnConfirmButtonClick()
     {
         confirmPanel.Open(selectedCardIds, OnConfirmed);
     }
 
-    // 確認パネルで「はい」押下
     private void OnConfirmed()
     {
         foreach (int cardId in selectedCardIds)
@@ -82,6 +95,12 @@ public class CardRewardPanel : MonoBehaviour
 
         gameObject.SetActive(false);
         RoguelikeManager.Instance.ReturnToMap();
+    }
+
+    private void UpdateSelectedCountText()
+    {
+        selectedCountText.text =
+            $"{selectedCardIds.Count} / {maxSelectCount}枚選択中";
     }
 
     private List<int> GetRewardCards(RewardData rewardData)

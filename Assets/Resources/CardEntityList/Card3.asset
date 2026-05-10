@@ -15,10 +15,11 @@ MonoBehaviour:
   no: 3
   name: test3
   hp: 10
-  at: 1
+  at: 20
   cost: 3
   effectDmg: 1
   effectHeal: 1
+  price: 0
   description: 
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
@@ -37,5 +38,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 0
+  abilities: 1
   targetCardID: 

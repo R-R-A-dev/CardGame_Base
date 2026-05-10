@@ -474,26 +474,17 @@ public class CardController : MonoBehaviour
 
     public void SetAbility(CardController card)
     {
-        if (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE))
-        {
-            SetCanAttack(true);
-        }
         if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
-        {
             card.model.isDamageNullifyOnce = true;
-        }
+        
         if (card.model.abilities.HasFlag(ABILITIES.DOUBLE_ACTION))
-        {
             card.model.isDoubleAction = true;
-        }
+        
         if (card.model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
-        {
             card.model.isStatsUpOnAttack = true;
-        }
+        
         if (card.model.abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET))
-        {
-            card.model.isDestroyer = true;
-        }
+            card.model.isDestroyer = true;   
     }
 
     public void UseAbilitiesTo(CardController target = null)

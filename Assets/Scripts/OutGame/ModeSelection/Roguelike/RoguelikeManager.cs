@@ -20,6 +20,8 @@ public class RoguelikeManager : MonoBehaviour
 
     [SerializeField] private GameObject treasureCardSelectPanel;
 
+    [SerializeField] private BattleRewardUI battleRewardUI;
+
     private RoguelikeGameState gameState;
     private RoguelikeStageData currentStageData;
     private int currentMapIndex = 0;
@@ -31,26 +33,25 @@ public class RoguelikeManager : MonoBehaviour
 
     private void Start()
     {
-        // 最初は全て非アクティブ
+        // 戦闘シーンから戻ってきた場合
+        if (RoguelikeSession.GameState != null)
+        {
+            gameState = RoguelikeSession.GameState;
+            currentStageData = gameState.CurrentStageData;
+            currentMapIndex = gameState.CurrentMapIndex;
+
+            if (RoguelikeSession.IsBattleWin)
+                OnBattleWin();      // 報酬パネルを開く
+            else
+                OnGameOver();       // ゲームオーバー処理
+
+            RoguelikeSession.Clear();
+            return;
+        }
+
+        // 通常起動時
         //deckAndStageSelectUI.gameObject.SetActive(false);
         //mapUI.Hide();
-        // 戦闘から戻ってきた場合
-        /*        if (RoguelikeSession.GameState != null)
-                {
-                    gameState = RoguelikeSession.GameState;
-                    currentStageData = RoguelikeSession.GameState.CurrentStageData;
-                    currentMapIndex = RoguelikeSession.GameState.CurrentMapIndex;
-
-                    // 勝利か敗北かで分岐
-                    if (RoguelikeSession.IsBattleWin)
-                        OnBattleWin();
-                    else
-                        OnGameOver();
-
-                    // セッションをリセット
-                    RoguelikeSession.Clear();
-                    return;
-                }*/
     }
 
     // ========================================
@@ -104,7 +105,7 @@ public class RoguelikeManager : MonoBehaviour
                 RoguelikeSession.CurrentNode = nodeData;
                 RoguelikeSession.GameState = gameState;
                 RoguelikeSession.BattleModifiers = nodeData.modifiers;
-                SceneManager.LoadScene("BattleScene");
+                SceneManager.LoadScene("Game");
                 break;
 
             case StageType.REST:
@@ -231,7 +232,11 @@ public class RoguelikeManager : MonoBehaviour
         else
         {
             ReturnToMap();
+            return;
         }
+        //mapUI.gameObject.SetActive(false);
+        battleRewardUI.Open(node.rewardData, gameState);
     }
+
 
 }

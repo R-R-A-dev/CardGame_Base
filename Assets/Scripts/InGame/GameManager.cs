@@ -845,8 +845,21 @@ public class GameManager : MonoBehaviour
         if (player.heroHp <= 0 || enemy.heroHp <= 0)
         {
             ShowResultPanel(player.heroHp);
+            ReturnRogueLikeMap();
         }
     }
+
+    void ReturnRogueLikeMap()
+    {
+        if (player.heroHp <= 0)
+        {
+            SceneManager.LoadScene("Field");
+        } else if (enemy.heroHp <= 0)
+        {
+            SceneManager.LoadScene("Field");
+        }
+    }
+
     void ShowResultPanel(int heroHp)
     {
         StopAllCoroutines();
