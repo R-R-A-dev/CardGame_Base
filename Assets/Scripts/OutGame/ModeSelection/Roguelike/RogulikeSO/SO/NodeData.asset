@@ -16,7 +16,7 @@ MonoBehaviour:
   stageType: 0
   modifiers: []
   enemyData: {fileID: 11400000, guid: 59824986887e5194389795ac89748d6f, type: 2}
-  rewardData: {fileID: 0}
+  rewardData: {fileID: 11400000, guid: c530fb5bce225f745b525c4927385a40, type: 2}
   restData: {fileID: 0}
   shopData: {fileID: 0}
   treasureData: {fileID: 0}

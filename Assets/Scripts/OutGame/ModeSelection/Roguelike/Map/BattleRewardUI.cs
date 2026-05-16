@@ -5,11 +5,18 @@ using UnityEngine.UI;
 
 public class BattleRewardUI : MonoBehaviour
 {
+    [SerializeField] private GameObject cardInfoPanel;
     [SerializeField] private List<CardController> cardList;
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private BattleRewardCardSelectPanel selectPanel;
 
     private RoguelikeGameState gameState;
+
+    private void Start()
+    {
+        // ActionにOnCardSelectedを登録
+        selectPanel.OnCardsConfirmed = OnCardSelected;
+    }
 
     public void Open(RewardData data, RoguelikeGameState state)
     {
@@ -87,5 +94,10 @@ public class BattleRewardUI : MonoBehaviour
             cardList[i].gameObject.SetActive(true);
             cardList[i].Init(ids[i], false);
         }
+    }
+
+    public void CloseInfoPanel()
+    {
+        cardInfoPanel.SetActive(false);
     }
 }

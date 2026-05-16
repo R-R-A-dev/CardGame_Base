@@ -16,7 +16,6 @@ public class RoguelikeManager : MonoBehaviour
     [SerializeField] private EventUI eventUI;
     [SerializeField] private CardLossUI cardLossUI;
 
-    [SerializeField] private CardRewardPanel cardRewardPanel;
 
     [SerializeField] private GameObject treasureCardSelectPanel;
 
@@ -36,10 +35,10 @@ public class RoguelikeManager : MonoBehaviour
         // 戦闘シーンから戻ってきた場合
         if (RoguelikeSession.GameState != null)
         {
+
             gameState = RoguelikeSession.GameState;
             currentStageData = gameState.CurrentStageData;
             currentMapIndex = gameState.CurrentMapIndex;
-
             if (RoguelikeSession.IsBattleWin)
                 OnBattleWin();      // 報酬パネルを開く
             else
@@ -49,7 +48,6 @@ public class RoguelikeManager : MonoBehaviour
             return;
         }
 
-        // 通常起動時
         //deckAndStageSelectUI.gameObject.SetActive(false);
         //mapUI.Hide();
     }
@@ -179,6 +177,7 @@ public class RoguelikeManager : MonoBehaviour
     // ========================================
     public void OnGameOver()
     {
+
         mapUI.Hide();
         // GameOverUI.Instance.Open();
         Debug.Log("ゲームオーバー");
@@ -222,21 +221,23 @@ public class RoguelikeManager : MonoBehaviour
     }
     public void OnBattleWin()
     {
+
         // 報酬パネルを開く
         NodeData node = RoguelikeSession.CurrentNode;
         if (node.rewardData != null)
         {
-            mapUI.Hide();
-            cardRewardPanel.Open(node.rewardData, gameState);
+            Debug.Log("報酬パネルを開く");
+            //mapUI.Hide();
+            mapUI.gameObject.SetActive(true);
+            battleRewardUI.Open(node.rewardData, gameState);
         }
         else
         {
+            Debug.Log("報酬なし、マップへ戻る");
             ReturnToMap();
             return;
         }
-        //mapUI.gameObject.SetActive(false);
-        battleRewardUI.Open(node.rewardData, gameState);
     }
-
-
 }
+
+//TODO: 敵の頭を攻撃するときに自分のアイコンも判定が出ている

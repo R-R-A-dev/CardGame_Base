@@ -856,6 +856,7 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene("Field");
         } else if (enemy.heroHp <= 0)
         {
+            RoguelikeSession.IsBattleWin = true;
             SceneManager.LoadScene("Field");
         }
     }
