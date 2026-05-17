@@ -239,5 +239,3 @@ public class RoguelikeManager : MonoBehaviour
         }
     }
 }
-
-//TODO: 敵の頭を攻撃するときに自分のアイコンも判定が出ている
