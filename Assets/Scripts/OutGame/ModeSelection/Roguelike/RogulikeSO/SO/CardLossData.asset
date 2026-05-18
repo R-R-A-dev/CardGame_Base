@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bded644787af95b4697bb71d5ca81214, type: 3}
   m_Name: CardLossData
   m_EditorClassIdentifier: 
-  cardLossCount: 0
+  cardLossCount: 1
   isPlayerChoice: 0
   description: 

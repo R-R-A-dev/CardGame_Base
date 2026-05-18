@@ -188,7 +188,12 @@ public class RoguelikeManager : MonoBehaviour
     // ========================================
     private void ApplyDamage(DamageNodeData damageData)
     {
-        if (damageData == null) return;
+        if (damageData == null)
+        {
+            Debug.LogWarning("DamageNodeDataがnullです");
+            ReturnToMap();
+            return;
+        }
 
         int damage = damageData.isPercentageDamage
             ? Mathf.FloorToInt(gameState.MaxHP * damageData.damagePercentage / 100f)
@@ -196,15 +201,15 @@ public class RoguelikeManager : MonoBehaviour
 
         gameState.CurrentHP = Mathf.Max(0, gameState.CurrentHP - damage);
 
-        // HP0でゲームオーバー
+        Debug.Log($"ダメージ: {damage} / 残りHP: {gameState.CurrentHP}");
+
         if (gameState.CurrentHP <= 0)
         {
             OnGameOver();
             return;
         }
 
-        // ダメージ後はそのままマップへ戻る
-        OpenMap();
+        ReturnToMap();
     }
 
     // ========================================
@@ -238,4 +243,4 @@ public class RoguelikeManager : MonoBehaviour
             return;
         }
     }
-}
+}//TODO:バフデバフの適用

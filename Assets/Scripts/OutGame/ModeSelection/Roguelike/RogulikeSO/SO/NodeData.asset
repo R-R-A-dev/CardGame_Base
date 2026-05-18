@@ -13,12 +13,18 @@ MonoBehaviour:
   m_Name: NodeData
   m_EditorClassIdentifier: 
   nodeId: 
-  stageType: 3
-  modifiers: []
+  stageType: 8
+  modifiers:
+  - modifierType: 0
+    value: 0
+    isPercentage: 0
+    applyToPlayer: 0
+    applyToEnemy: 0
+    description: 
   enemyData: {fileID: 0}
   rewardData: {fileID: 0}
   restData: {fileID: 0}
   shopData: {fileID: 0}
-  treasureData: {fileID: 11400000, guid: dc74973d46f3d0f48bc5f8fff88ed93a, type: 2}
+  treasureData: {fileID: 0}
   damageData: {fileID: 0}
-  cardLossData: {fileID: 0}
+  cardLossData: {fileID: 11400000, guid: ad1156dc59194914091d299f63acb0e4, type: 2}

@@ -15,20 +15,13 @@ public class CardLossUI : MonoBehaviour
         cardLossData = data;
         gameState = state;
         lossCount = data.cardLossCount;
-        gameObject.SetActive(true);
+        //gameObject.SetActive(true);
 
-        descText.text = data.description;
+        //descText.text = data.description;
 
-        if (data.isPlayerChoice)
-        {
-            // プレイヤーがカードを選んで捨てる
-            ShowDeckForSelection();
-        }
-        else
-        {
-            // ランダムで失う
-            RemoveRandomCards();
-        }
+        // ランダムで失う
+        RemoveRandomCards();
+
     }
 
     private void ShowDeckForSelection()
@@ -38,12 +31,21 @@ public class CardLossUI : MonoBehaviour
 
     private void RemoveRandomCards()
     {
-        for (int i = 0; i < lossCount; i++)
+        // デッキの枚数がcardLossCount未満なら処理しない
+        if (gameState.CurrentDeck.Count < cardLossData.cardLossCount)
         {
-            if (gameState.CurrentDeck.Count == 0) break;
+            Debug.Log($"デッキ枚数が足りないため消失しません。" +
+                      $"デッキ:{gameState.CurrentDeck.Count}枚 / 必要:{cardLossData.cardLossCount}枚");
+            Close();
+            return;
+        }
+
+        for (int i = 0; i < cardLossData.cardLossCount; i++)
+        {
             int index = Random.Range(0, gameState.CurrentDeck.Count);
             gameState.CurrentDeck.RemoveAt(index);
         }
+
         Close();
     }
 

@@ -20,6 +20,8 @@ public class RoguelikeGameState
         CurrentHP = MaxHP;
         Gold = 50;
         CurrentDeck = new List<int>(config.DeckId);
+        CurrentDeck.Add(1);
+        CurrentDeck.Add(1);
         CurrentStageData = stageData;
         CurrentMapIndex = 0;
     }
