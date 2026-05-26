@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
   m_Name: Card2
   m_EditorClassIdentifier: 
-  no: 2
+  no: 1
   name: test2
   hp: 10
   at: 1
   cost: 2
   effectDmg: 1
   effectHeal: 1
+  price: 0
   description: test
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}

@@ -118,5 +118,3 @@ public class BattleRewardCardSelectPanel : MonoBehaviour, IPointerDownHandler
         cardInfoPanel.SetActive(false);
     }
 }
-
-//TODO:残り damage cardloss

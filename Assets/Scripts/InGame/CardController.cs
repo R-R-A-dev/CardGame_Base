@@ -44,7 +44,51 @@ public class CardController : MonoBehaviour
     public void Init(int cardID, bool isPlayer)
     {
         model = new CardModel(cardID, isPlayer);
+        ApplyRoguelike(model);
         view.SetCard(model);
+    }
+
+    void ApplyRoguelike(CardModel model)
+    {
+        if (RoguelikeSession.BattleModifiers == null ||
+            RoguelikeSession.BattleModifiers.Count == 0) return;
+
+        for (int i = 0; i < RoguelikeSession.BattleModifiers.Count; i++)
+        {
+            ParameterModifier modifier = RoguelikeSession.BattleModifiers[i];
+            switch (modifier.modifierType)
+            {
+                case ParameterModifierType.MANA_REDUCTION:
+                    model.cost -= modifier.value;
+                    if(model.cost<1)
+                        model.cost = 0;
+                    break;
+
+                case ParameterModifierType.MANA_BOOST:
+                    model.cost += modifier.value;
+                    break;
+
+                case ParameterModifierType.ATTACK_BOOST:
+                    model.at += modifier.value;
+                    break;
+
+                case ParameterModifierType.ATTACK_REDUCTION:
+                    model.at -= modifier.value;
+                    if(model.at<1)
+                        model.at = 0;
+                    break;
+
+                case ParameterModifierType.DEFENSE_BOOST:
+                    model.hp += modifier.value;
+                    break;
+
+                case ParameterModifierType.DEFENSE_REDUCTION:
+                    model.hp -= modifier.value;
+                    if (model.hp < 1)
+                        model.hp = 1;
+                    break;
+            }
+        }
     }
 
     public void EffectCardInit(CardModel effectModel)
@@ -476,15 +520,15 @@ public class CardController : MonoBehaviour
     {
         if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
             card.model.isDamageNullifyOnce = true;
-        
+
         if (card.model.abilities.HasFlag(ABILITIES.DOUBLE_ACTION))
             card.model.isDoubleAction = true;
-        
+
         if (card.model.abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK))
             card.model.isStatsUpOnAttack = true;
-        
+
         if (card.model.abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET))
-            card.model.isDestroyer = true;   
+            card.model.isDestroyer = true;
     }
 
     public void UseAbilitiesTo(CardController target = null)

@@ -94,6 +94,10 @@ public class RoguelikeManager : MonoBehaviour
     /// <param name="nodeData"></param>
     public void OnNodeSelected(NodeData nodeData)
     {
+        if (nodeData.modifiers != null && nodeData.modifiers.Count > 0)
+            ApplyModifiers(nodeData.modifiers);
+
+
         switch (nodeData.stageType)
         {
             case StageType.NORMAL_BATTLE:
@@ -103,6 +107,8 @@ public class RoguelikeManager : MonoBehaviour
                 RoguelikeSession.CurrentNode = nodeData;
                 RoguelikeSession.GameState = gameState;
                 RoguelikeSession.BattleModifiers = nodeData.modifiers;
+                ModeConfigManager.Instance.currentGameMode = GameMode.ROGUELIKE;
+                //RoguelikeSession.GameState.CurrentDeck
                 SceneManager.LoadScene("Game");
                 break;
 
@@ -124,6 +130,51 @@ public class RoguelikeManager : MonoBehaviour
 
             case StageType.CARD_LOSS:
                 cardLossUI.Open(nodeData.cardLossData, gameState);
+                break;
+        }
+    }
+
+    // RoguelikeManager
+    private void ApplyModifiers(List<ParameterModifier> modifiers)
+    {
+        foreach (ParameterModifier modifier in modifiers)
+        {
+            if (modifier.applyToPlayer)
+                ApplyModifierToPlayer(modifier);
+        }
+    }
+
+    private void ApplyModifierToPlayer(ParameterModifier modifier)
+    {
+        int value = modifier.isPercentage
+            ? Mathf.FloorToInt(gameState.MaxHP * modifier.value / 100f)
+            : modifier.value;
+
+        switch (modifier.modifierType)
+        {
+            case ParameterModifierType.HP_BOOST:
+                gameState.MaxHP += value;
+                gameState.CurrentHP += value;
+                break;
+            case ParameterModifierType.HP_REDUCTION:
+                gameState.MaxHP -= value;
+                //gameState.CurrentHP = Mathf.Min(gameState.CurrentHP, gameState.MaxHP);
+                break;
+            case ParameterModifierType.MANA_BOOST:
+                break;
+            case ParameterModifierType.MANA_REDUCTION:
+                break;
+            case ParameterModifierType.ATTACK_BOOST:
+                break;
+            case ParameterModifierType.ATTACK_REDUCTION:
+                break;
+            case ParameterModifierType.DEFENSE_BOOST:
+                break;
+            case ParameterModifierType.DEFENSE_REDUCTION:
+                break;
+            case ParameterModifierType.CARD_DRAW_BOOST:
+                break;
+            case ParameterModifierType.CARD_DRAW_REDUCTION:
                 break;
         }
     }

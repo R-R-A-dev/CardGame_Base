@@ -66,9 +66,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] BattleAudioManager globalAudioManager;
 
-
-
-    // シングルトン化（どこからでもアクセスできるようにする）
+    //TODO:ローグライクでの敵のデータの受け渡し
     public static GameManager instance;
     private void Awake()
     {
@@ -125,11 +123,18 @@ public class GameManager : MonoBehaviour
         }
         else if (ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
         {
-
+            player.Init(RoguelikeSession.GameState.CurrentDeck);
+            Debug.Log(RoguelikeSession.GameState.CurrentDeck.Count);
+            enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
+            uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+            uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+            TurnEndButtonText.text = "Decide";
+            StartCoroutine(SettingInitHand());
+            StartCoroutine(CountDownChangeCard());
         }
         else
         {
-            player.Init(new List<int>() { 2, 3, 3, 4, 3, 2, 1, 1 });
+            player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
             enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
 
             //player.deck = GameSession.SelectedDeck;
@@ -139,7 +144,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(SettingInitHand());
             StartCoroutine(CountDownChangeCard());
         }
-        
+
         StartCoroutine(WaitStartTurn());
     }
 
@@ -239,9 +244,10 @@ public class GameManager : MonoBehaviour
 
     public void ReduceManaCost(int cost, bool isPlayerCard)
     {
+
         if (isPlayerCard)
         {
-            player.manaCost -= cost;
+            enemy.manaCost -= cost;
         }
         else
         {
@@ -249,6 +255,7 @@ public class GameManager : MonoBehaviour
         }
         uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
     }
+
 
     public void Restart()
     {
@@ -400,7 +407,6 @@ public class GameManager : MonoBehaviour
         card.transform.localPosition = Vector3.zero;
         card.transform.localEulerAngles = Vector3.zero;
         card.transform.SetParent(card.transform.parent.parent);
-        //
         card.movement.DrawEffect(card);
     }
 
@@ -634,7 +640,7 @@ public class GameManager : MonoBehaviour
         isSummoning = true;
         EnemyTurnZone();
 
-        if(ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
+        if (ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
             //詰将棋モードの場合、ゲームオーバー処理
             Debug.Log("Lethal Puzzle Mode: Game Over on Turn Change");
@@ -854,11 +860,24 @@ public class GameManager : MonoBehaviour
         if (player.heroHp <= 0)
         {
             SceneManager.LoadScene("Field");
-        } else if (enemy.heroHp <= 0)
+        }
+        else if (enemy.heroHp <= 0)
         {
             RoguelikeSession.IsBattleWin = true;
+            DeckSetCards(player);
             SceneManager.LoadScene("Field");
         }
+    }
+
+    void DeckSetCards(GamePlayerManager player)
+    {
+        foreach (CardController card in playerHandTransform.GetComponentsInChildren<CardController>())
+            RoguelikeSession.GameState.CurrentDeck.Add(card.model.no);
+
+        foreach (CardController card in playerFieldTransform.GetComponentsInChildren<CardController>())
+            RoguelikeSession.GameState.CurrentDeck.Add(card.model.no);
+
+        RoguelikeSession.GameState.CurrentDeck = player.deck;
     }
 
     void ShowResultPanel(int heroHp)
