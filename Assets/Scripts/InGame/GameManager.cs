@@ -107,11 +107,11 @@ public class GameManager : MonoBehaviour
     {
         uiManager.HideResultPanel();
 
-        if (ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
+        if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
             ApplyLethalPuzzle();
         }
-        else if (ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
+        else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
             player.deck = GameSession.SelectedDeck;
             enemy.deck = GameSession.SelectedDeck;
@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(SettingInitHand());
             StartCoroutine(CountDownChangeCard());
         }
-        else if (ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
+        else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
         {
             player.Init(RoguelikeSession.GameState.CurrentDeck);
             Debug.Log(RoguelikeSession.GameState.CurrentDeck.Count);
