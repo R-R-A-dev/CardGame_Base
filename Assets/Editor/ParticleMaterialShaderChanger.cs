@@ -58,6 +58,7 @@ public class ParticleMaterialShaderChanger : EditorWindow
             Material mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null) continue;
 
+
             // テクスチャを事前に保存
             var savedTextures = new Dictionary<string, Texture>();
             Shader oldShader = mat.shader;
@@ -85,6 +86,12 @@ public class ParticleMaterialShaderChanger : EditorWindow
                     mat.SetTexture(kv.Key, kv.Value);
 
                 if (kv.Key == "_MainTex" && mat.HasProperty("_BaseMap"))
+                    mat.SetTexture("_BaseMap", kv.Value);
+                if (kv.Key == "MainTexture" && mat.HasProperty("_BaseMap"))
+                    mat.SetTexture("_BaseMap", kv.Value);
+
+                // ShaderGraphsのGUID形式プロパティ名 → _BaseMap へリマップ
+                if (kv.Key.StartsWith("Texture2D_") && mat.HasProperty("_BaseMap"))
                     mat.SetTexture("_BaseMap", kv.Value);
             }
 
