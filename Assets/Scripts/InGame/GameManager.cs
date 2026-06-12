@@ -73,7 +73,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] BattleAudioManager globalAudioManager;
 
-    //TODO:ターンや勝敗エフェクト　全体通して遊ぶ
+    //TODO:文字の出現時間大きさ　エフェクト表示調整　全体通して遊ぶ
     public static GameManager instance;
     private void Awake()
     {
