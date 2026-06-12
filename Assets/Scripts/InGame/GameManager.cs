@@ -43,6 +43,13 @@ public class GameManager : MonoBehaviour
     public CameraShake cameraShake;
     [SerializeField] Image selectingPanel;
 
+    [SerializeField] GameObject playerTurn;
+    [SerializeField] GameObject enemyTurn;
+    [SerializeField] GameObject winEffect;
+    [SerializeField] GameObject loseEffect;
+    [SerializeField] GameObject effectBack;
+
+
     [SerializeField] Transform playerDeck;
     [SerializeField] Transform enemyDeck;
 
@@ -66,7 +73,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] BattleAudioManager globalAudioManager;
 
-    //TODO:ローグライクでの敵のデータの受け渡し
+    //TODO:ターンや勝敗エフェクト　全体通して遊ぶ
     public static GameManager instance;
     private void Awake()
     {
@@ -77,6 +84,10 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
+        //effect.transform.SetParent(UIParticle.transform);
+        //UIParticle.particles.Add(effect);
+        //UIParticle.RefreshParticles();
+        //effect.transform.localPosition = Vector3.zero;
         StartGame();
     }
 
