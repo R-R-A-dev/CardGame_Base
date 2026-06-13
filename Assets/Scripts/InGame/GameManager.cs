@@ -84,10 +84,6 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        //effect.transform.SetParent(UIParticle.transform);
-        //UIParticle.particles.Add(effect);
-        //UIParticle.RefreshParticles();
-        //effect.transform.localPosition = Vector3.zero;
         StartGame();
     }
 
@@ -232,20 +228,24 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         bool startTurn = true;
         isSummoning = true;
+        effectBack.SetActive(true);
         BattleAudioManager.Instance.PlaySE("TurnChange");
         if (startTurn)
         {
+            playerTurn.SetActive(true);
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
             TurnEndButton.interactable = true;
         }
         else
         {
+            enemyTurn.SetActive(true);
             TurnEndButton.interactable = false;
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
         }
-
-
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(1.2f);
+        playerTurn.SetActive(false);
+        enemyTurn.SetActive(false);
+        effectBack.SetActive(false);
         isPlayerTurn = true;
         PlayerTurnZone();
         isSummoning = false;
@@ -650,25 +650,31 @@ public class GameManager : MonoBehaviour
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
         isSummoning = true;
         EnemyTurnZone();
+        effectBack.SetActive(true);
 
-        if (ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
+        if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
             //詰将棋モードの場合、ゲームオーバー処理
             Debug.Log("Lethal Puzzle Mode: Game Over on Turn Change");
         }
         if (!isPlayerTurn)
         {
+            playerTurn.SetActive(true);
             StartCoroutine(TurnChangeAnimateText("Player Turn"));
             TurnEndButton.interactable = true;
         }
         else
         {
+            enemyTurn.SetActive(true);
             TurnEndButton.interactable = false;
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
         }
         IsDraggFlgOff();
         BattleAudioManager.Instance.PlaySE("TurnChange");
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(1.2f);
+        effectBack.SetActive(false);
+        playerTurn.SetActive(false);
+        enemyTurn.SetActive(false);
 
         isSummoning = false;
         PlayerTurnZone();
@@ -963,7 +969,6 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator TurnChangeAnimateText(string text)
     {
-
         effectText.text = text;
         // 初期状態取得
         float startFontSize = effectText.fontSize;
@@ -987,7 +992,7 @@ public class GameManager : MonoBehaviour
         }
 
         // --- (2) 0.5秒で fontsize=130, alpha=255 ---
-        float duration2 = 1.4f;
+        float duration2 = 0.7f;
         elapsed = 0f;
 
         while (elapsed < duration2)
@@ -1002,7 +1007,7 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        float duration3 = 0.3f;
+        float duration3 = 0.2f;
         elapsed = 0f;
 
         while (elapsed < duration3)
