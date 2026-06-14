@@ -867,7 +867,7 @@ public class GameManager : MonoBehaviour
     {
         if (player.heroHp <= 0 || enemy.heroHp <= 0)
         {
-            ShowResultPanel(player.heroHp);
+            StartCoroutine(ShowResultPanel(player.heroHp));
             ReturnRogueLikeMap();
         }
     }
@@ -897,10 +897,20 @@ public class GameManager : MonoBehaviour
         RoguelikeSession.GameState.CurrentDeck = player.deck;
     }
 
-    void ShowResultPanel(int heroHp)
+    IEnumerator ShowResultPanel(int heroHp)
     {
         StopAllCoroutines();
         uiManager.ShowResultPanel(heroHp);
+        //TODO:勝利、敗北のエフェクト
+        effectBack.SetActive(true);
+        if (heroHp <= 0)
+            loseEffect.SetActive(true);
+        else if (heroHp > 0)
+            winEffect.SetActive(true);
+
+        yield return new WaitForSeconds(1.2f);
+        effectBack.SetActive(false);
+        //結果後の動作
     }
 
     public void SummonLightCenterOn()
