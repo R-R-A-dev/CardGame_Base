@@ -294,4 +294,4 @@ public class RoguelikeManager : MonoBehaviour
             return;
         }
     }
-}//TODO:バフデバフの適用
+}

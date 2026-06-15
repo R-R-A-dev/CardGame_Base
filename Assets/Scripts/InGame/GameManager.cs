@@ -73,7 +73,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] BattleAudioManager globalAudioManager;
 
-    //TODO:文字の出現時間大きさ　エフェクト表示調整　全体通して遊ぶ
     public static GameManager instance;
     private void Awake()
     {
@@ -866,11 +865,9 @@ public class GameManager : MonoBehaviour
     public void CheckHeroHP()
     {
         if (player.heroHp <= 0 || enemy.heroHp <= 0)
-        {
             StartCoroutine(ShowResultPanel(player.heroHp));
-            ReturnRogueLikeMap();
-        }
     }
+
 
     void ReturnRogueLikeMap()
     {
@@ -900,7 +897,7 @@ public class GameManager : MonoBehaviour
     IEnumerator ShowResultPanel(int heroHp)
     {
         StopAllCoroutines();
-        uiManager.ShowResultPanel(heroHp);
+        //uiManager.ShowResultPanel(heroHp);
         //TODO:勝利、敗北のエフェクト
         effectBack.SetActive(true);
         if (heroHp <= 0)
@@ -911,6 +908,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1.2f);
         effectBack.SetActive(false);
         //結果後の動作
+
+        ReturnRogueLikeMap();
     }
 
     public void SummonLightCenterOn()
