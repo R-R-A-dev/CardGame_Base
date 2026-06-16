@@ -896,21 +896,43 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ShowResultPanel(int heroHp)
     {
-        StopAllCoroutines();
+        // StopAllCoroutines();
+        yield return new WaitForSeconds(2f);
         //uiManager.ShowResultPanel(heroHp);
         //TODO:勝利、敗北のエフェクト
         effectBack.SetActive(true);
         if (heroHp <= 0)
+        {
             loseEffect.SetActive(true);
+            StartCoroutine(TurnChangeAnimateText("You Lose"));
+        }
         else if (heroHp > 0)
+        {
             winEffect.SetActive(true);
-
+            StartCoroutine(TurnChangeAnimateText("You Win"));
+        }
         yield return new WaitForSeconds(1.2f);
         effectBack.SetActive(false);
         //結果後の動作
-
-        ReturnRogueLikeMap();
+        ReturnMode();
     }
+
+    void ReturnMode()
+    {
+        if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
+        {
+            
+        }
+        else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
+        {
+            
+        }
+        else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
+        {
+            ReturnRogueLikeMap();
+        }
+    }
+
 
     public void SummonLightCenterOn()
     {
