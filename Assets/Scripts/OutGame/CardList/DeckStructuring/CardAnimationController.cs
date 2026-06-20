@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 public class CardAnimationController : MonoBehaviour
@@ -46,6 +47,7 @@ public class CardAnimationController : MonoBehaviour
             Debug.LogWarning("PlayMoveTo: target が指定されていません");
             return;
         }
+
         rectTransform.DOMove(target, duration).SetEase(ease);
     }
 

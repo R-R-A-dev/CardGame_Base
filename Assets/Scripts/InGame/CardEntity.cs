@@ -124,7 +124,7 @@ public enum SPELLS
     DESTROY_ENEMY_CARD = 64,         // 敵を一体倒す
     STEAL_ENEMY_CARD = 128,          // 敵のフィールドのカードを自分のフィールドのカードにする
     DRAW_CARDS = 256,                // カードを複数枚引く
-    SEARCH_SPECIFIC_UNIT = 512,      // 特定のユニットを手札にする
+    //SEARCH_SPECIFIC_UNIT = 512,      // 特定のユニットを手札にする
     SUMMON_SPECIFIC_UNIT = 1024,     // 特定のユニットをフィールドに出す
     EFFECT_SELECTION_FRIEND = 2048,  // 味方効果対象を選択
     EFFECT_SELECTION_ENEMY = 4096,   // 敵効果対象を選択

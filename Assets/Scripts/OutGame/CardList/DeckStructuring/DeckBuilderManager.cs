@@ -79,8 +79,5 @@ public class DeckBuilderManager : MonoBehaviour
         }
         SceneManager.LoadScene(1);
     }
-
-
-
 }
 

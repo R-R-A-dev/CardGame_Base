@@ -140,10 +140,10 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
-            enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
-
-            //player.deck = GameSession.SelectedDeck;
+            //player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
+            //enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
+            player.Init(GameSession.SelectedDeck);
+            enemy.Init(new List<int>(GameSession.SelectedDeck));
             uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
@@ -342,7 +342,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 4; i++)
         {
             //GiveCardToHand(player.deck, playerHandTransform);
             //GiveCardToHand(enemy.deck, enemyHandTransform);

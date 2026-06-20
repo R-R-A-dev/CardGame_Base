@@ -227,8 +227,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
             if (holdCard == null)
                 holdCard = Instantiate(gameObject, transform.root);
 
-            
-            Debug.Log(holdCard);
+
             holdCard.transform.position = transform.position;
             //クリックしたオブジェクトからholdCardに情報をコピー
             holdCard.GetComponent<OutGameCardList>().DragCardGen(GetComponent<OutGameCardList>());
@@ -269,8 +268,8 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
     IEnumerator CardEffectToDeck(Vector3 movePos, CardAnimationController cardAnimationController,
         OutGameCardList outGameCardList, int cardNum, CardDragHandler cardDragHandler)
     {
+
         holdCard = null;
-        DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
 
         //デッキのアニメーションカード生成　アニメーション
         GameObject beforeCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();
@@ -283,12 +282,23 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         beforeCard.GetComponent<CanvasGroup>().blocksRaycasts = false;
         GetComponent<CanvasGroup>().blocksRaycasts = false;
 
+        Transform originalParent = cardAnimationController.transform.parent;
+
+        // 親の親の親の親を取得
+        Transform targetParent = cardAnimationController.transform
+            .parent.parent.parent.parent;
+
+        // 移動前のワールド座標を保持したまま親を変更
+        cardAnimationController.transform.SetParent(targetParent, true);
+
         cardAnimationController.PlayMoveTo(movePos, 0.2f);
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = false;
-
+        
 
         yield return new WaitForSeconds(0.2f);
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
+        cardAnimationController.transform.SetParent(originalParent, true);
+        DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
 
 
         //一覧のアニメーションカード生成　アニメーション
