@@ -544,7 +544,7 @@ public class CardController : MonoBehaviour
                 return;
             }
             EffectAttack(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
         {
@@ -558,7 +558,7 @@ public class CardController : MonoBehaviour
             //    enemyCard.CheckAlive();
             //}
             EffectAttack(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO))
         {
@@ -604,7 +604,7 @@ public class CardController : MonoBehaviour
                 return;
             }
             Destroys(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
 
         if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
@@ -851,7 +851,7 @@ public class CardController : MonoBehaviour
         return canUse;
     }
 
-    public void CheckAlive()
+    public IEnumerator CheckAlive()
     {
         if (model.isAlive)
         {
@@ -859,7 +859,7 @@ public class CardController : MonoBehaviour
         }
         else
         {
-            if (this == null) return;
+            if (this == null) yield break;
             destroyEffect(model.destroyEffect, transform);
             Destroy(this.gameObject);
         }
@@ -879,7 +879,7 @@ public class CardController : MonoBehaviour
                 return;
             }
             EffectAttack(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
 
         if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
@@ -933,7 +933,7 @@ public class CardController : MonoBehaviour
                 return;
             }
             Destroys(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
         if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
         {
@@ -978,7 +978,7 @@ public class CardController : MonoBehaviour
             //}
 
             Destroys(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
         if (model.spells.HasFlag(SPELLS.RANDOM_DAMAGE))
         {
@@ -988,7 +988,7 @@ public class CardController : MonoBehaviour
                 target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
             }
             EffectAttack(target);
-            target.CheckAlive();
+            StartCoroutine(target.CheckAlive());
         }
 
         if (model.spells.HasFlag(SPELLS.SWAP_HP_ATK))

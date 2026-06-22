@@ -140,10 +140,10 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            //player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
-            //enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
-            player.Init(GameSession.SelectedDeck);
-            enemy.Init(new List<int>(GameSession.SelectedDeck));
+            player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
+            enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
+            //player.Init(GameSession.SelectedDeck);
+            //enemy.Init(new List<int>(GameSession.SelectedDeck));
             uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
@@ -342,7 +342,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 2; i++)
         {
             //GiveCardToHand(player.deck, playerHandTransform);
             //GiveCardToHand(enemy.deck, enemyHandTransform);
@@ -687,7 +687,7 @@ public class GameManager : MonoBehaviour
 
         if (isPlayerTurn)
         {
-
+            Debug.Log("Playerのターン");
             player.IncreaseManaCost();
             // 手札が3枚未満ならドロー
             if (GetFriendHandTransform(true).Length < 3)
@@ -699,6 +699,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            Debug.Log("Enemyのターン");
             enemy.IncreaseManaCost();
             // 手札が3枚未満ならドロー
             if (GetEnemyHandTransform(true).Length < 3)
@@ -745,8 +746,8 @@ public class GameManager : MonoBehaviour
         /*        Debug.Log("attacker HP:" + attacker.model.hp);
                 Debug.Log("defender HP:" + defender.model.hp);*/
         yield return new WaitForSeconds(0.8f + (defender.model.attackTime / 60));
-        attacker.CheckAlive();
-        defender.CheckAlive();
+        StartCoroutine(attacker.CheckAlive());
+        StartCoroutine(defender.CheckAlive());
     }
 
 
@@ -1040,7 +1041,7 @@ public class GameManager : MonoBehaviour
 
         float duration3 = 0.2f;
         elapsed = 0f;
-
+        isPlayerTurn = !isPlayerTurn;
         while (elapsed < duration3)
         {
             elapsed += Time.deltaTime;
@@ -1051,7 +1052,7 @@ public class GameManager : MonoBehaviour
 
             yield return null;
         }
-        isPlayerTurn = !isPlayerTurn;
+        
         // 完全に非表示に
         color.a = 0f;
         effectText.color = color;

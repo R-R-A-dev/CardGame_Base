@@ -125,7 +125,7 @@ public class AI : MonoBehaviour
                 //StartCoroutine(attacker.movement.MoveToTarget(defender.transform));
                 yield return new WaitForSeconds(0.51f);
                 StartCoroutine(gameManager.CardsBattle(attacker, defender));
-
+                yield return new WaitForSeconds(0.5f);
             }
             else
             {
