@@ -35,7 +35,7 @@ public class AI : MonoBehaviour
         // コスト以下のカードがあれば、カードをフィールドに出し続ける
         // 条件：モンスターカードならコストのみ
         // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
-        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0 )
+        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0)
         {
             while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
             {
@@ -50,9 +50,9 @@ public class AI : MonoBehaviour
                 selectableHandCardList,
                 card => !(gameManager.GetEnemyFieldCards(true).Length > 4 && card.model.spells == SPELLS.NONE)
             );
-            
-            if(selectCard == null) break;
-            
+
+            if (selectCard == null) break;
+
 
             //　カードを表にする
             selectCard.Show();
@@ -130,13 +130,17 @@ public class AI : MonoBehaviour
             else
             {
                 //StartCoroutine(attacker.movement.MoveToTarget(gameManager.playerHero));
-                yield return new WaitForSeconds(0.25f);
-                gameManager.AttackToHero(attacker);
-                yield return new WaitForSeconds(0.25f);
-                gameManager.CheckHeroHP();
-                if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+                if (GameManager.instance.player.heroHp > 0)
+                {
+                    yield return new WaitForSeconds(0.25f);
+                    gameManager.AttackToHero(attacker);
+                    yield return new WaitForSeconds(0.25f);
+                    gameManager.CheckHeroHP();
+                }
+                else
                     yield break;
             }
+
             fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
             yield return new WaitForSeconds(2);
         }
@@ -230,7 +234,7 @@ public class AI : MonoBehaviour
             {
                 targets[index] = hand[i];
                 index++;
-            }  
+            }
             target = targets[UnityEngine.Random.Range(0, targets.Length - 1)];
         }
 

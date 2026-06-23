@@ -11,6 +11,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.XR;
+using DG.Tweening;
+using static Unity.Burst.Intrinsics.X86.Avx;
 
 public class GameManager : MonoBehaviour
 {
@@ -1074,12 +1076,30 @@ public class GameManager : MonoBehaviour
         }
         text.transform.SetParent(textPool.transform);
         text.transform.position = cardTransform.position;
-        text.GetComponent<TextMeshProUGUI>().text = damage.ToString();
+        TextMeshProUGUI tmp = text.GetComponent<TextMeshProUGUI>();
+        tmp.text = damage.ToString();
+        tmp.color = Color.red;
+        tmp.alpha = 1f; // 初期アルファを1に
         text.SetActive(true);
-        //0.5秒後に消えてtextPoolの子オブジェクトに戻る
-        yield return new WaitForSeconds(0.5f);
-        text.SetActive(false);
 
+        text.transform.localScale = Vector3.zero;
+        text.SetActive(true);
+
+        // DOTweenで演出を作成
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+
+        // 1. 小さい状態から、一気に大きく（0.2秒）
+        seq.Append(text.transform.DOScale(1.5f, 0.2f).SetEase(Ease.OutBack));
+
+        // 2. 少しだけ小さく戻す（0.1秒）
+        seq.Append(text.transform.DOScale(1.0f, 0.1f));
+
+        seq.AppendInterval(0.3f);
+
+        // シーケンスが終わるまで待機
+        yield return seq.WaitForCompletion();
+
+        text.SetActive(false);
     }
 
     public IEnumerator GenHealText(GameObject text, int damage, Transform cardTransform)
