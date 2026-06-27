@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: NodeData
   m_EditorClassIdentifier: 
   nodeId: 
-  stageType: 0
+  stageType: 4
   modifiers:
   - modifierType: 6
     value: 5
@@ -24,7 +24,7 @@ MonoBehaviour:
   enemyData: {fileID: 11400000, guid: 59824986887e5194389795ac89748d6f, type: 2}
   rewardData: {fileID: 11400000, guid: c530fb5bce225f745b525c4927385a40, type: 2}
   restData: {fileID: 0}
-  shopData: {fileID: 0}
-  treasureData: {fileID: 0}
+  shopData: {fileID: 11400000, guid: 9bc1d5fe0ccb4a143a02ccf4aed796ea, type: 2}
+  treasureData: {fileID: 11400000, guid: dc74973d46f3d0f48bc5f8fff88ed93a, type: 2}
   damageData: {fileID: 0}
   cardLossData: {fileID: 0}

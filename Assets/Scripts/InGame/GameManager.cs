@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using DG.Tweening;
 using static Unity.Burst.Intrinsics.X86.Avx;
+using UnityEngine.AddressableAssets; using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class GameManager : MonoBehaviour
 {
@@ -162,7 +163,7 @@ public class GameManager : MonoBehaviour
         //ModeConfigManager.Instance.twoPickList
         int selectNum = ModeConfigManager.Instance.LethalPuzzleIndex;
         LethalPuzzleData lethalPuzzleData = ModeConfigManager.Instance.lethalPuzzleList[selectNum];
-        GenerateCard(lethalPuzzleData.playerInitialHand, lethalPuzzleData.playerInitialField, lethalPuzzleData.enemyInitialField);
+        StartCoroutine(GenerateCardCoroutine(lethalPuzzleData.playerInitialHand, lethalPuzzleData.playerInitialField, lethalPuzzleData.enemyInitialField));
 
         player.Init(lethalPuzzleData.playerDeck);
         enemy.Init(lethalPuzzleData.playerDeck);
@@ -404,22 +405,34 @@ public class GameManager : MonoBehaviour
 
     void CreateCardEffect(int cardID, Transform hand)
     {
-        // カードの生成とデータの受け渡し
-        CardController card = Instantiate(cardPrefab, hand, false);
-        if (hand.name == "PlayerHand")
+        // Addressablesで非同期生成を開始
+        // 第一引数はAddressableに設定したパス（またはアドレス名）
+        Addressables.InstantiateAsync("Prefabs/Card", hand).Completed += (handle) =>
         {
-            card.Init(cardID, true);
-            card.transform.SetParent(playerDeck);
-        }
-        else
-        {
-            card.Init(cardID, false);
-            card.transform.SetParent(enemyDeck);
-        }
-        card.transform.localPosition = Vector3.zero;
-        card.transform.localEulerAngles = Vector3.zero;
-        card.transform.SetParent(card.transform.parent.parent);
-        card.movement.DrawEffect(card);
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                // 生成されたGameObjectを取得
+                GameObject obj = handle.Result;
+                CardController card = obj.GetComponent<CardController>();
+
+                // データの初期化（元の処理）
+                bool isPlayer = (hand.name == "PlayerHand");
+                card.Init(cardID, isPlayer);
+
+                // 親の設定（元の処理をそのまま適用）
+                card.transform.SetParent(isPlayer ? playerDeck : enemyDeck);
+                card.transform.localPosition = Vector3.zero;
+                card.transform.localEulerAngles = Vector3.zero;
+                card.transform.SetParent(card.transform.parent.parent);
+
+                // エフェクトの実行
+                card.movement.DrawEffect(card);
+            }
+            else
+            {
+                Debug.LogError("カードの生成に失敗しました: " + handle.OperationException);
+            }
+        };
     }
 
     void CreateCard(int cardID, Transform hand)
@@ -467,23 +480,54 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void GenerateCard(List<int> playerHand, List<int> playerField, List<int> enemyField)
+    IEnumerator GenerateCardCoroutine(List<int> playerHand, List<int> playerField, List<int> enemyField)
     {
-        for (int i = 0; i < playerHand.Count; i++)
-            CreateCard(playerHand[i], playerHandTransform);
+        // Addressableのアドレス名（適宜書き換えてください）
+        string assetPath = "Prefabs/Card";
 
-        for (int i = 0; i < playerField.Count; i++)
+        // 1. 手札の生成
+        foreach (int cardID in playerHand)
         {
-            CardController card = Instantiate(cardPrefab, playerFieldTransform, false);
-            card.movement.isHand = false;
-            card.Init(playerField[i], true);
-            card.model.isFieldCard = true;
+            yield return CreateCardAsync(cardID, playerHandTransform, assetPath);
         }
-        for (int i = 0; i < enemyField.Count; i++)
+
+        // 2. プレイヤーフィールドの生成
+        foreach (int cardID in playerField)
         {
-            CardController card = Instantiate(cardPrefab, enemyFieldTransform, false);
+            yield return CreateFieldCardAsync(cardID, playerFieldTransform, true, assetPath);
+        }
+
+        // 3. 敵フィールドの生成
+        foreach (int cardID in enemyField)
+        {
+            yield return CreateFieldCardAsync(cardID, enemyFieldTransform, false, assetPath);
+        }
+    }
+
+    // 共通化：非同期でカードを生成して初期化するコルーチン
+    IEnumerator CreateCardAsync(int cardID, Transform parent, string path)
+    {
+        var handle = Addressables.InstantiateAsync(path, parent);
+        yield return handle; // ここで生成が終わるまで待機（フレーム分散）
+
+        if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+        {
+            CardController card = handle.Result.GetComponent<CardController>();
+            card.Init(cardID, parent.name == "PlayerHand");
+        }
+    }
+
+    // 共通化：非同期でフィールドカードを生成して初期化するコルーチン
+    IEnumerator CreateFieldCardAsync(int cardID, Transform parent, bool isPlayer, string path)
+    {
+        var handle = Addressables.InstantiateAsync(path, parent);
+        yield return handle;
+
+        if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+        {
+            CardController card = handle.Result.GetComponent<CardController>();
             card.movement.isHand = false;
-            card.Init(enemyField[i], false);
+            card.Init(cardID, isPlayer);
             card.model.isFieldCard = true;
         }
     }
@@ -1070,36 +1114,52 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator GenDamageText(GameObject text, int damage, Transform cardTransform)
     {
+        // 1. 生成処理（Addressables化）
         if (text == null)
         {
-            text = Instantiate(damageText.gameObject);
+            string assetPath = "Prefabs/DamageText"; // 指定のパス
+            var handle = Addressables.InstantiateAsync(assetPath);
+
+            // 生成完了まで1フレーム待機
+            yield return handle;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                text = handle.Result;
+            }
+            else
+            {
+                Debug.LogError("ダメージテキストの生成に失敗しました");
+                yield break;
+            }
         }
+
+        // 2. 初期設定
         text.transform.SetParent(textPool.transform);
         text.transform.position = cardTransform.position;
+
         TextMeshProUGUI tmp = text.GetComponent<TextMeshProUGUI>();
         tmp.text = damage.ToString();
         tmp.color = Color.red;
-        tmp.alpha = 1f; // 初期アルファを1に
-        text.SetActive(true);
+        tmp.alpha = 1f;
 
         text.transform.localScale = Vector3.zero;
         text.SetActive(true);
 
-        // DOTweenで演出を作成
+        // 3. DOTween演出
         DG.Tweening.Sequence seq = DOTween.Sequence();
-
-        // 1. 小さい状態から、一気に大きく（0.2秒）
         seq.Append(text.transform.DOScale(1.5f, 0.2f).SetEase(Ease.OutBack));
-
-        // 2. 少しだけ小さく戻す（0.1秒）
         seq.Append(text.transform.DOScale(1.0f, 0.1f));
-
         seq.AppendInterval(0.3f);
 
-        // シーケンスが終わるまで待機
+        // シーケンス終了まで待機
         yield return seq.WaitForCompletion();
 
+        // 4. 後処理
         text.SetActive(false);
+
+        // ※もし「生成したインスタンス」をその都度破棄したい場合は以下を有効化
+        // Addressables.ReleaseInstance(text);
     }
 
     public IEnumerator GenHealText(GameObject text, int damage, Transform cardTransform)
