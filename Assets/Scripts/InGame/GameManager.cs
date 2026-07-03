@@ -217,6 +217,9 @@ public class GameManager : MonoBehaviour
 
         while (timeCount > 0)
         {
+            if (player.heroHp <= 0 || enemy.heroHp <= 0)
+                yield break;
+
             yield return new WaitForSeconds(1);
             timeCount--;
             uiManager.UpdateTime(timeCount);
@@ -554,6 +557,9 @@ public class GameManager : MonoBehaviour
 
         while (timeCount > 0)
         {
+            if (player.heroHp <= 0 || enemy.heroHp <= 0)
+                yield break;
+
             yield return new WaitForSeconds(1);
             timeCount--;
             uiManager.UpdateTime(timeCount);

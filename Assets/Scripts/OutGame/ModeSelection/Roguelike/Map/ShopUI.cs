@@ -9,6 +9,7 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private Button closeButton;
     [SerializeField] private ShopCardSelectPanel selectPanel;
+    [SerializeField] private OwnedDeckCheckPanel ownedDeckCheckPanel;
 
     private RoguelikeGameState gameState;
     private Dictionary<CardController, int> cardPriceMap
@@ -19,6 +20,9 @@ public class ShopUI : MonoBehaviour
     {
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonClick);
+
+        ownedDeckCheckPanel.OnOpened = selectPanel.PauseShopMode;
+        ownedDeckCheckPanel.OnClosed = selectPanel.ResumeShopMode;
 
         // Actionを複数カード対応に変更
         selectPanel.OnCardBuyConfirmed = OnCardBuyConfirmed;
@@ -56,39 +60,30 @@ public class ShopUI : MonoBehaviour
     }
 
     // 複数カード購入処理
-    private void OnCardBuyConfirmed(List<int> cardIds, int totalPrice)
+    private void OnCardBuyConfirmed(List<CardController> cards, int price)
     {
         // 所持金チェック
-        if (gameState.Gold < totalPrice)
+        if (gameState.Gold < price)
         {
             Debug.Log("所持金が足りません");
             return;
         }
 
-        gameState.Gold -= totalPrice;
-        goldText.text = $"G: {gameState.Gold}";
+        // ゴールド消費
+        gameState.Gold -= price;
 
-        foreach (int cardId in cardIds)
+        // 購入したカードをデッキへ追加＆非表示
+        foreach (CardController card in cards)
         {
-            if (purchasedCardIds.Contains(cardId)) continue;
-
-            gameState.CurrentDeck.Add(cardId);
-            purchasedCardIds.Add(cardId);
-
-            // 購入済みカードを非表示
-            foreach (var kvp in cardPriceMap)
-            {
-                if (kvp.Key.model.no == cardId)
-                {
-                    kvp.Key.gameObject.SetActive(false);
-                    break;
-                }
-            }
+            gameState.CurrentDeck.Add(card.model.no);
+            card.gameObject.SetActive(false);
         }
 
-        // 所持金更新をパネルに通知
-        selectPanel.UpdateGold(gameState.Gold);
+        // 所持金表示更新
         goldText.text = $"G: {gameState.Gold}";
+
+        // ShopCardSelectPanelへ通知
+        selectPanel.UpdateGold(gameState.Gold);
     }
 
     private void OnCloseButtonClick()

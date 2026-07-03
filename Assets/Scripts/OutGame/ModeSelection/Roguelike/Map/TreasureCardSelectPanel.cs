@@ -72,4 +72,15 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
     {
         cardInfoPanel.SetActive(false);
     }
+
+
+    public void PauseTreasureMode()
+    {
+        isTreasureMode = false;
+    }
+
+    public void ResumeTreasureMode()
+    {
+        isTreasureMode = true;
+    }
 }

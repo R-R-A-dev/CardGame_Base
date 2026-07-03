@@ -19,6 +19,7 @@ public class RoguelikeGameState
         MaxHP = stageData.playerInitialHP;
         CurrentHP = MaxHP;
         Gold = 50;
+        //TODO:デッキIDからデッキを取得
         CurrentDeck = new List<int>(config.DeckId);
         CurrentDeck.Add(3);
         CurrentDeck.Add(3);

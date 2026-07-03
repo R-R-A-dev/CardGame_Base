@@ -65,6 +65,7 @@ public class DeckAndStageSelectUI : MonoBehaviour
             StageConfig = new StageConfig { StageId = selectedStageIndex }
         };
         // Managerに渡す
+
         RoguelikeManager.Instance.StartRoguelike(config);
         UpdateStartButton();
     }

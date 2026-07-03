@@ -25,7 +25,7 @@ public class ShopCardSelectPanel : MonoBehaviour, IPointerDownHandler
     public bool IsInfoPanelOpen => cardInfoPanel.activeSelf;
 
     // ShopUIへの通知
-    public System.Action<List<int>, int> OnCardBuyConfirmed; // 選択カードID一覧・合計金額
+    public System.Action<List<CardController>, int> OnCardBuyConfirmed; // 選択カードID一覧・合計金額
 
     private bool isShopMode = false;
     private int currentGold = 0;                            // 所持金を保持
@@ -155,9 +155,12 @@ public class ShopCardSelectPanel : MonoBehaviour, IPointerDownHandler
         if (totalSelectedPrice > currentGold) return;
 
         OnCardBuyConfirmed?.Invoke(
-            new List<int>(selectedCardIds),
+            new List<CardController>(selectedCards),
             totalSelectedPrice
-        );
+                );
+        // 選択済みカードのSelectedPanelを非表示にしてリセット
+        foreach (CardController card in selectedCards)
+            SetCardSelectedPanel(card, false);
 
         // 選択状態をリセット
         selectedCardIds.Clear();
@@ -176,6 +179,16 @@ public class ShopCardSelectPanel : MonoBehaviour, IPointerDownHandler
         selectedCardPrice = 0;
         cardBuyButton.interactable = selectedCardIds.Count > 0;
         cardInfoPanel.SetActive(false);
+    }
+
+    public void PauseShopMode()
+    {
+        isShopMode = false;
+    }
+
+    public void ResumeShopMode()
+    {
+        isShopMode = true;
     }
 }
 //所持金以上は変えないこと　選択額を超えないこと　購入処理
