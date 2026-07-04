@@ -144,7 +144,7 @@ public class GameManager : MonoBehaviour
         else
         {
             player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
-            enemy.Init(new List<int>() { 3, 4, 3, 3, 4, 4, 4, 4, 1 });
+            enemy.Init(new List<int>() { 2, 2, 2, 2, 4, 4, 4, 4, 1 });
             //player.Init(GameSession.SelectedDeck);
             //enemy.Init(new List<int>(GameSession.SelectedDeck));
             uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);

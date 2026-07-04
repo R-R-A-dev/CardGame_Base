@@ -140,7 +140,8 @@ public class AI : MonoBehaviour
                 else
                     yield break;
             }
-
+            if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+                yield break;
             fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
             yield return new WaitForSeconds(2);
         }
