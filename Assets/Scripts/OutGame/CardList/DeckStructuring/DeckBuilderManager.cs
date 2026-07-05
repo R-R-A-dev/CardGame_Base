@@ -77,6 +77,7 @@ public class DeckBuilderManager : MonoBehaviour
         {
             //Debug.Log(GameSession.SelectedDeck[i]);
         }
+        //SceneLoader.Instance.LoadScene("Game");
         SceneManager.LoadScene(1);
     }
 }
