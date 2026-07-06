@@ -10,13 +10,48 @@ public static class SaveManager
     private static string BackupPath
         => Path.Combine(Application.persistentDataPath, "save_backup.json");
 
+
+
+    // ========================================
+    // 初回起動時の初期データ作成
+    // ========================================
+    public static SaveData CreateInitialSaveData()
+    {
+        SaveData saveData = new SaveData();
+
+        // 初期カードを配布
+        saveData.ownedCardIds = new List<int> { 2, 2, 2, 2 };
+
+        // 初期所持金
+        saveData.gold = 100;
+
+        // 最初のパックをアンロック
+        saveData.unlockedPackIds = new List<int> { 0 };
+
+        Save(saveData);
+        Debug.Log("初期セーブデータを作成しました");
+
+        return saveData;
+    }
+
+    // ========================================
+    // 初回起動かどうかを確認してロード
+    // ========================================
+    public static SaveData LoadOrInitialize()
+    {
+        if (!HasSaveData())
+            return CreateInitialSaveData();
+
+        return Load();
+    }
+
+    // 以下既存のまま
     public static void Save(SaveData data)
     {
         try
         {
             string json = JsonUtility.ToJson(data, true);
 
-            // 既存のセーブをバックアップに退避してから上書き
             if (File.Exists(SavePath))
                 File.Copy(SavePath, BackupPath, true);
 
@@ -30,7 +65,6 @@ public static class SaveManager
 
     public static SaveData Load()
     {
-        // メインファイルから読み込み試行
         if (File.Exists(SavePath))
         {
             SaveData data = TryLoad(SavePath);
@@ -39,13 +73,11 @@ public static class SaveManager
             Debug.LogWarning("メインセーブが壊れています。バックアップから復元します");
         }
 
-        // メインが壊れていたらバックアップから復元
         if (File.Exists(BackupPath))
         {
             SaveData data = TryLoad(BackupPath);
             if (data != null)
             {
-                // バックアップをメインに復元
                 try
                 {
                     File.Copy(BackupPath, SavePath, true);
@@ -69,7 +101,6 @@ public static class SaveManager
             string json = File.ReadAllText(path);
             SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-            // nullチェック（JSONが空など）
             if (data == null)
             {
                 Debug.LogError($"セーブデータがnullです: {path}");

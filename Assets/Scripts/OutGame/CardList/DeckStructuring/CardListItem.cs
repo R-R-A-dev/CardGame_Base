@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Splines.ExtrusionShapes;
 using UnityEngine.UI;
 
 public class CardListItem : MonoBehaviour
@@ -17,9 +18,9 @@ public class CardListItem : MonoBehaviour
     {
         // 全カードデータと所持カードデータを比較して
         CardEntity[] entitys = CardDatabase.LoadAllCards();
-
-        // 例: 総所持数で初期化
-        CardListData.PossessionCard = new List<int>() { 1, 1, 1, 1 };
+        //List<int> ownedCardIds = SaveManager.Load().ownedCardIds;
+        //// 例: 総所持数で初期化
+        //CardListData.PossessionCard = ownedCardIds;
 
 
 

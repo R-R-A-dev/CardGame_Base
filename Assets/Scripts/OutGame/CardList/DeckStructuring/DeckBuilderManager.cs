@@ -19,11 +19,20 @@ public class DeckBuilderManager : MonoBehaviour
     {
         Instance = this;
         dataSet();
+        SaveData saveData = SaveManager.LoadOrInitialize();
+        List<int> ownedCardIds = SaveManager.Load().ownedCardIds;
+        // 例: 総所持数で初期化
+        CardListData.PossessionCard = ownedCardIds;
     }
+    //TODO：ゲーム内のデータの管理クラスを持つ、セーブデータを持つ方
+    //TODO：ガチャの実装
+
     private void Start()
     {
 
     }
+
+
 
     private void OnEnable()
     {
