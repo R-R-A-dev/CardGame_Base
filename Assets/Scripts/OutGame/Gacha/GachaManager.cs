@@ -1,100 +1,95 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GachaManager : MonoBehaviour
 {
-    [SerializeField] CardController cardPrefab;
-    [SerializeField] Transform openedCardTrans;
+    public static GachaManager Instance { get; private set; }
 
-    [SerializeField] Transform[] openPackPos;
+    [SerializeField] private List<PackData> allPacks; // 全パックのSO
+    [SerializeField] private GachaUI gachaUI;
+    [SerializeField] private GachaOpenUI gachaOpenUI;
+    [SerializeField] private GachaResultUI gachaResultUI;
 
-    [SerializeField] Transform expandCardTrans1;
-    [SerializeField] Transform expandCardTrans2;
-    [SerializeField] Transform expandCardTrans3;
-    [SerializeField] Transform expandCardTrans4;
-    [SerializeField] Transform expandCardTrans5;
-    [SerializeField] Transform expandCardTrans6;
-    [SerializeField] Transform expandCardTrans7;
-    [SerializeField] Transform expandCardTrans8;
-
-    private void Start()
+    private void Awake()
     {
-        OpenPack();
+        Instance = this;
     }
 
-    void OpenPack()
+    // メニューからガチャ画面を開く
+    public void OpenGacha()
     {
-        CreateCard(decisionCardId());
-
-        StartCoroutine(ExpandPackCards());
+        gachaUI.Open(GetUnlockedPacks());
     }
 
-    void CreateCard(int[] cardId)
+    // アンロック済みパックを取得
+    public List<PackData> GetUnlockedPacks()
     {
-        for (int i = 0; i < openPackPos.Length; i++)
+        SaveData saveData = SaveManager.Load();
+        List<PackData> unlocked = new List<PackData>();
+
+        foreach (PackData pack in allPacks)
         {
-            CardController card = Instantiate(cardPrefab, openPackPos[i]);
-            card.Init(cardId[i], true);
+            if (pack.isUnlockedByDefault ||
+                saveData.unlockedPackIds.Contains(allPacks.IndexOf(pack)))
+                unlocked.Add(pack);
+        }
+        return unlocked;
+    }
+
+    // パックを購入して開封
+    public void PurchasePack(PackData pack)
+    {
+        SaveData saveData = SaveManager.Load();
+
+        // 所持金チェック
+        if (saveData.gold < pack.price)
+        {
+            Debug.Log("所持金が足りません");
+            return;
         }
 
+        // 所持金を消費
+        saveData.gold -= pack.price;
+
+        // カードを抽選
+        List<int> drawnCards = DrawCards(pack);
+
+        // 所持カードに追加
+        saveData.ownedCardIds.AddRange(drawnCards);
+        SaveManager.Save(saveData);
+
+        // 開封演出画面へ
+        gachaUI.Hide();
+        gachaOpenUI.Open(drawnCards);
     }
 
-    int[] decisionCardId()
+    // カードをランダム抽選
+    private List<int> DrawCards(PackData pack)
     {
-        int[] cardId = new int[8];
-        return cardId;
+        List<int> pool = new List<int>(pack.cardPool);
+        List<int> result = new List<int>();
+
+        for (int i = 0; i < pack.drawCount; i++)
+        {
+            if (pool.Count == 0) break;
+            int index = Random.Range(0, pool.Count);
+            result.Add(pool[index]);
+            pool.RemoveAt(index);
+        }
+        return result;
     }
 
-    IEnumerator ExpandPackCards()
+    // 開封演出終了後に一覧へ
+    public void OnOpenAnimationComplete(List<int> drawnCards)
     {
-        int cardNum = 0;
-        Transform moveTarget = null;
-        //CardController[] cardList = openedCardTrans.GetComponentsInChildren<CardController>();
-        CardController[] cardList = new CardController[openPackPos.Length];
-        for (int i = 0; i < openPackPos.Length; i++)
-        {
-            cardList[i] = openPackPos[i].GetComponentInChildren<CardController>();
-        }
-        yield return new WaitForSeconds(1.25f);
-        foreach (CardController card in cardList)
-        {
-            cardNum += 1;
-
-            switch (cardNum)
-            {
-                case 1:
-                    moveTarget = expandCardTrans1;
-                    break;
-                case 2:
-                    moveTarget = expandCardTrans2;
-                    break;
-                case 3:
-                    moveTarget = expandCardTrans3;
-                    break;
-                case 4:
-                    moveTarget = expandCardTrans4;
-                    break;
-                case 5:
-                    moveTarget = expandCardTrans5;
-                    break;
-                case 6:
-                    moveTarget = expandCardTrans6;
-                    break;
-                case 7:
-                    moveTarget = expandCardTrans7;
-                    break;
-                case 8:
-                    moveTarget = expandCardTrans8;
-                    break;
-            }
-
-            StartCoroutine(card.movement.ExpandThisCard(moveTarget));
-            yield return new WaitForSeconds(0.1f);
-        }
+        gachaOpenUI.Hide();
+        gachaResultUI.Open(drawnCards);
     }
 
+    // 一覧画面を閉じてガチャ画面に戻る
+    public void OnResultClose()
+    {
+        gachaResultUI.Hide();
+        gachaUI.Open(GetUnlockedPacks());
+    }
 }
-/*
-
-
-*/

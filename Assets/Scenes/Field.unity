@@ -175348,25 +175348,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ff804b2e8c986142a96e4cc9d1b5160, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardPrefab: {fileID: -4390397048053376548, guid: 1e18d796ac11eec44a1dc8c8542c1a48, type: 3}
-  openedCardTrans: {fileID: 1488742128}
-  openPackPos:
-  - {fileID: 1008923635629045745}
-  - {fileID: 206644232}
-  - {fileID: 427234693}
-  - {fileID: 203181448}
-  - {fileID: 703407354}
-  - {fileID: 1119543597}
-  - {fileID: 226697128}
-  - {fileID: 517435500}
-  expandCardTrans1: {fileID: 590391030}
-  expandCardTrans2: {fileID: 1204780832}
-  expandCardTrans3: {fileID: 1567420142}
-  expandCardTrans4: {fileID: 1887691047}
-  expandCardTrans5: {fileID: 680100442}
-  expandCardTrans6: {fileID: 211993469}
-  expandCardTrans7: {fileID: 1574835081}
-  expandCardTrans8: {fileID: 2079614171}
+  allPacks: []
+  gachaUI: {fileID: 0}
+  gachaOpenUI: {fileID: 0}
+  gachaResultUI: {fileID: 0}
 --- !u!4 &854643324
 Transform:
   m_ObjectHideFlags: 0
