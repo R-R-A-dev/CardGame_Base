@@ -5,7 +5,7 @@ public class GachaManager : MonoBehaviour
 {
     public static GachaManager Instance { get; private set; }
 
-    [SerializeField] private List<PackData> allPacks; // 全パックのSO
+    [SerializeField] private List<PackData> allPacks;
     [SerializeField] private GachaUI gachaUI;
     [SerializeField] private GachaOpenUI gachaOpenUI;
     [SerializeField] private GachaResultUI gachaResultUI;
@@ -15,13 +15,11 @@ public class GachaManager : MonoBehaviour
         Instance = this;
     }
 
-    // メニューからガチャ画面を開く
     public void OpenGacha()
     {
         gachaUI.Open(GetUnlockedPacks());
     }
 
-    // アンロック済みパックを取得
     public List<PackData> GetUnlockedPacks()
     {
         SaveData saveData = SaveManager.Load();
@@ -36,60 +34,134 @@ public class GachaManager : MonoBehaviour
         return unlocked;
     }
 
-    // パックを購入して開封
-    public void PurchasePack(PackData pack)
+    // quantity個のパックをまとめて購入
+    public void PurchasePack(PackData pack, int quantity)
     {
-        SaveData saveData = SaveManager.Load();
+        if (quantity <= 0) return;
 
-        // 所持金チェック
-        if (saveData.gold < pack.price)
+        const int MAX_PURCHASE_QUANTITY = 10;
+        if (quantity > MAX_PURCHASE_QUANTITY)
+        {
+            Debug.LogWarning($"購入数の上限は{MAX_PURCHASE_QUANTITY}個です");
+            quantity = MAX_PURCHASE_QUANTITY;
+        }
+
+        SaveData saveData = SaveManager.Load();
+        int totalPrice = pack.price * quantity;
+
+        if (saveData.gold < totalPrice)
         {
             Debug.Log("所持金が足りません");
             return;
         }
 
-        // 所持金を消費
-        saveData.gold -= pack.price;
+        saveData.gold -= totalPrice;
 
-        // カードを抽選
-        List<int> drawnCards = DrawCards(pack);
+        List<List<GachaCardEntry>> packResults = new List<List<GachaCardEntry>>();
+        for (int i = 0; i < quantity; i++)
+        {
+            List<GachaCardEntry> drawnCards = DrawCards(pack);
+            packResults.Add(drawnCards);
 
-        // 所持カードに追加
-        saveData.ownedCardIds.AddRange(drawnCards);
+            foreach (GachaCardEntry entry in drawnCards)
+                saveData.ownedCardIds.Add(entry.cardId);
+        }
+
         SaveManager.Save(saveData);
 
-        // 開封演出画面へ
         gachaUI.Hide();
-        gachaOpenUI.Open(drawnCards);
+        gachaOpenUI.Open(pack, packResults);
     }
 
-    // カードをランダム抽選
-    private List<int> DrawCards(PackData pack)
-    {
-        List<int> pool = new List<int>(pack.cardPool);
-        List<int> result = new List<int>();
-
-        for (int i = 0; i < pack.drawCount; i++)
-        {
-            if (pool.Count == 0) break;
-            int index = Random.Range(0, pool.Count);
-            result.Add(pool[index]);
-            pool.RemoveAt(index);
-        }
-        return result;
-    }
-
-    // 開封演出終了後に一覧へ
-    public void OnOpenAnimationComplete(List<int> drawnCards)
+    public void OnAllPacksOpened(List<GachaCardEntry> allDrawnCards)
     {
         gachaOpenUI.Hide();
-        gachaResultUI.Open(drawnCards);
+
+        List<int> cardIds = new List<int>();
+        foreach (GachaCardEntry entry in allDrawnCards)
+            cardIds.Add(entry.cardId);
+
+        gachaResultUI.Open(cardIds);
     }
 
-    // 一覧画面を閉じてガチャ画面に戻る
     public void OnResultClose()
     {
         gachaResultUI.Hide();
         gachaUI.Open(GetUnlockedPacks());
+    }
+
+    public void UnlockPack(int packIndex)
+    {
+        SaveData saveData = SaveManager.Load();
+        if (!saveData.unlockedPackIds.Contains(packIndex))
+        {
+            saveData.unlockedPackIds.Add(packIndex);
+            SaveManager.Save(saveData);
+        }
+    }
+
+    // カード抽選（レアリティ決定 → 該当レアリティ内から均等抽選）
+    // 戻り値をList<GachaCardEntry>に変更（cardId・rarityのペア）
+    private List<GachaCardEntry> DrawCards(PackData pack)
+    {
+        List<GachaCardEntry> result = new List<GachaCardEntry>();
+
+        if (pack.cardPool == null || pack.cardPool.Count == 0)
+        {
+            Debug.LogWarning($"{pack.packName}のcardPoolが空です");
+            return result;
+        }
+
+        if (pack.rarityDropRates == null || pack.rarityDropRates.Count == 0)
+        {
+            Debug.LogWarning($"{pack.packName}のrarityDropRatesが空です");
+            return result;
+        }
+
+        for (int i = 0; i < pack.drawCount; i++)
+        {
+            CardRarity rarity = DrawRarity(pack.rarityDropRates);
+            int cardId = DrawCardFromRarity(pack.cardPool, rarity);
+            result.Add(new GachaCardEntry { cardId = cardId, rarity = rarity });
+        }
+        return result;
+    }
+
+    private CardRarity DrawRarity(List<RarityDropRate> rarityDropRates)
+    {
+        float totalRate = 0f;
+        foreach (RarityDropRate rate in rarityDropRates)
+            totalRate += rate.dropRatePercent;
+
+        float randomValue = Random.Range(0f, totalRate);
+        float cumulative = 0f;
+
+        foreach (RarityDropRate rate in rarityDropRates)
+        {
+            cumulative += rate.dropRatePercent;
+            if (randomValue <= cumulative)
+                return rate.rarity;
+        }
+
+        return rarityDropRates[rarityDropRates.Count - 1].rarity;
+    }
+
+    private int DrawCardFromRarity(List<GachaCardEntry> cardPool, CardRarity rarity)
+    {
+        List<GachaCardEntry> sameRarityCards = new List<GachaCardEntry>();
+        foreach (GachaCardEntry entry in cardPool)
+        {
+            if (entry.rarity == rarity)
+                sameRarityCards.Add(entry);
+        }
+
+        if (sameRarityCards.Count == 0)
+        {
+            Debug.LogWarning($"レアリティ{rarity}のカードがcardPoolに存在しません");
+            return cardPool[Random.Range(0, cardPool.Count)].cardId;
+        }
+
+        int index = Random.Range(0, sameRarityCards.Count);
+        return sameRarityCards[index].cardId;
     }
 }

@@ -1,14 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class GachaPackItem : MonoBehaviour
 {
     [SerializeField] private Image packImage;
-    [SerializeField] private TextMeshProUGUI packNameText;
-    [SerializeField] private TextMeshProUGUI priceText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private Button selectButton;
+    [SerializeField] private Button packButton; // パック全体がボタン
 
     private PackData packData;
     private System.Action<PackData> onSelected;
@@ -19,11 +15,13 @@ public class GachaPackItem : MonoBehaviour
         onSelected = onSelectedCallback;
 
         packImage.sprite = data.packImage;
-        packNameText.text = data.packName;
-        priceText.text = $"G {data.price}";
-        descriptionText.text = data.description;
 
-        selectButton.onClick.RemoveAllListeners();
-        selectButton.onClick.AddListener(() => onSelected?.Invoke(packData));
+        packButton.onClick.RemoveAllListeners();
+        packButton.onClick.AddListener(OnPackClicked);
+    }
+
+    private void OnPackClicked()
+    {
+        onSelected?.Invoke(packData);
     }
 }
