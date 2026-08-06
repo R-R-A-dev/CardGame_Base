@@ -3,8 +3,9 @@ using System.Collections.Generic;
 [System.Serializable]
 public class SaveData
 {
-    // 所持カード（カードIDのリスト）
-    public List<int> ownedCardIds = new List<int>();
+    // 所持カード（添え字＝カードID-1、値＝所持枚数）
+    // 例: ownedCardCounts[0] は カードID:1 の所持枚数
+    public List<int> ownedCardCounts = new List<int>();
 
     // 所持金
     public int gold = 0;
@@ -28,9 +29,6 @@ public class SaveData
     public GameSettings settings = new GameSettings();
 }
 
-// ========================================
-// デッキ保存データ（CPU対戦・ローグライク共通）
-// ========================================
 [System.Serializable]
 public class DeckSaveData
 {
@@ -38,9 +36,6 @@ public class DeckSaveData
     public List<int> cardIds = new List<int>();
 }
 
-// ========================================
-// ローグライクモードの進捗
-// ========================================
 [System.Serializable]
 public class RoguelikeSaveData
 {
@@ -48,32 +43,21 @@ public class RoguelikeSaveData
     public int maxHP;
     public int gold;
     public List<int> currentDeck = new List<int>();
-    public string currentNodeId;                          // NodeDataのnodeIdで保存
+    public string currentNodeId;
     public List<string> clearedNodeIds = new List<string>();
     public int currentMapIndex;
-    public string stageDataName;                          // RoguelikeStageDataの名前で保存
-    public bool isInProgress = false;                     // ローグライク進行中かどうか
+    public string stageDataName;
+    public bool isInProgress = false;
 }
 
-// ========================================
-// 各モードのステージクリア状況
-// ========================================
 [System.Serializable]
 public class StageClearData
 {
-    // リーサルパズルのクリア済みステージID一覧
     public List<int> clearedLethalPuzzleStageIds = new List<int>();
-
-    // ローグライクのクリア済みステージ名一覧
     public List<string> clearedRoguelikeStageNames = new List<string>();
-
-    // 2Pickのクリア済みステージID一覧
     public List<int> clearedTwoPickStageIds = new List<int>();
 }
 
-// ========================================
-// 設定
-// ========================================
 [System.Serializable]
 public class GameSettings
 {

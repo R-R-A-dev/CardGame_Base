@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class GachaCardItem : MonoBehaviour
@@ -11,18 +10,27 @@ public class GachaCardItem : MonoBehaviour
     [SerializeField] private Button cardButton;
 
     [Header("回転対象")]
-    [SerializeField] private RectTransform cardRoot; // RectTransformに変更（scale制御のため）
+    [SerializeField] private RectTransform cardRoot;
 
     [Header("通常時の回転演出設定")]
-    [SerializeField] private float flipDuration = 0.4f;
+    [SerializeField] private float flipDuration = 0.1f;
     [SerializeField] private float switchAngle = -90f;
 
+    [Header("通常時のスケール演出設定")]
+    [SerializeField] private float scaleUpDuration = 0.8f;
+    [SerializeField] private float scaleDownDuration = 0.8f;
+    [SerializeField] private float maxScale = 2f;
+
     [Header("SSR演出設定")]
-    [SerializeField] private float ssrFlipDuration = 0.5f;  // -180→-90度にかかる時間
-    [SerializeField] private float ssrSwitchAngle = -90f;  // 裏表切り替え角度
-    [SerializeField] private float ssrScaleUpTime = 0.5f;  // スケール2になるまでの時間
-    [SerializeField] private float ssrScaleDownTime = 0.9f;  // スケール1に戻るまでの時間
-    [SerializeField] private float ssrMaxScale = 2f;
+    [SerializeField] private float ssrFlipDuration = 0.1f;  // -180度→ssrSwitchAngleにかかる時間
+    [SerializeField] private float ssrSwitchAngle = -90f;  // 裏表を切り替える角度
+    [SerializeField] private float ssrPunchScaleTime = 0.2f;  // maxScale→punchScaleにかかる時間
+    [SerializeField] private float ssrScaleDownTime = 0.5f;  // punchScale→1に戻る時間（回転も同時に0度へ戻る）
+    [SerializeField] private float ssrMaxScale = 2f;    // 一段階目の拡大スケール
+    [SerializeField] private float ssrPunchScale = 2.3f;  // 一瞬だけ膨らむ最大スケール
+
+    [Header("共通詳細パネル")]
+    [SerializeField] private GachaCardDetailPanel detailPanel;
 
     private bool isRevealed = false;
     private bool isClickable = false;
@@ -34,7 +42,7 @@ public class GachaCardItem : MonoBehaviour
     private const float END_ANGLE = 0f;
 
     public CardRarity Rarity => rarity;
-
+    public bool IsRevealed => isRevealed;
 
     public void Setup(int id, CardRarity cardRarity, bool revealed, System.Action<GachaCardItem> onClickedCallback)
     {
@@ -50,10 +58,7 @@ public class GachaCardItem : MonoBehaviour
         cardController.Init(cardId, false);
 
         cardButton.onClick.RemoveAllListeners();
-
         cardButton.onClick.AddListener(OnCardButtonClick);
-
-
         cardButton.interactable = false;
     }
 
@@ -61,12 +66,18 @@ public class GachaCardItem : MonoBehaviour
     {
         isClickable = clickable;
         cardButton.interactable = clickable && !isRevealed;
-
     }
 
     private void OnCardButtonClick()
     {
-        if (!isClickable || isRevealed) return;
+        // めくり済みなら詳細パネルを開く
+        if (isRevealed)
+        {
+            detailPanel.Open(cardController); // GachaCardItemが持つcardControllerを渡す
+            return;
+        }
+
+        if (!isClickable) return;
         onClicked?.Invoke(this);
     }
 
@@ -95,33 +106,31 @@ public class GachaCardItem : MonoBehaviour
 
         yield return StartCoroutine(RotateY(switchAngle, END_ANGLE, remainDuration));
 
+        // スケール演出（1→2→1）を削除。通常カードは回転のみで完結する
+
         isRevealed = true;
+        cardButton.interactable = true;
     }
 
     // ===== SSR専用めくり演出 =====
     private IEnumerator SSRFlipAnimation()
     {
         int originalSiblingIndex = cardRoot.GetSiblingIndex();
-
-        // めくっている間だけ同階層で最前面に
         cardRoot.SetAsLastSibling();
 
-        // ① 0.5秒かけて -180度→-90度 の回転と同時にスケールを2倍に
         yield return StartCoroutine(SSRFlipAndScaleUp());
 
-        // ② -90度に到達した時点で裏面を非表示にする
         backImage.SetActive(false);
 
-        // ③ 0.9秒かけてスケールを1に戻す
-        yield return StartCoroutine(ScaleTo(Vector3.one, ssrScaleDownTime));
+        yield return StartCoroutine(ScaleOnly(ssrMaxScale, ssrPunchScale, ssrPunchScaleTime));
+        yield return StartCoroutine(ScaleAndRotateBack(ssrPunchScale, 1f, ssrScaleDownTime));
 
-        // めくり終わったので元のsiblingIndexに戻す
         cardRoot.SetSiblingIndex(originalSiblingIndex);
 
         isRevealed = true;
+        cardButton.interactable = true; // ← 追加：めくり終わったら詳細クリック用に再度trueにする
     }
 
-    // -180度→-90度の回転と、スケール1→2を同時に0.5秒かけて行う
     private IEnumerator SSRFlipAndScaleUp()
     {
         float elapsed = 0f;
@@ -144,28 +153,46 @@ public class GachaCardItem : MonoBehaviour
         cardRoot.localScale = endScale;
     }
 
-    // スケールのみを指定時間かけて変化させる（回転は-90→0度へ同時に戻す）
-    private IEnumerator ScaleTo(Vector3 targetScale, float duration)
+    // スケールのみを指定時間かけて変化させる（回転はそのまま）
+    private IEnumerator ScaleOnly(float fromScale, float toScale, float duration)
     {
         float elapsed = 0f;
-        Vector3 startScale = cardRoot.localScale;
 
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
-            cardRoot.localScale = Vector3.Lerp(startScale, targetScale, t);
+            float scale = Mathf.Lerp(fromScale, toScale, t);
+            cardRoot.localScale = Vector3.one * scale;
+
+            yield return null;
+        }
+
+        cardRoot.localScale = Vector3.one * toScale;
+    }
+
+    // スケールと回転(ssrSwitchAngle→0度)を同時に変化させる
+    private IEnumerator ScaleAndRotateBack(float fromScale, float toScale, float duration)
+    {
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            float scale = Mathf.Lerp(fromScale, toScale, t);
+            cardRoot.localScale = Vector3.one * scale;
             cardRoot.localRotation = Quaternion.Euler(0f, Mathf.Lerp(ssrSwitchAngle, END_ANGLE, t), 0f);
 
             yield return null;
         }
 
-        cardRoot.localScale = targetScale;
+        cardRoot.localScale = Vector3.one * toScale;
         cardRoot.localRotation = Quaternion.Euler(0f, END_ANGLE, 0f);
     }
 
-    // 指定角度から指定角度までY軸回転させる（通常演出用）
     private IEnumerator RotateY(float fromAngle, float toAngle, float duration)
     {
         float elapsed = 0f;
@@ -195,6 +222,6 @@ public class GachaCardItem : MonoBehaviour
         backImage.SetActive(false);
 
         isRevealed = true;
-        cardButton.interactable = false;
+        cardButton.interactable = true; // ← false から true に変更
     }
 }

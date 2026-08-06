@@ -5,21 +5,19 @@ using TMPro;
 public class GachaResultCardItem : MonoBehaviour
 {
     [SerializeField] private CardController cardController;
-    [SerializeField] private TextMeshProUGUI countText; // "×2"等
-    [SerializeField] private GameObject countBadge;      // 1枚の場合は非表示にする
-
-    public void Setup(int cardId, int count)
+    [SerializeField] private TextMeshProUGUI countText;
+    [SerializeField] private Button cardButton;
+    [SerializeField] private GachaCardDetailPanel detailPanel;
+    // detailPanel引数を削除
+    public void Setup(int id, int count)
     {
-        cardController.Init(cardId, false);
+        cardController.Init(id, false);
 
         if (count > 1)
-        {
-            countBadge.SetActive(true);
             countText.text = $"×{count}";
-        }
-        else
-        {
-            countBadge.SetActive(false);
-        }
+
+        cardButton.onClick.RemoveAllListeners();
+        cardButton.onClick.AddListener(() => detailPanel.Open(cardController)); // cardControllerを渡す
+
     }
 }

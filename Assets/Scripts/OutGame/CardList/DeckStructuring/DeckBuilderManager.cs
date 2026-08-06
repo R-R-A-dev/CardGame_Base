@@ -20,7 +20,7 @@ public class DeckBuilderManager : MonoBehaviour
         Instance = this;
         dataSet();
         SaveData saveData = SaveManager.LoadOrInitialize();
-        List<int> ownedCardIds = SaveManager.Load().ownedCardIds;
+        List<int> ownedCardIds = SaveManager.Load().ownedCardCounts;
         // 例: 総所持数で初期化
         CardListData.PossessionCard = ownedCardIds;
     }

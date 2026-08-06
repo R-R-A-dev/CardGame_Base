@@ -97,7 +97,6 @@ public class GachaOpenUI : MonoBehaviour
             if (isValid)
             {
                 cardList[i].transform.position = packPosition.position;
-                // rarityも一緒に渡す
                 cardList[i].Setup(drawnCards[i].cardId, drawnCards[i].rarity, false, OnCardClicked);
             }
         }
@@ -194,10 +193,8 @@ public class GachaOpenUI : MonoBehaviour
     {
         // SSRの場合はカメラシェイクを鳴らす
         if (card.Rarity == CardRarity.SSR)
-        {
-            Debug.Log("SSRカードが引かれたのでカメラシェイクを鳴らす");
             cameraShake.StartShake(0.8f, 20f, 5, 0, false);
-        }
+        
         card.PlayRevealAnimation();
         revealedCount++;
 

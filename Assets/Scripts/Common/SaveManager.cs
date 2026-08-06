@@ -20,7 +20,7 @@ public static class SaveManager
         SaveData saveData = new SaveData();
 
         // 初期カードを配布
-        saveData.ownedCardIds = new List<int> { 2, 2, 2, 2 };
+        saveData.ownedCardCounts = new List<int> { 2, 2, 2, 2 };
 
         // 初期所持金
         saveData.gold = 100;

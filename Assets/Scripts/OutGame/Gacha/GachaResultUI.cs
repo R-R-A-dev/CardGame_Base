@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class GachaResultUI : MonoBehaviour
 {
-    [SerializeField] private Transform cardListParent;
-    [SerializeField] private GachaResultCardItem cardItemPrefab;
+    [SerializeField] private List<GachaResultCardItem> cardItems;
     [SerializeField] private Button closeButton;
 
     private void Start()
@@ -16,15 +14,10 @@ public class GachaResultUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // 複数パック分の合算カードを受け取り、重複をまとめて表示
     public void Open(List<int> allDrawnCards)
     {
         gameObject.SetActive(true);
 
-        foreach (Transform child in cardListParent)
-            Destroy(child.gameObject);
-
-        // 同じカードIDが何枚あるか集計
         Dictionary<int, int> countMap = new Dictionary<int, int>();
         foreach (int cardId in allDrawnCards)
         {
@@ -34,11 +27,20 @@ public class GachaResultUI : MonoBehaviour
                 countMap[cardId] = 1;
         }
 
-        // 集計結果をもとに1種類につき1つ生成
-        foreach (var kvp in countMap)
+        List<int> uniqueIds = new List<int>(countMap.Keys);
+
+        for (int i = 0; i < cardItems.Count; i++)
         {
-            GachaResultCardItem item = Instantiate(cardItemPrefab, cardListParent);
-            item.Setup(kvp.Key, kvp.Value); // カードID・枚数
+            if (i < uniqueIds.Count)
+            {
+                int cardId = uniqueIds[i];
+                cardItems[i].gameObject.SetActive(true);
+                cardItems[i].Setup(cardId, countMap[cardId]);
+            }
+            else
+            {
+                cardItems[i].gameObject.SetActive(false);
+            }
         }
     }
 

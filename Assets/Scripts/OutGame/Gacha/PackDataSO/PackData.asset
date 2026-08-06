@@ -21,13 +21,13 @@ MonoBehaviour:
   unlockConditionDescription: 
   rarityDropRates:
   - rarity: 0
-    dropRatePercent: 0
+    dropRatePercent: 100
   - rarity: 1
     dropRatePercent: 0
   - rarity: 2
     dropRatePercent: 0
   - rarity: 3
-    dropRatePercent: 100
+    dropRatePercent: 0
   cardPool:
   - cardId: 1
     rarity: 0

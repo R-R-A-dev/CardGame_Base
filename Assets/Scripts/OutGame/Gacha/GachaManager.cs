@@ -41,21 +41,16 @@ public class GachaManager : MonoBehaviour
 
         const int MAX_PURCHASE_QUANTITY = 10;
         if (quantity > MAX_PURCHASE_QUANTITY)
-        {
-            Debug.LogWarning($"購入数の上限は{MAX_PURCHASE_QUANTITY}個です");
             quantity = MAX_PURCHASE_QUANTITY;
-        }
 
-        SaveData saveData = SaveManager.Load();
         int totalPrice = pack.price * quantity;
 
-        if (saveData.gold < totalPrice)
+        // メモリ上のデータを直接参照
+        if (!GameDataHolder.Instance.SpendGold(totalPrice))
         {
             Debug.Log("所持金が足りません");
             return;
         }
-
-        saveData.gold -= totalPrice;
 
         List<List<GachaCardEntry>> packResults = new List<List<GachaCardEntry>>();
         for (int i = 0; i < quantity; i++)
@@ -64,10 +59,11 @@ public class GachaManager : MonoBehaviour
             packResults.Add(drawnCards);
 
             foreach (GachaCardEntry entry in drawnCards)
-                saveData.ownedCardIds.Add(entry.cardId);
+                GameDataHolder.Instance.AddCard(entry.cardId);
         }
 
-        SaveManager.Save(saveData);
+        // ここでまとめてファイルに保存
+        GameDataHolder.Instance.SaveToFile();
 
         gachaUI.Hide();
         gachaOpenUI.Open(pack, packResults);
