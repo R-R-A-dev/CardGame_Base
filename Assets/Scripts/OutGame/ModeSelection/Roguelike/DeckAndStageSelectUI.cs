@@ -13,6 +13,9 @@ public class DeckAndStageSelectUI : MonoBehaviour
     [SerializeField] private GameObject ModeSelectionPanel;
     [SerializeField] private TextMeshProUGUI selectedDeck;
 
+    [SerializeField] private DeckBuilderUI deckBuilderUI; // 追加：DeckBuilderUIへの参照
+
+
     private int selectedStageIndex = -1;
     public int selectedDeckId = 0;
 
@@ -33,7 +36,6 @@ public class DeckAndStageSelectUI : MonoBehaviour
     {
         selectedDeckId = deckId;
         deckConfirmPanle.SetActive(true);
-        UpdateStartButton();
     }
 
     //値を受け取る
@@ -73,9 +75,13 @@ public class DeckAndStageSelectUI : MonoBehaviour
     //デッキ編成
     public void OpenDeckEdit()
     {
-        // デッキ編成UIを開く処理
         deckEdit.SetActive(true);
         ModeSelectionPanel.SetActive(false);
+
+        // 選択中のデッキIDでデッキ編集を開始
+        // （selectedDeckIdをそのままdeckNumとして使う想定。プロジェクトの対応に合わせて調整）
+        Debug.Log($"Opening Deck Edit for Deck ID: {selectedDeckId}");
+        deckBuilderUI.StartDeckEdit(selectedDeckId);
     }
 
     public void CloseStagePannle()

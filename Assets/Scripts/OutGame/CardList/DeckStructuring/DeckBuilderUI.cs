@@ -24,6 +24,13 @@ public class DeckBuilderUI : MonoBehaviour
     [Header("フィルター UI")]
     [SerializeField] private FilterPanelUI filterPanel;
 
+    [Header("通常モード用UI")]
+    [SerializeField] private GameObject normalGameStartButton; // 通常のゲームスタートボタン
+
+    [Header("ローグライクモード用UI")]
+    [SerializeField] private GameObject roguelikeDecideButton; // ローグライク用の決定ボタン
+    [SerializeField] private GameObject deckEditPanel;         // このデッキ編集画面全体（非表示にする対象）
+
 
     private CardFilterSettings cardListFilter = new CardFilterSettings();
     private CardFilterSettings deckFilter = new CardFilterSettings();
@@ -44,6 +51,24 @@ public class DeckBuilderUI : MonoBehaviour
     public void StartDeckEdit(int deckNum)
     {
         DeckBuilderManager.Instance.deckNum = deckNum;
+
+        bool isRoguelike = ModeConfigManager.Instance != null &&
+                            ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE;
+
+        if (isRoguelike)
+        {
+            // roguelikeDecks[deckNum].cardIds はIDそのままのリスト（加工しない）
+            List<int> cardIds = GameDataHolder.Instance.Data.roguelikeDecks[deckNum].cardIds;
+
+            // 表示用にだけ、添字方式（枚数ベース）へ一時変換
+            List<int> countList = ConvertCardIdsToCountList(cardIds);
+
+            while (CardListData.Decks.Count <= deckNum)
+                CardListData.Decks.Add(new List<int>());
+
+            CardListData.Decks[deckNum] = countList;
+        }
+
         DisplayDeck();
         DisplayCardList();
         RefreshAllCardUI();
@@ -51,6 +76,104 @@ public class DeckBuilderUI : MonoBehaviour
         DeckBuilderManager.Instance.deckStatisticsUI.
             RefreshStatistics(DeckBuilderManager.Instance.deckNum);
         SortCard();
+
+        UpdateModeButtons();
+    }
+
+    // ローグライクモードかどうかでボタンの表示を切り替える
+    private void UpdateModeButtons()
+    {
+        bool isRoguelike = ModeConfigManager.Instance != null &&
+                            ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE;
+
+        normalGameStartButton.SetActive(!isRoguelike);
+        roguelikeDecideButton.SetActive(isRoguelike);
+    }
+
+    // ローグライクモードの決定ボタン押下時
+    public void OnRoguelikeDecideButtonClick()
+    {
+        int deckIndex = DeckBuilderManager.Instance.deckNum;
+
+        // 編集後のCardListData.Decks（添字方式）を、IDそのままのリストへ変換
+        List<int> countList = CardListData.Decks[deckIndex];
+        List<int> cardIds = ConvertCountListToCardIds(countList);
+
+        // roguelikeDecksのcardIdsへ「IDそのまま」の状態で丸ごと上書き
+        GameDataHolder.Instance.Data.roguelikeDecks[deckIndex].cardIds = cardIds;
+
+        GameDataHolder.Instance.SaveToFile();
+
+        deckEditPanel.SetActive(false);
+    }
+
+    // ===== 表示用の一時変換のみに使う内部メソッド =====
+
+    // IDそのままリスト → 添字方式（枚数ベース）に変換（DeckBuilderUI表示専用）
+    private List<int> ConvertCardIdsToCountList(List<int> cardIds)
+    {
+        List<int> result = new List<int>();
+
+        if (cardIds == null || cardIds.Count == 0)
+            return result;
+
+        int maxId = 0;
+        foreach (int id in cardIds)
+            if (id > maxId) maxId = id;
+
+        result = new List<int>(new int[maxId]);
+
+        foreach (int id in cardIds)
+        {
+            int index = id - 1;
+            result[index]++;
+        }
+
+        return result;
+    }
+
+    // 添字方式（枚数ベース） → IDそのままリストに変換（保存直前のみ使用）
+    private List<int> ConvertCountListToCardIds(List<int> countList)
+    {
+        List<int> result = new List<int>();
+
+        if (countList == null) return result;
+
+        for (int i = 0; i < countList.Count; i++)
+        {
+            int cardId = i + 1;
+            int count = countList[i];
+
+            for (int n = 0; n < count; n++)
+                result.Add(cardId);
+        }
+
+        return result;
+    }
+
+    // ローグライクデッキの保存処理
+    private void SaveRoguelikeDeck(List<int> deck)
+    {
+        DeckSaveData deckData = new DeckSaveData
+        {
+            deckName = $"ローグライクデッキ{DeckBuilderManager.Instance.deckNum}",
+            cardIds = deck
+        };
+
+        // 既存の同番号デッキがあれば上書き、なければ追加
+        var existingDeck = GameDataHolder.Instance.Data.roguelikeDecks
+            .Find(d => d.deckName == deckData.deckName);
+
+        if (existingDeck != null)
+        {
+            existingDeck.cardIds = deck;
+        }
+        else
+        {
+            GameDataHolder.Instance.Data.roguelikeDecks.Add(deckData);
+        }
+
+        GameDataHolder.Instance.SaveToFile();
     }
 
     void Update()
