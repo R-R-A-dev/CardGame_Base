@@ -28,6 +28,14 @@ public static class SaveManager
         // 最初のパックをアンロック
         saveData.unlockedPackIds = new List<int> { 0 };
 
+        // デッキ枠を事前生成（3枠）
+        const int initialDeckSlotCount = 3;
+        for (int i = 0; i < initialDeckSlotCount; i++)
+        {
+            saveData.roguelikeDecks.Add(new DeckSaveData());
+            saveData.cpuBattleDecks.Add(new DeckSaveData());
+        }
+
         Save(saveData);
         Debug.Log("初期セーブデータを作成しました");
 

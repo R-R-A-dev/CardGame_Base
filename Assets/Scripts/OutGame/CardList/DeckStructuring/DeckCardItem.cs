@@ -12,14 +12,18 @@ public class DeckCardItem : MonoBehaviour
     /// </summary>
     public GameObject[] CardSetUp( Transform cardListContent, int deckNum)
     {
+        // 再生成前に既存のカードを削除（StartDeckEditが複数回呼ばれても重複生成しないようにする）
+        foreach (Transform child in cardListContent)
+            Destroy(child.gameObject);
+
         //全カードデータと所持カードデータを比較して
         //デッキにあるカードとその枚数を取得する
         CardEntity[] entitys = CardDatabase.LoadAllCards();
-        CardListData.Decks = new List<List<int>> { new List<int> { 1, 1, 1, 1 } };
-        GameObject[] cardObjects = new GameObject[CardListData.Decks[deckNum].Count];
-        for (int i = 0; i < CardListData.Decks[deckNum].Count; i++)
+        List<int> editingDeckCounts = GameDataHolder.Instance.EditingDeckCounts;
+        GameObject[] cardObjects = new GameObject[editingDeckCounts.Count];
+        for (int i = 0; i < editingDeckCounts.Count; i++)
         {
-            if (CardListData.Decks[deckNum][i] > 0)
+            if (editingDeckCounts[i] > 0)
             {
                 //カード番号：entitys[i].no
                 //カードの枚数：CardListData.PossessionCard[i]
@@ -40,7 +44,7 @@ public class DeckCardItem : MonoBehaviour
     /// <param name="cardNo"></param>
     public void AddDeckCard(int cardNo)
     {
-        CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1]++;
+        GameDataHolder.Instance.EditingDeckCounts[cardNo - 1]++;
     }
 
     /// <summary>
@@ -49,7 +53,7 @@ public class DeckCardItem : MonoBehaviour
     /// <param name="cardNo"></param>
     public void ReturnListCard(int cardNo)
     {
-        CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1]--;
+        GameDataHolder.Instance.EditingDeckCounts[cardNo - 1]--;
     }
 
     /// <summary>

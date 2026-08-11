@@ -15,16 +15,14 @@ public class DeckBuilderManager : MonoBehaviour
 
     public static DeckBuilderManager Instance { get; private set; }
 
+    // デッキ編集画面が決定ボタンで閉じられた時に呼ばれる
+    public System.Action OnDeckEditClosed;
+
     void Awake()
     {
         Instance = this;
         dataSet();
-        SaveData saveData = SaveManager.LoadOrInitialize();
-        List<int> ownedCardIds = SaveManager.Load().ownedCardCounts;
-        // 例: 総所持数で初期化
-        CardListData.PossessionCard = ownedCardIds;
     }
-    //TODO：ゲーム内のデータの管理クラスを持つ、セーブデータを持つ方
     //TODO：ガチャの実装
 
     private void Start()
@@ -32,11 +30,22 @@ public class DeckBuilderManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// デッキ編集の唯一の開始入口
+    /// </summary>
+    public void OpenDeckEditForDeck(int targetDeckNum)
+    {
+        deckNum = targetDeckNum;
+        deckBuilderUI.StartDeckEdit(deckNum);
+    }
 
-
+    // CPU戦モードはコード側からOpenDeckEditForDeckを呼ぶ箇所がなく、
+    // シーン上のパネルSetActive(true)のみで開かれる（OnEnableが唯一の初期化トリガー）ため維持する。
+    // ローグライク側はDeckAndStageSelectUIがOpenDeckEditForDeckを明示的に呼ぶため、
+    // ここではその時点のdeckNumで再初期化されるだけで実害はない。
     private void OnEnable()
     {
-        deckBuilderUI.StartDeckEdit(deckNum);
+        OpenDeckEditForDeck(deckNum);
     }
 
     /// <summary>
@@ -81,6 +90,9 @@ public class DeckBuilderManager : MonoBehaviour
 
     public void GameStart()
     {
+        // CPU戦デッキをcpuBattleDecksへ保存
+        GameDataHolder.Instance.CommitDeckEdit(deckNum, false);
+
         GameSession.SelectedDeck = deckBuilderUI.GetDeck();
         for (int i = 0; i < GameSession.SelectedDeck.Count; i++)
         {

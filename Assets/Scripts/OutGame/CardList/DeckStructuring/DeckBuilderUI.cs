@@ -55,24 +55,12 @@ public class DeckBuilderUI : MonoBehaviour
         bool isRoguelike = ModeConfigManager.Instance != null &&
                             ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE;
 
-        if (isRoguelike)
-        {
-            // roguelikeDecks[deckNum].cardIds はIDそのままのリスト（加工しない）
-            List<int> cardIds = GameDataHolder.Instance.Data.roguelikeDecks[deckNum].cardIds;
-
-            // 表示用にだけ、添字方式（枚数ベース）へ一時変換
-            List<int> countList = ConvertCardIdsToCountList(cardIds);
-
-            while (CardListData.Decks.Count <= deckNum)
-                CardListData.Decks.Add(new List<int>());
-
-            CardListData.Decks[deckNum] = countList;
-        }
+        GameDataHolder.Instance.BeginDeckEdit(deckNum, isRoguelike);
 
         DisplayDeck();
         DisplayCardList();
-        RefreshAllCardUI();
         PrepareDeck();
+        RefreshAllCardUI();
         DeckBuilderManager.Instance.deckStatisticsUI.
             RefreshStatistics(DeckBuilderManager.Instance.deckNum);
         SortCard();
@@ -94,17 +82,20 @@ public class DeckBuilderUI : MonoBehaviour
     public void OnRoguelikeDecideButtonClick()
     {
         int deckIndex = DeckBuilderManager.Instance.deckNum;
-
-        // 編集後のCardListData.Decks（添字方式）を、IDそのままのリストへ変換
-        List<int> countList = CardListData.Decks[deckIndex];
-        List<int> cardIds = ConvertCountListToCardIds(countList);
-
-        // roguelikeDecksのcardIdsへ「IDそのまま」の状態で丸ごと上書き
-        GameDataHolder.Instance.Data.roguelikeDecks[deckIndex].cardIds = cardIds;
-
-        GameDataHolder.Instance.SaveToFile();
+        GameDataHolder.Instance.CommitDeckEdit(deckIndex, true);
 
         deckEditPanel.SetActive(false);
+        DeckBuilderManager.Instance.OnDeckEditClosed?.Invoke();
+    }
+
+    // CPU戦モードの決定ボタン押下時
+    public void OnCpuBattleDecideButtonClick()
+    {
+        int deckIndex = DeckBuilderManager.Instance.deckNum;
+        GameDataHolder.Instance.CommitDeckEdit(deckIndex, false);
+
+        deckEditPanel.SetActive(false);
+        DeckBuilderManager.Instance.OnDeckEditClosed?.Invoke();
     }
 
     // ===== 表示用の一時変換のみに使う内部メソッド =====
@@ -252,11 +243,11 @@ public class DeckBuilderUI : MonoBehaviour
         }
         //デッキに二枚目であればオブジェクトプールから取得して追加
         //一枚目であればそのまま移動
-        if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] >= 2)
+        if (GameDataHolder.Instance.EditingDeckCounts[cardNo - 1] >= 2)
         {
             DeckBuilderManager.Instance.deckBuilderUI.PoolCard(card.gameObject);
         }
-        else if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 1)
+        else if (GameDataHolder.Instance.EditingDeckCounts[cardNo - 1] == 1)
         {
             int newCardCost = card.Cost;
 
@@ -321,7 +312,7 @@ public class DeckBuilderUI : MonoBehaviour
         }
 
 
-        if (CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] == 0)
+        if (GameDataHolder.Instance.EditingDeckCounts[cardNo - 1] == 0)
         {
             foreach (OutGameCardList outGameCardList in deckContent.GetComponentsInChildren<OutGameCardList>())
             {
@@ -562,11 +553,12 @@ public class DeckBuilderUI : MonoBehaviour
         OutGameCardList[] cardLists = deckContent.GetComponentsInChildren<OutGameCardList>(true);
 
         //リストの初期化 カードNo取得用
-        int[] cardNum = new int[CardListData.Decks[DeckBuilderManager.Instance.deckNum].Count];
-        
+        List<int> editingDeckCounts = GameDataHolder.Instance.EditingDeckCounts;
+        int[] cardNum = new int[editingDeckCounts.Count];
+
         // 例: デッキデータを代入
         for (int i = 0; i < cardNum.Length; i++)
-            cardNum[i] = CardListData.Decks[DeckBuilderManager.Instance.deckNum][i];
+            cardNum[i] = editingDeckCounts[i];
 
         // 要素が 0 より大きいものだけを抽出して新しい配列に
         int[] filtered = cardNum.Where(num => num > 0).ToArray();     

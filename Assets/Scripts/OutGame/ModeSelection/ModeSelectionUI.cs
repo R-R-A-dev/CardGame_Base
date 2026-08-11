@@ -3,39 +3,39 @@ using UnityEngine.SceneManagement;
 
 public class ModeSelectionUI : MonoBehaviour
 {
-    [Header("ƒpƒlƒ‹")]
-    [SerializeField] private GameObject modeSelectPanel;      // ƒ‚[ƒh‘I‘ğƒƒCƒ“ƒpƒlƒ‹
-    [SerializeField] private GameObject lethalPuzzlePanel;    // ‹l«Šû‘I‘ğƒpƒlƒ‹
-    [SerializeField] private GameObject twoPickPanel;         // 2Pick‘I‘ğƒpƒlƒ‹
-    [SerializeField] private GameObject roguelikePanel;       // ƒ[ƒOƒ‰ƒCƒN‘I‘ğƒpƒlƒ‹
+    [Header("ï¿½pï¿½lï¿½ï¿½")]
+    [SerializeField] private GameObject modeSelectPanel;      // ï¿½ï¿½ï¿½[ï¿½hï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½pï¿½lï¿½ï¿½
+    [SerializeField] private GameObject lethalPuzzlePanel;    // ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½
+    [SerializeField] private GameObject twoPickPanel;         // 2Pickï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½
+    [SerializeField] private GameObject roguelikePanel;       // ï¿½ï¿½ï¿½[ï¿½Oï¿½ï¿½ï¿½Cï¿½Nï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½
 
-    [Header("ƒV[ƒ“–¼İ’è")]
+    [Header("ï¿½Vï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½İ’ï¿½")]
     [SerializeField] private string battleScene = "Battle";
     [SerializeField] private string titleScene = "Title";
 
     private void Start()
     {
-        // ‰Šúó‘ÔFƒ‚[ƒh‘I‘ğƒpƒlƒ‹‚Ì‚İ•\¦
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÔFï¿½ï¿½ï¿½[ï¿½hï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½ï¿½Ì‚İ•\ï¿½ï¿½
         ShowModeSelectPanel();
     }
 
     // ========================================
-    // ƒpƒlƒ‹•\¦§Œä
+    // ï¿½pï¿½lï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     // ========================================
 
     /// <summary>
-    /// ƒ‚[ƒh‘I‘ğƒpƒlƒ‹‚ğ•\¦
+    /// ï¿½ï¿½ï¿½[ï¿½hï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
     /// </summary>
-    private void ShowModeSelectPanel()
+    public void ShowModeSelectPanel()
     {
-        //modeSelectPanel.SetActive(true);
-        //lethalPuzzlePanel.SetActive(false);
-        //twoPickPanel.SetActive(false);
-        //roguelikePanel.SetActive(false);
+        modeSelectPanel.SetActive(true);
+        lethalPuzzlePanel.SetActive(false);
+        twoPickPanel.SetActive(false);
+        roguelikePanel.SetActive(false);
     }
 
     /// <summary>
-    /// ‹l«Šû‘I‘ğƒpƒlƒ‹‚ğ•\¦
+    /// ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
     /// </summary>
     private void ShowLethalPuzzlePanel()
     {
@@ -46,7 +46,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 2Pick‘I‘ğƒpƒlƒ‹‚ğ•\¦
+    /// 2Pickï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
     /// </summary>
     private void ShowTwoPickPanel()
     {
@@ -57,7 +57,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ[ƒOƒ‰ƒCƒN‘I‘ğƒpƒlƒ‹‚ğ•\¦
+    /// ï¿½ï¿½ï¿½[ï¿½Oï¿½ï¿½ï¿½Cï¿½Nï¿½Iï¿½ï¿½ï¿½pï¿½lï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
     /// </summary>
     private void ShowRoguelikePanel()
     {
@@ -68,11 +68,11 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     // ========================================
-    // ƒ‚[ƒh‘I‘ğƒ{ƒ^ƒ“iƒƒCƒ“ƒpƒlƒ‹j
+    // ï¿½ï¿½ï¿½[ï¿½hï¿½Iï¿½ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½pï¿½lï¿½ï¿½ï¿½j
     // ========================================
 
     /// <summary>
-    /// ‹l«Šûƒ‚[ƒhƒ{ƒ^ƒ“
+    /// ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½hï¿½{ï¿½^ï¿½ï¿½
     /// </summary>
     public void OnClickLethalPuzzleMode()
     {
@@ -80,7 +80,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 2Pickƒ‚[ƒhƒ{ƒ^ƒ“
+    /// 2Pickï¿½ï¿½ï¿½[ï¿½hï¿½{ï¿½^ï¿½ï¿½
     /// </summary>
     public void OnClickTwoPickMode()
     {
@@ -88,7 +88,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ[ƒOƒ‰ƒCƒNƒ‚[ƒhƒ{ƒ^ƒ“
+    /// ï¿½ï¿½ï¿½[ï¿½Oï¿½ï¿½ï¿½Cï¿½Nï¿½ï¿½ï¿½[ï¿½hï¿½{ï¿½^ï¿½ï¿½
     /// </summary>
     public void OnClickRoguelikeMode()
     {
@@ -96,7 +96,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ^ƒCƒgƒ‹‚É–ß‚é
+    /// ï¿½^ï¿½Cï¿½gï¿½ï¿½ï¿½É–ß‚ï¿½
     /// </summary>
     public void OnClickBackToTitle()
     {
@@ -104,11 +104,11 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     // ========================================
-    // –ß‚éƒ{ƒ^ƒ“iŠeƒTƒuƒpƒlƒ‹j
+    // ï¿½ß‚ï¿½{ï¿½^ï¿½ï¿½ï¿½iï¿½eï¿½Tï¿½uï¿½pï¿½lï¿½ï¿½ï¿½j
     // ========================================
 
     /// <summary>
-    /// ƒ‚[ƒh‘I‘ğ‚É–ß‚é
+    /// ï¿½ï¿½ï¿½[ï¿½hï¿½Iï¿½ï¿½ï¿½É–ß‚ï¿½
     /// </summary>
     public void OnClickBackToModeSelect()
     {

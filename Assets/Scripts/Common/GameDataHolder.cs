@@ -48,6 +48,83 @@ public class GameDataHolder : MonoBehaviour
     }
 
     // ========================================
+    // デッキ編集ブリッジ（添字方式のワーキングデータ ⇄ IDそのまま方式のセーブデータ）
+    // ========================================
+
+    // デッキ編集用ワーキングデータ（添字方式）。CardListData.Decksの代替
+    public List<int> EditingDeckCounts { get; private set; }
+
+    // 所持カードの表示用コピー（添字方式）。CardListData.PossessionCardの代替
+    public List<int> DisplayPossessionCard { get; private set; }
+
+    public void BeginDeckEdit(int deckNum, bool isRoguelike)
+    {
+        int cardTypeCount = CardDatabase.LoadAllCards().Length;
+
+        List<DeckSaveData> decks = isRoguelike ? Data.roguelikeDecks : Data.cpuBattleDecks;
+        while (decks.Count <= deckNum)
+            decks.Add(new DeckSaveData());
+
+        EditingDeckCounts = ConvertCardIdsToCountList(decks[deckNum].cardIds, cardTypeCount);
+        DisplayPossessionCard = ConvertCardIdsToCountList(
+            CardOwnershipConverter.ToCardIdList(Data.ownedCardCounts), cardTypeCount);
+
+        Debug.Log($"[BeginDeckEdit] deckNum={deckNum} isRoguelike={isRoguelike} " +
+            $"savedCardIds.Count={decks[deckNum].cardIds.Count} EditingDeckCounts合計={SumOf(EditingDeckCounts)}");
+    }
+
+    public void CommitDeckEdit(int deckNum, bool isRoguelike)
+    {
+        List<DeckSaveData> decks = isRoguelike ? Data.roguelikeDecks : Data.cpuBattleDecks;
+        while (decks.Count <= deckNum)
+            decks.Add(new DeckSaveData());
+
+        decks[deckNum].cardIds = ConvertCountListToCardIds(EditingDeckCounts);
+        SaveToFile();
+
+        Debug.Log($"[CommitDeckEdit] deckNum={deckNum} isRoguelike={isRoguelike} " +
+            $"savedCardIds.Count={decks[deckNum].cardIds.Count}");
+    }
+
+    private int SumOf(List<int> counts)
+    {
+        int sum = 0;
+        foreach (int c in counts) sum += c;
+        return sum;
+    }
+
+    // IDそのままリスト → 添字方式（枚数ベース）に変換。sizeは必ず全カード種数を渡す
+    private List<int> ConvertCardIdsToCountList(List<int> cardIds, int size)
+    {
+        List<int> result = new List<int>(new int[size]);
+        if (cardIds == null) return result;
+
+        foreach (int id in cardIds)
+        {
+            int index = id - 1;
+            if (index >= 0 && index < result.Count)
+                result[index]++;
+        }
+        return result;
+    }
+
+    // 添字方式（枚数ベース） → IDそのままリストに変換
+    private List<int> ConvertCountListToCardIds(List<int> countList)
+    {
+        List<int> result = new List<int>();
+        if (countList == null) return result;
+
+        for (int i = 0; i < countList.Count; i++)
+        {
+            int cardId = i + 1;
+            int count = countList[i];
+            for (int n = 0; n < count; n++)
+                result.Add(cardId);
+        }
+        return result;
+    }
+
+    // ========================================
     // 所持カード関連
     // ========================================
     public void AddCard(int cardId)

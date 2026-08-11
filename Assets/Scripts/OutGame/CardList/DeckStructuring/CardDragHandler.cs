@@ -180,9 +180,9 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         //所持一覧でoutgamecardlistのNoを取得してカードの枚数から取得可能か判定
         //CardListData.PossessionCard[cardNum - 1];
         int cardNo = GetComponent<OutGameCardList>().No;
-        if (!isDeck && CardListData.PossessionCard[cardNo - 1] > 0)
+        if (!isDeck && GameDataHolder.Instance.DisplayPossessionCard[cardNo - 1] > 0)
             return true;
-        else if (isDeck && CardListData.Decks[DeckBuilderManager.Instance.deckNum][cardNo - 1] > 0)
+        else if (isDeck && GameDataHolder.Instance.EditingDeckCounts[cardNo - 1] > 0)
             return true;
 
         return false;
@@ -284,9 +284,10 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
         Transform originalParent = cardAnimationController.transform.parent;
 
-        // 親の親の親の親を取得
-        Transform targetParent = cardAnimationController.transform
-            .parent.parent.parent.parent;
+        // 一番上の階層（Canvasルート）を取得
+        // ※階層の深さはプールから再利用したカードか新規生成したカードかで変わるため、
+        //   固定段数の.parentではなく.rootで取得する
+        Transform targetParent = cardAnimationController.transform.root;
 
         // 移動前のワールド座標を保持したまま親を変更
         cardAnimationController.transform.SetParent(targetParent, true);
@@ -298,8 +299,9 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
         yield return new WaitForSeconds(0.2f);
         cardAnimationController.GetComponent<CanvasGroup>().blocksRaycasts = true;
         cardAnimationController.transform.SetParent(originalParent, true);
+        // AddCardToDeck内で、デッキ内が1枚目ならこのカード（holdCard）自体がdeckContentの
+        // 子オブジェクトとして再利用され、2枚目以降ならプールに戻される（AddDeckCard参照）
         DeckBuilderManager.Instance.AddCardToDeck(outGameCardList, cardNum, cardDragHandler);
-
 
         //一覧のアニメーションカード生成　アニメーション
         GameObject afterCard = DeckBuilderManager.Instance.deckBuilderUI.GetCardPool();

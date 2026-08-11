@@ -16,18 +16,18 @@ public class CardListItem : MonoBehaviour
     /// </summary>
     public GameObject[] CardSetUp(Transform cardListContent)
     {
+        // 再生成前に既存のカードを削除（StartDeckEditが複数回呼ばれても重複生成しないようにする）
+        foreach (Transform child in cardListContent)
+            Destroy(child.gameObject);
+
         // 全カードデータと所持カードデータを比較して
         CardEntity[] entitys = CardDatabase.LoadAllCards();
-        //List<int> ownedCardIds = SaveManager.Load().ownedCardIds;
-        //// 例: 総所持数で初期化
-        //CardListData.PossessionCard = ownedCardIds;
 
-
-
-        GameObject[] cardObjects = new GameObject[CardListData.PossessionCard.Count];
-        for (int i = 0; i < CardListData.PossessionCard.Count; i++)
+        List<int> displayPossessionCard = GameDataHolder.Instance.DisplayPossessionCard;
+        GameObject[] cardObjects = new GameObject[displayPossessionCard.Count];
+        for (int i = 0; i < displayPossessionCard.Count; i++)
         {
-            if (CardListData.PossessionCard[i] > 0)
+            if (displayPossessionCard[i] > 0)
             {
                 //カード番号：entitys[i].no
                 //カードの枚数：CardListData.PossessionCard[i]
@@ -47,7 +47,7 @@ public class CardListItem : MonoBehaviour
     /// <param name="cardNo"></param>
     public void AddCardList(int cardNo)
     {
-        CardListData.PossessionCard[cardNo - 1]++;
+        GameDataHolder.Instance.DisplayPossessionCard[cardNo - 1]++;
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class CardListItem : MonoBehaviour
     /// <param name="cardNo"></param>
     public void ReturnCardList(int cardNo)
     {
-        CardListData.PossessionCard[cardNo - 1]--;
+        GameDataHolder.Instance.DisplayPossessionCard[cardNo - 1]--;
     }
 
     /// <summary>
@@ -65,12 +65,13 @@ public class CardListItem : MonoBehaviour
     public void PrepareDeck()
     {
         // デッキに入っている分だけ減算
-        List<int> deck = CardListData.Decks[DeckBuilderManager.Instance.deckNum];
-        for (int i = 0; i < CardListData.PossessionCard.Count; i++)
+        List<int> deck = GameDataHolder.Instance.EditingDeckCounts;
+        List<int> displayPossessionCard = GameDataHolder.Instance.DisplayPossessionCard;
+        for (int i = 0; i < displayPossessionCard.Count; i++)
         {
-            CardListData.PossessionCard[i] -= deck[i];
-            if (CardListData.PossessionCard[i] < 0)
-                CardListData.PossessionCard[i] = 0;
+            displayPossessionCard[i] -= deck[i];
+            if (displayPossessionCard[i] < 0)
+                displayPossessionCard[i] = 0;
         }
     }
 

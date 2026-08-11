@@ -22,7 +22,7 @@ public class DeckStatisticsUI : MonoBehaviour
         // デッキ情報が渡されなかった場合、指定されたデッキ番号から取得(デッキの所持状況)
         //TwoPickのデッキが渡された場合はそちらを優先
         if (deck == null)
-            deck = CardListData.Decks[deckNum];
+            deck = GameDataHolder.Instance.EditingDeckCounts;
 
         // TwoPickのCaredEntityリストを用意が必要
         // 所持カードリスト取得

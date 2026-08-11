@@ -93,50 +93,36 @@ public class OutGameCardList : MonoBehaviour
         //デッキにある場合は枚数を表示のみ
         //自分の番号とデッキと一覧の比較からパネルの表示をする
 
-        int deckCardNum = CardListData.Decks[deckNum][No - 1];
-        int cardListNum = CardListData.PossessionCard[No - 1];
+        int deckCardNum = GameDataHolder.Instance.EditingDeckCounts[No - 1];
+        int cardListNum = GameDataHolder.Instance.DisplayPossessionCard[No - 1];
 
-        if (isDeck && deckCardNum > 0)
+        if (isDeck)
         {
-            countText.gameObject.SetActive(true);
-            countPanel.SetActive(true);
-            countText.text = $"×{deckCardNum}";
+            // デッキ側：枚数表示のみ。「編成中」オーバーレイは常に非表示にする
+            bool showCount = deckCardNum > 0;
+            countText.gameObject.SetActive(showCount);
+            countPanel.SetActive(showCount);
+            if (showCount)
+                countText.text = $"×{deckCardNum}";
+
+            selectedText.gameObject.SetActive(false);
+            selectedPanel.SetActive(false);
         }
-        else if (cardListNum > 0)
+        else
         {
-            countText.gameObject.SetActive(true);
-            countPanel.SetActive(true);
-            countText.text = $"×{cardListNum - deckCardNum}";
-            if (deckCardNum > 0)
-            {
-                selectedText.gameObject.SetActive(true);
-                selectedPanel.SetActive(true);
+            // 所持一覧側：残り枚数を表示し、所持しているカードは「編成中」オーバーレイも合わせて表示する
+            bool showCount = cardListNum > 0 || deckCardNum > 0;
+            countText.gameObject.SetActive(showCount);
+            countPanel.SetActive(showCount);
+            if (showCount)
+                countText.text = $"×{cardListNum}";
+
+            // デッキに入っているかどうかに関わらず、所持しているカードは開いた直後から表示する
+            selectedText.gameObject.SetActive(showCount);
+            selectedPanel.SetActive(showCount);
+            if (showCount)
                 selectedText.text = $"編成中\n×{deckCardNum}";
-            }
         }
-
-        //if (isDeck && deckCardNum > 0)
-        //{
-        //    countText.gameObject.SetActive(true);
-        //    countPanel.SetActive(true);
-        //    countText.text = $"×{deckCardNum}";
-        //}
-        //else if (cardListNum > 0)
-        //{
-        //    countText.gameObject.SetActive(true);
-        //    countPanel.SetActive(true);
-        //    countText.text = $"×{cardListNum - deckCardNum}";
-        //    if (deckCardNum > 0)
-        //    {
-        //        selectedText.gameObject.SetActive(true);
-        //        selectedPanel.SetActive(true);
-        //        selectedText.text = $"編成中\n×{deckCardNum}";
-        //    }
-        //    if (deckCardNum > 0 && cardListNum > 0)
-        //    {
-        //        CardListData.PossessionCard[No - 1] = cardListNum - deckCardNum;
-        //    }
-        //}
 
     }
 
@@ -146,26 +132,11 @@ public class OutGameCardList : MonoBehaviour
     /// <param name="isDeck"></param>
     public void RefreshCardView(bool isDeck, int cardNo, int deckNum, OutGameCardList outGameCardList)
     {
-        int deckCardNum = CardListData.Decks[deckNum][No - 1];
-        int cardListNum = CardListData.PossessionCard[No - 1];
-
-        
-
-        if (isDeck)
-        {
-            // OutgameCardList：デッキのカード
-            outGameCardList.countText.text = $"×{deckCardNum}";
-            countText.text = $"×{deckCardNum}";
-            outGameCardList.selectedText.text = $"編成中\n×{deckCardNum}";
-        }
-        else
-        {
-            // OutgameCardList：所持一覧のカード
-            outGameCardList.countText.text = $"×{cardListNum}";
-            countText.text = $"×{deckCardNum}";
-            outGameCardList.selectedText.text = $"編成中\n×{deckCardNum}";
-
-        }
+        // テキストの書き換えだけでSetActiveを呼んでいなかったため、
+        // 元々非表示だったパネルはテキストが更新されても見た目に反映されなかった。
+        // 表示制御込みのRefreshViewを呼ぶようにする。
+        RefreshView(isDeck, deckNum);
+        outGameCardList.RefreshView(isDeck, deckNum);
     }
 
 
@@ -173,6 +144,11 @@ public class OutGameCardList : MonoBehaviour
     {
         countText.gameObject.SetActive(true);
         countPanel.SetActive(true);
+
+        // このカードオブジェクトはデッキ側の表示として再利用されるため、
+        // 一覧側で使われる「編成中」オーバーレイは非表示にする
+        selectedText.gameObject.SetActive(false);
+        selectedPanel.SetActive(false);
     }
 
     /// <summary>
