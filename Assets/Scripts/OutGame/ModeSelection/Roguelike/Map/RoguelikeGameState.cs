@@ -19,10 +19,13 @@ public class RoguelikeGameState
         MaxHP = stageData.playerInitialHP;
         CurrentHP = MaxHP;
         Gold = 50;
-        //TODO:デッキIDからデッキを取得
-        CurrentDeck = new List<int>(config.DeckId);
-        CurrentDeck.Add(3);
-        CurrentDeck.Add(3);
+
+        // 選択されたデッキIDから実際のカードIDリストを取得
+        List<DeckSaveData> decks = GameDataHolder.Instance.Data.roguelikeDecks;
+        CurrentDeck = (config.DeckId >= 0 && config.DeckId < decks.Count)
+            ? new List<int>(decks[config.DeckId].cardIds)
+            : new List<int>();
+
         CurrentStageData = stageData;
         CurrentMapIndex = 0;
     }

@@ -20,13 +20,17 @@ public class DeckAndStageSelectUI : MonoBehaviour
     private const int MIN_DECK_SIZE = 40;
 
     private int selectedStageIndex = -1;
-    public int selectedDeckId = 0;
+    public int selectedDeckId = -1;
+    private int decidedDeckId = -1; // DecideDeckで決定されたデッキIDのみを保持
 
     private void Start()
     {
         // 通知を受け取るだけ
         stageSelectUI.OnStageSelected += OnStageSelected;
         deckSelectUI.OnDeckSelected += OnDeckSelectedEdit;
+
+        // デッキが決定されるまでステージ選択ボタンは非活性にしておく
+        stageSelectUI.SetSelectButtonsInteractable(false);
 
         // 注意: DeckEditパネルはシーン開始時点で非アクティブなため、
         // ここではDeckBuilderManager.Instanceがまだnull（Awakeが未実行）。
@@ -85,11 +89,10 @@ public class DeckAndStageSelectUI : MonoBehaviour
         //ローグライク
         RoguelikeStartConfig config = new RoguelikeStartConfig
         {
-            DeckId = selectedDeckId,
+            DeckId = decidedDeckId,
             StageConfig = new StageConfig { StageId = selectedStageIndex }
         };
-        // Managerに渡す
-
+        // Managerに渡し、生成されたゲーム状態を受け取る
         RoguelikeManager.Instance.StartRoguelike(config);
     }
 
@@ -137,6 +140,9 @@ public class DeckAndStageSelectUI : MonoBehaviour
     {
         deckConfirmPanle.SetActive(false);
         selectedDeck.text = selectedDeckId.ToString();
+
+        decidedDeckId = selectedDeckId;
+        stageSelectUI.SetSelectButtonsInteractable(true);
     }
 }
 /*ゲームスタート後にitemからstageのデータを取得

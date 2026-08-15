@@ -47,12 +47,13 @@ public class OwnedDeckCheckPanel : MonoBehaviour, IPointerDownHandler
         cardListPanel.SetActive(true);
         cardInfoPanel.SetActive(false);
 
-        CardDisplay(new List<int> {1,2,3 });
+        RoguelikeGameState gameState = RoguelikeManager.Instance != null ? RoguelikeManager.Instance.GameState : null;
+        CardDisplay(gameState != null ? gameState.CurrentDeck : new List<int>());
 
         // 呼び出し元（Shop/Treasure等）のモードを止める
         OnOpened?.Invoke();
     }
-    //TODO:購入処理おかしい rewardのカード表示もおかしい
+
     private void CardDisplay(List<int> deckCardIds)
     {
         foreach (CardController card in cardList)

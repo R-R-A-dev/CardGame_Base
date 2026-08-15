@@ -6,6 +6,8 @@ public class RoguelikeManager : MonoBehaviour
 {
     public static RoguelikeManager Instance { get; private set; }
 
+    public RoguelikeGameState GameState => gameState;
+
     [SerializeField] private DeckAndStageSelectUI deckAndStageSelectUI;
     [SerializeField] private MapUI mapUI;
     [SerializeField] private List<RoguelikeStageData> stageData;
@@ -20,6 +22,7 @@ public class RoguelikeManager : MonoBehaviour
     [SerializeField] private GameObject treasureCardSelectPanel;
 
     [SerializeField] private BattleRewardUI battleRewardUI;
+    [SerializeField] private RoguelikeStageClearUI stageClearUI;
 
     private RoguelikeGameState gameState;
     private RoguelikeStageData currentStageData;
@@ -64,7 +67,7 @@ public class RoguelikeManager : MonoBehaviour
     /// DeckAndStageSelectUIの開始ボタンから呼ぶ
     /// RoguelikeStartConfigとRoguelikeStageDataを所持しておく</summary>
     /// <param name="config"></param>
-    public void StartRoguelike(RoguelikeStartConfig config)
+    public RoguelikeGameState StartRoguelike(RoguelikeStartConfig config)
     {
         treasureCardSelectPanel.SetActive(false);
 
@@ -77,6 +80,8 @@ public class RoguelikeManager : MonoBehaviour
         // デッキ選択画面を閉じてマップへ
         //deckAndStageSelectUI.gameObject.SetActive(false);
         OpenMap();
+
+        return gameState;
     }
 
     /// <summary>
@@ -218,9 +223,19 @@ public class RoguelikeManager : MonoBehaviour
     // ========================================
     private void OnStageClear()
     {
-        // ステージクリア画面へ
-        // StageClearUI.Instance.Open();
         Debug.Log("ステージクリア！");
+
+        // 報酬パネルを開く（ランで貯めたゴールドを所持金に加算）
+        mapUI.Hide();
+        stageClearUI.Open(gameState, currentStageData.stageName);
+    }
+
+    // ========================================
+    // ステージクリア報酬パネルを閉じた時（RoguelikeStageClearUIから呼ばれる）
+    // ========================================
+    public void OnStageClearConfirmed()
+    {
+        deckAndStageSelectUI.gameObject.SetActive(true);
     }
 
     // ========================================

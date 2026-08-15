@@ -8,6 +8,7 @@ public class BattleRewardUI : MonoBehaviour
     [SerializeField] private GameObject cardInfoPanel;
     [SerializeField] private List<CardController> cardList;
     [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private Button closeButton;
     [SerializeField] private BattleRewardCardSelectPanel selectPanel;
 
     private RoguelikeGameState gameState;
@@ -16,6 +17,9 @@ public class BattleRewardUI : MonoBehaviour
     {
         // ActionにOnCardSelectedを登録
         selectPanel.OnCardsConfirmed = OnCardSelected;
+
+        closeButton.onClick.RemoveAllListeners();
+        closeButton.onClick.AddListener(OnCloseButtonClick);
     }
 
     public void Open(RewardData data, RoguelikeGameState state)
@@ -53,6 +57,19 @@ public class BattleRewardUI : MonoBehaviour
             gameState.CurrentDeck.Add(cardId);
 
         Close();
+    }
+
+    private void OnCloseButtonClick()
+    {
+        if (selectPanel.IsInfoPanelOpen)
+        {
+            selectPanel.CloseInfoPanel();
+            return;
+        }
+
+        // 選択が完了していれば所持カードに反映してから閉じる（TryConfirmSelection内でClose()も呼ばれる）
+        if (!selectPanel.TryConfirmSelection())
+            Close();
     }
 
     private void Close()

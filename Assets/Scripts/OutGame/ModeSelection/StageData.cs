@@ -2,67 +2,68 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // ========================================
-// ƒXƒe[ƒWƒ^ƒCƒv
+// ï¿½Xï¿½eï¿½[ï¿½Wï¿½^ï¿½Cï¿½v
 // ========================================
 public enum StageType
 {
-    NORMAL_BATTLE,  // ’Êíí“¬
-    ELITE_BATTLE,   // ƒGƒŠ[ƒgí“¬
-    BOSS_BATTLE,    // ƒ{ƒXí“¬
-    TREASURE,       // •ó” i•ñV‚Ì‚İj
-    SHOP,           // ƒVƒ‡ƒbƒv
-    EVENT,          // ƒCƒxƒ“ƒg
-    REST,           // ‹xŒeiHP‰ñ•œj
-    DAMAGE,         // ƒ_ƒ[ƒW
-    CARD_LOSS       // ƒJ[ƒhƒƒXƒg
+    NORMAL_BATTLE,  // ï¿½Êï¿½í“¬
+    ELITE_BATTLE,   // ï¿½Gï¿½ï¿½ï¿½[ï¿½gï¿½í“¬
+    BOSS_BATTLE,    // ï¿½{ï¿½Xï¿½í“¬
+    TREASURE,       // ï¿½ó” iï¿½ï¿½Vï¿½Ì‚İj
+    SHOP,           // ï¿½Vï¿½ï¿½ï¿½bï¿½v
+    EVENT,          // ï¿½Cï¿½xï¿½ï¿½ï¿½g
+    REST,           // ï¿½xï¿½eï¿½iHPï¿½ñ•œj
+    DAMAGE,         // ï¿½_ï¿½ï¿½ï¿½[ï¿½W
+    CARD_LOSS       // ï¿½Jï¿½[ï¿½hï¿½ï¿½ï¿½Xï¿½g
 }
 
 // ========================================
-// ƒpƒ‰ƒ[ƒ^•ÏXƒ^ƒCƒv
+// ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½ÏXï¿½^ï¿½Cï¿½v
 // ========================================
 public enum ParameterModifierType
 {
-    HP_BOOST,           // Å‘åHP‘‰Á
-    HP_REDUCTION,       // Å‘åHPŒ¸­
-    MANA_BOOST,         // Å‘åƒ}ƒi‘‰Á
-    MANA_REDUCTION,     // Å‘åƒ}ƒiŒ¸­
-    ATTACK_BOOST,       // UŒ‚—Í‘‰Á
-    ATTACK_REDUCTION,   // UŒ‚—ÍŒ¸­
-    DEFENSE_BOOST,      // –hŒä—Í‘‰Á
-    DEFENSE_REDUCTION,  // –hŒä—ÍŒ¸­
-    CARD_DRAW_BOOST,    // ƒhƒ[–‡”‘‰Á
-    CARD_DRAW_REDUCTION // ƒhƒ[–‡”Œ¸­
+    None,
+    HP_BOOST,           // ï¿½Å‘ï¿½HPï¿½ï¿½ï¿½ï¿½
+    HP_REDUCTION,       // ï¿½Å‘ï¿½HPï¿½ï¿½ï¿½ï¿½
+    MANA_BOOST,         // ï¿½Å‘ï¿½}ï¿½iï¿½ï¿½ï¿½ï¿½
+    MANA_REDUCTION,     // ï¿½Å‘ï¿½}ï¿½iï¿½ï¿½ï¿½ï¿½
+    ATTACK_BOOST,       // ï¿½Uï¿½ï¿½ï¿½Í‘ï¿½ï¿½ï¿½
+    ATTACK_REDUCTION,   // ï¿½Uï¿½ï¿½ï¿½ÍŒï¿½ï¿½ï¿½
+    DEFENSE_BOOST,      // ï¿½hï¿½ï¿½Í‘ï¿½ï¿½ï¿½
+    DEFENSE_REDUCTION,  // ï¿½hï¿½ï¿½ÍŒï¿½ï¿½ï¿½
+    CARD_DRAW_BOOST,    // ï¿½hï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    CARD_DRAW_REDUCTION // ï¿½hï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
 // ========================================
-// ƒpƒ‰ƒ[ƒ^•ÏXİ’è
+// ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½ÏXï¿½İ’ï¿½
 // ========================================
 [System.Serializable]
 public class ParameterModifier
 {
-    [Header("•ÏXƒ^ƒCƒv")]
+    [Header("ï¿½ÏXï¿½^ï¿½Cï¿½v")]
     public ParameterModifierType modifierType;
 
-    [Header("•ÏX’l")]
-    public int value; // ‘Œ¸’l
-    public bool isPercentage; // ƒp[ƒZƒ“ƒgw’è‚©ifalse‚È‚çŒÅ’è’lj
+    [Header("ï¿½ÏXï¿½l")]
+    public int value; // ï¿½ï¿½ï¿½ï¿½ï¿½l
+    public bool isPercentage; // ï¿½pï¿½[ï¿½Zï¿½ï¿½ï¿½gï¿½wï¿½è‚©ï¿½ifalseï¿½È‚ï¿½Å’ï¿½lï¿½j
 
-    [Header("“K—p‘ÎÛ")]
-    public bool applyToPlayer = true; // ƒvƒŒƒCƒ„[‚É“K—p
-    public bool applyToEnemy = false;  // “G‚É“K—p
+    [Header("ï¿½Kï¿½pï¿½Îï¿½")]
+    public bool applyToPlayer = true; // ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½É“Kï¿½p
+    public bool applyToEnemy = false;  // ï¿½Gï¿½É“Kï¿½p
 
-    [Header("à–¾")]
+    [Header("ï¿½ï¿½ï¿½ï¿½")]
     [TextArea(1, 2)]
-    public string description; // UI•\¦—p
+    public string description; // UIï¿½\ï¿½ï¿½ï¿½p
 }
 
 // ========================================
-// ƒXƒe[ƒWƒf[ƒ^ ScriptableObject
+// ï¿½Xï¿½eï¿½[ï¿½Wï¿½fï¿½[ï¿½^ ScriptableObject
 // ========================================
 [CreateAssetMenu(fileName = "StageData", menuName = "Roguelike/StageData")]
 public class StageData : ScriptableObject
 {
-    [Header("=== ƒXƒe[ƒWŠî–{î•ñ ===")]
+    [Header("=== ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½{ï¿½ï¿½ï¿½ ===")]
     public string stageName = "Stage 1";
     public int stageNumber = 1;
     public StageType stageType = StageType.NORMAL_BATTLE;
@@ -70,57 +71,57 @@ public class StageData : ScriptableObject
     [TextArea(2, 4)]
     public string stageDescription;
 
-    public Sprite stageIcon; // ƒXƒe[ƒWƒAƒCƒRƒ“
-    public Sprite stageBackground; // ”wŒi‰æ‘œ
+    public Sprite stageIcon; // ï¿½Xï¿½eï¿½[ï¿½Wï¿½Aï¿½Cï¿½Rï¿½ï¿½
+    public Sprite stageBackground; // ï¿½wï¿½iï¿½æ‘œ
 
-    [Header("=== “Gİ’è ===")]
-    [Tooltip("“G‚Ì–¼‘O")]
+    [Header("=== ï¿½Gï¿½İ’ï¿½ ===")]
+    [Tooltip("ï¿½Gï¿½Ì–ï¿½ï¿½O")]
     public string enemyName = "Goblin";
 
-    [Tooltip("“G‚ÌHP")]
+    [Tooltip("ï¿½Gï¿½ï¿½HP")]
     public int enemyHP = 20;
 
-    [Tooltip("“G‚Ì‰Šúƒ}ƒi")]
+    [Tooltip("ï¿½Gï¿½Ìï¿½ï¿½ï¿½ï¿½}ï¿½i")]
     public int enemyInitialMana = 1;
 
-    [Tooltip("“G‚ªg—p‚·‚éƒfƒbƒLiƒJ[ƒhID‚ÌƒŠƒXƒgj")]
+    [Tooltip("ï¿½Gï¿½ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½ï¿½fï¿½bï¿½Lï¿½iï¿½Jï¿½[ï¿½hIDï¿½Ìƒï¿½ï¿½Xï¿½gï¿½j")]
     public List<int> enemyDeck = new List<int>();
 
-    [Header("=== ƒpƒ‰ƒ[ƒ^•ÏXƒMƒ~ƒbƒN ===")]
-    [Tooltip("‚±‚ÌƒXƒe[ƒW‚Å“K—p‚³‚ê‚éƒpƒ‰ƒ[ƒ^•ÏX")]
+    [Header("=== ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½ÏXï¿½Mï¿½~ï¿½bï¿½N ===")]
+    [Tooltip("ï¿½ï¿½ï¿½ÌƒXï¿½eï¿½[ï¿½Wï¿½Å“Kï¿½pï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½ÏX")]
     public List<ParameterModifier> parameterModifiers = new List<ParameterModifier>();
 
-    [Header("=== •ñVİ’è ===")]
-    [Tooltip("ƒNƒŠƒA‚ÌƒS[ƒ‹ƒh•ñV")]
+    [Header("=== ï¿½ï¿½Vï¿½İ’ï¿½ ===")]
+    [Tooltip("ï¿½Nï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ÌƒSï¿½[ï¿½ï¿½ï¿½hï¿½ï¿½V")]
     public int goldReward = 50;
 
-    [Tooltip("ƒNƒŠƒA‚É‘I‚×‚éƒJ[ƒh”")]
+    [Tooltip("ï¿½Nï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½É‘Iï¿½×‚ï¿½Jï¿½[ï¿½hï¿½ï¿½")]
     public int cardRewardCount = 3;
 
-    [Tooltip("•ñVƒJ[ƒhƒv[ƒ‹i‹ó‚Ìê‡‚Í‹¤’Êƒv[ƒ‹‚©‚çj")]
+    [Tooltip("ï¿½ï¿½Vï¿½Jï¿½[ï¿½hï¿½vï¿½[ï¿½ï¿½ï¿½iï¿½ï¿½Ìê‡ï¿½Í‹ï¿½ï¿½Êƒvï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½j")]
     public List<int> rewardCardPool = new List<int>();
 
-    [Header("=== “Áêİ’è ===")]
-    [Tooltip("‹xŒe’n“_‚Ìê‡‚Ì‰ñ•œ—Ê")]
+    [Header("=== ï¿½ï¿½ï¿½ï¿½İ’ï¿½ ===")]
+    [Tooltip("ï¿½xï¿½eï¿½nï¿½_ï¿½Ìê‡ï¿½Ì‰ñ•œ—ï¿½")]
     public int healAmount = 10;
 
-    [Tooltip("ƒVƒ‡ƒbƒv‚Ìê‡‚Ì”Ì”„ƒJ[ƒh”")]
+    [Tooltip("ï¿½Vï¿½ï¿½ï¿½bï¿½vï¿½Ìê‡ï¿½Ì”Ì”ï¿½ï¿½Jï¿½[ï¿½hï¿½ï¿½")]
     public int shopCardCount = 5;
 
-    [Tooltip("ƒVƒ‡ƒbƒv‚Ìê‡‚Ì”Ì”„ƒJ[ƒhƒŠƒXƒg")]
+    [Tooltip("ï¿½Vï¿½ï¿½ï¿½bï¿½vï¿½Ìê‡ï¿½Ì”Ì”ï¿½ï¿½Jï¿½[ï¿½hï¿½ï¿½ï¿½Xï¿½g")]
     public List<int> shopCardList = new List<int>();
 
-    [Tooltip("•ó” ‚Ìê‡‚ÌƒJ[ƒhŠl“¾”")]
+    [Tooltip("ï¿½ó” ‚Ìê‡ï¿½ÌƒJï¿½[ï¿½hï¿½lï¿½ï¿½ï¿½ï¿½")]
     public int treasureCardCount = 1;
 }
 
 /*
- * ƒXƒe[ƒWî•ñ
- * ƒ}ƒbƒvî•ñ
- * ƒXƒe[ƒWî•ñ
- * “Gî•ñ
- * ƒoƒtƒfƒoƒt
- * •ñV
+ * ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½ï¿½
+ * ï¿½}ï¿½bï¿½vï¿½ï¿½ï¿½
+ * ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½ï¿½
+ * ï¿½Gï¿½ï¿½ï¿½
+ * ï¿½oï¿½tï¿½fï¿½oï¿½t
+ * ï¿½ï¿½V
  * 
  * 
 */

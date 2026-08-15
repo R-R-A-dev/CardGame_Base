@@ -19,6 +19,8 @@ public class BattleRewardCardSelectPanel : MonoBehaviour, IPointerDownHandler
     // BattleRewardUIへの通知（相互依存を避けるためAction使用）
     public System.Action<List<int>> OnCardsConfirmed;
 
+    public bool IsInfoPanelOpen => cardInfoPanel.activeSelf;
+
     private bool isRewardMode = false;
     private int maxSelectCount = 1;
 
@@ -107,10 +109,17 @@ public class BattleRewardCardSelectPanel : MonoBehaviour, IPointerDownHandler
 
     private void OnCardGetButtonClick()
     {
-        if (selectedCardIds.Count != maxSelectCount) return;
+        TryConfirmSelection();
+    }
+
+    // 選択が規定枚数に達していれば確定する。決定ボタン・閉じるボタン両方から呼ばれる
+    public bool TryConfirmSelection()
+    {
+        if (selectedCardIds.Count != maxSelectCount) return false;
 
         OnCardsConfirmed?.Invoke(new List<int>(selectedCardIds));
         SetRewardMode(false, maxSelectCount);
+        return true;
     }
 
     public void CloseInfoPanel()

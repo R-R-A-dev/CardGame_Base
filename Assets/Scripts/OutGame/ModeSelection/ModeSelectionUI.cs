@@ -15,6 +15,12 @@ public class ModeSelectionUI : MonoBehaviour
 
     private void Start()
     {
+        // ���퉺�ʁF�퓬�V�[������߂��Ă����ꍇ�A����ɐ�s����RoguelikeSceneController.Awake()��
+        // ���[�O���C�N�p�l����L�������Ă���B(Start()�̎��s���Ԃ͕ی؂���Ȃ���
+        // RoguelikeSession.GameState�̓`�F�b�N�ł͋������邽�߁A���ۂ̃A�N�e�B�u��Ԃ��Q��)
+        if (roguelikePanel.activeSelf)
+            return;
+
         // ������ԁF���[�h�I���p�l���̂ݕ\��
         ShowModeSelectPanel();
     }

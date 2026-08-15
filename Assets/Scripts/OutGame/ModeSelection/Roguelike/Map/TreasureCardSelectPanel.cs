@@ -8,19 +8,21 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
 {
     [SerializeField] private GameObject cardInfoPanel;
     [SerializeField] private CardController cardController;
-    [SerializeField] private Button closeButton; // 取得ボタンを閉じるボタンに変更
+    [SerializeField] private Button closeInfoPanelButton;
 
     [SerializeField] private TextMeshProUGUI cardNameText;
     [SerializeField] private TextMeshProUGUI cardAttackText;
     [SerializeField] private TextMeshProUGUI cardHealthText;
     [SerializeField] private TextMeshProUGUI cardDescriptionText;
 
+    public bool IsInfoPanelOpen => cardInfoPanel.activeSelf;
+
     private bool isTreasureMode = false;
 
     private void Start()
     {
-        closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(OnCloseButtonClick);
+        closeInfoPanelButton.onClick.RemoveAllListeners();
+        closeInfoPanelButton.onClick.AddListener(CloseInfoPanel);
         cardInfoPanel.SetActive(false);
     }
 
@@ -56,17 +58,6 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
         cardHealthText.text = card.model.hp.ToString();
         cardDescriptionText.text = card.model.description;
     }
-
-    private void OnCloseButtonClick()
-    {
-        cardInfoPanel.SetActive(false);
-        SetTreasureMode(false);
-        // TreasureUIに閉じるを通知
-        OnClosed?.Invoke();
-    }
-
-    // TreasureUIへの通知
-    public System.Action OnClosed;
 
     public void CloseInfoPanel()
     {

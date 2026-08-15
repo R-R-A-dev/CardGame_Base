@@ -22,8 +22,16 @@ public class StageSelectUI : MonoBehaviour
 
     private void OnSelected(int index)
     {
-       
+
         OnStageSelected?.Invoke(index); // DeckAndStageSelectUIに通知するだけ
+    }
+
+    public void SetSelectButtonsInteractable(bool interactable)
+    {
+        foreach (var button in selectButtons)
+        {
+            button.interactable = interactable;
+        }
     }
 
     public void OpenConfirmPannel()

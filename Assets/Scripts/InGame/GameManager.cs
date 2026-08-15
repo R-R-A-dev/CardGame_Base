@@ -143,7 +143,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            player.Init(new List<int>() { 3, 3, 3, 4, 3, 2, 1, 1 });
+            player.Init(new List<int>() { 3, 2, 3, 4, 3, 2, 1, 1 });
             enemy.Init(new List<int>() { 2, 2, 2, 2, 4, 4, 4, 4, 1 });
             //player.Init(GameSession.SelectedDeck);
             //enemy.Init(new List<int>(GameSession.SelectedDeck));
@@ -931,20 +931,24 @@ public class GameManager : MonoBehaviour
         else if (enemy.heroHp <= 0)
         {
             RoguelikeSession.IsBattleWin = true;
-            DeckSetCards(player);
+            DeckSetCards();
             SceneManager.LoadScene("Field");
         }
     }
 
-    void DeckSetCards(GamePlayerManager player)
+    void DeckSetCards()
     {
+        List<int> survivingCards = new List<int>();
+
         foreach (CardController card in playerHandTransform.GetComponentsInChildren<CardController>())
-            RoguelikeSession.GameState.CurrentDeck.Add(card.model.no);
+            survivingCards.Add(card.model.no);
 
         foreach (CardController card in playerFieldTransform.GetComponentsInChildren<CardController>())
-            RoguelikeSession.GameState.CurrentDeck.Add(card.model.no);
+            survivingCards.Add(card.model.no);
 
-        RoguelikeSession.GameState.CurrentDeck = player.deck;
+        survivingCards.AddRange(player.deck);
+
+        RoguelikeSession.GameState.CurrentDeck = survivingCards;
     }
 
     IEnumerator ShowResultPanel(int heroHp)

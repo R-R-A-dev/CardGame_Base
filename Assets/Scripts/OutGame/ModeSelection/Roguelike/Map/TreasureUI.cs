@@ -8,14 +8,15 @@ public class TreasureUI : MonoBehaviour
     [SerializeField] private List<CardController> cardList;
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private TextMeshProUGUI cardCountText;
+    [SerializeField] private Button closeButton;
     [SerializeField] private TreasureCardSelectPanel selectPanel;
     [SerializeField] private OwnedDeckCheckPanel ownedDeckCheckPanel;
     private RoguelikeGameState gameState;
 
     private void Start()
     {
-        // 閉じるボタンのActionを登録
-        selectPanel.OnClosed = Close;
+        closeButton.onClick.RemoveAllListeners();
+        closeButton.onClick.AddListener(OnCloseButtonClick);
 
         ownedDeckCheckPanel.OnOpened = selectPanel.PauseTreasureMode;
         ownedDeckCheckPanel.OnClosed = selectPanel.ResumeTreasureMode;
@@ -89,6 +90,16 @@ public class TreasureUI : MonoBehaviour
             cardList[i].gameObject.SetActive(true);
             cardList[i].Init(ids[i], false);
         }
+    }
+
+    private void OnCloseButtonClick()
+    {
+        if (selectPanel.IsInfoPanelOpen)
+        {
+            selectPanel.CloseInfoPanel();
+            return;
+        }
+        Close();
     }
 
     private void Close()

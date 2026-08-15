@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: NodeData
   m_EditorClassIdentifier: 
   nodeId: 
-  stageType: 4
+  stageType: 0
   modifiers:
   - modifierType: 6
     value: 5
