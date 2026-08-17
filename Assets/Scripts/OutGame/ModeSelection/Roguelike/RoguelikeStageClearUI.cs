@@ -33,3 +33,4 @@ public class RoguelikeStageClearUI : MonoBehaviour
         RoguelikeManager.Instance.OnStageClearConfirmed();
     }
 }
+
