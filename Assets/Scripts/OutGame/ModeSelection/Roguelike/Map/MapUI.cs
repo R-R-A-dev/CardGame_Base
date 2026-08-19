@@ -30,4 +30,11 @@ public class MapUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    // MapUI自体はアクティブのまま、現在表示中のステージUIだけを非表示にする
+    public void HideCurrentStage()
+    {
+        if (currentStageUI != null)
+            currentStageUI.Hide();
+    }
 }

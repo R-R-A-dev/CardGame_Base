@@ -226,7 +226,8 @@ public class RoguelikeManager : MonoBehaviour
         Debug.Log("ステージクリア！");
 
         // 報酬パネルを開く（ランで貯めたゴールドを所持金に加算）
-        mapUI.Hide();
+        // MapUI自体はアクティブのまま、現在のステージUIだけを非表示にする
+        mapUI.HideCurrentStage();
         stageClearUI.Open(gameState, currentStageData.stageName);
     }
 
