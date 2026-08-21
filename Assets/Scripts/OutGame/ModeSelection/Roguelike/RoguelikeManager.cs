@@ -205,6 +205,8 @@ public class RoguelikeManager : MonoBehaviour
     private void OnMapCleared()
     {
         currentMapIndex++;
+        // シーン再読み込み後のStart()でgameState.CurrentMapIndexから復元されるため同期しておく
+        gameState.CurrentMapIndex = currentMapIndex;
 
         // 全マップクリアでステージクリア
         if (currentMapIndex >= currentStageData.maps.Count)
