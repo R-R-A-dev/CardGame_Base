@@ -142,6 +142,8 @@ public class OutGameCardList : MonoBehaviour
 
     public void DeckAddPanelOn()
     {
+        int deckCardNum = GameDataHolder.Instance.EditingDeckCounts[No - 1];
+        countText.text = $"×{deckCardNum}";
         countText.gameObject.SetActive(true);
         countPanel.SetActive(true);
 

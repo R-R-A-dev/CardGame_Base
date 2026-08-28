@@ -2,68 +2,68 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // ========================================
-// �X�e�[�W�^�C�v
+// ステージタイプ
 // ========================================
 public enum StageType
 {
-    NORMAL_BATTLE,  // �ʏ�퓬
-    ELITE_BATTLE,   // �G���[�g�퓬
-    BOSS_BATTLE,    // �{�X�퓬
-    TREASURE,       // �󔠁i��V�̂݁j
-    SHOP,           // �V���b�v
-    EVENT,          // �C�x���g
-    REST,           // �x�e�iHP�񕜁j
-    DAMAGE,         // �_���[�W
-    CARD_LOSS       // �J�[�h���X�g
+    NORMAL_BATTLE,  // 通常戦闘
+    ELITE_BATTLE,   // エリート戦闘
+    BOSS_BATTLE,    // ボス戦闘
+    TREASURE,       // 宝箱（報酬のみ）
+    SHOP,           // ショップ
+    EVENT,          // イベント
+    REST,           // 休憩（HP回復）
+    DAMAGE,         // ダメージ
+    CARD_LOSS       // カードロスト
 }
 
 // ========================================
-// �p�����[�^�ύX�^�C�v
+// パラメータ変更タイプ
 // ========================================
 public enum ParameterModifierType
 {
     None,
-    HP_BOOST,           // �ő�HP����
-    HP_REDUCTION,       // �ő�HP����
-    MANA_BOOST,         // �ő�}�i����
-    MANA_REDUCTION,     // �ő�}�i����
-    ATTACK_BOOST,       // �U���͑���
-    ATTACK_REDUCTION,   // �U���͌���
-    DEFENSE_BOOST,      // �h��͑���
-    DEFENSE_REDUCTION,  // �h��͌���
-    CARD_DRAW_BOOST,    // �h���[��������
-    CARD_DRAW_REDUCTION // �h���[��������
+    HP_BOOST,           // 最大HP増加
+    HP_REDUCTION,       // 最大HP減少
+    MANA_BOOST,         // 最大マナ増加
+    MANA_REDUCTION,     // 最大マナ減少
+    ATTACK_BOOST,       // 攻撃力増加
+    ATTACK_REDUCTION,   // 攻撃力減少
+    DEFENSE_BOOST,      // 防御力増加
+    DEFENSE_REDUCTION,  // 防御力減少
+    CARD_DRAW_BOOST,    // ドロー枚数増加
+    CARD_DRAW_REDUCTION // ドロー枚数減少
 }
 
 // ========================================
-// �p�����[�^�ύX�ݒ�
+// パラメータ変更設定
 // ========================================
 [System.Serializable]
 public class ParameterModifier
 {
-    [Header("�ύX�^�C�v")]
+    [Header("変更タイプ")]
     public ParameterModifierType modifierType;
 
-    [Header("�ύX�l")]
-    public int value; // �����l
-    public bool isPercentage; // �p�[�Z���g�w�肩�ifalse�Ȃ�Œ�l�j
+    [Header("変更値")]
+    public int value; // 増減値
+    public bool isPercentage; // パーセント指定か（falseなら固定値）
 
-    [Header("�K�p�Ώ�")]
-    public bool applyToPlayer = true; // �v���C���[�ɓK�p
-    public bool applyToEnemy = false;  // �G�ɓK�p
+    [Header("適用対象")]
+    public bool applyToPlayer = true; // プレイヤーに適用
+    public bool applyToEnemy = false;  // 敵に適用
 
-    [Header("����")]
+    [Header("説明")]
     [TextArea(1, 2)]
-    public string description; // UI�\���p
+    public string description; // UI表示用
 }
 
 // ========================================
-// �X�e�[�W�f�[�^ ScriptableObject
+// ステージデータ ScriptableObject
 // ========================================
 [CreateAssetMenu(fileName = "StageData", menuName = "Roguelike/StageData")]
 public class StageData : ScriptableObject
 {
-    [Header("=== �X�e�[�W��{��� ===")]
+    [Header("=== ステージ基本情報 ===")]
     public string stageName = "Stage 1";
     public int stageNumber = 1;
     public StageType stageType = StageType.NORMAL_BATTLE;
@@ -71,57 +71,57 @@ public class StageData : ScriptableObject
     [TextArea(2, 4)]
     public string stageDescription;
 
-    public Sprite stageIcon; // �X�e�[�W�A�C�R��
-    public Sprite stageBackground; // �w�i�摜
+    public Sprite stageIcon; // ステージアイコン
+    public Sprite stageBackground; // 背景画像
 
-    [Header("=== �G�ݒ� ===")]
-    [Tooltip("�G�̖��O")]
+    [Header("=== 敵設定 ===")]
+    [Tooltip("敵の名前")]
     public string enemyName = "Goblin";
 
-    [Tooltip("�G��HP")]
+    [Tooltip("敵のHP")]
     public int enemyHP = 20;
 
-    [Tooltip("�G�̏����}�i")]
+    [Tooltip("敵の初期マナ")]
     public int enemyInitialMana = 1;
 
-    [Tooltip("�G���g�p����f�b�L�i�J�[�hID�̃��X�g�j")]
+    [Tooltip("敵が使用するデッキ（カードIDのリスト）")]
     public List<int> enemyDeck = new List<int>();
 
-    [Header("=== �p�����[�^�ύX�M�~�b�N ===")]
-    [Tooltip("���̃X�e�[�W�œK�p�����p�����[�^�ύX")]
+    [Header("=== パラメータ変更ギミック ===")]
+    [Tooltip("このステージで適用されるパラメータ変更")]
     public List<ParameterModifier> parameterModifiers = new List<ParameterModifier>();
 
-    [Header("=== ��V�ݒ� ===")]
-    [Tooltip("�N���A���̃S�[���h��V")]
+    [Header("=== 報酬設定 ===")]
+    [Tooltip("クリア時のゴールド報酬")]
     public int goldReward = 50;
 
-    [Tooltip("�N���A���ɑI�ׂ�J�[�h��")]
+    [Tooltip("クリア時に選べるカード数")]
     public int cardRewardCount = 3;
 
-    [Tooltip("��V�J�[�h�v�[���i��̏ꍇ�͋��ʃv�[������j")]
+    [Tooltip("報酬カードプール（空の場合は共通プールを使用）")]
     public List<int> rewardCardPool = new List<int>();
 
-    [Header("=== ����ݒ� ===")]
-    [Tooltip("�x�e�n�_�̏ꍇ�̉񕜗�")]
+    [Header("=== 個別設定 ===")]
+    [Tooltip("休憩地点の場合の回復量")]
     public int healAmount = 10;
 
-    [Tooltip("�V���b�v�̏ꍇ�̔̔��J�[�h��")]
+    [Tooltip("ショップの場合の販売カード数")]
     public int shopCardCount = 5;
 
-    [Tooltip("�V���b�v�̏ꍇ�̔̔��J�[�h���X�g")]
+    [Tooltip("ショップの場合の販売カードリスト")]
     public List<int> shopCardList = new List<int>();
 
-    [Tooltip("�󔠂̏ꍇ�̃J�[�h�l����")]
+    [Tooltip("宝箱の場合のカード枚数")]
     public int treasureCardCount = 1;
 }
 
 /*
- * �X�e�[�W���
- * �}�b�v���
- * �X�e�[�W���
- * �G���
- * �o�t�f�o�t
- * ��V
- * 
- * 
+ * ステージ情報
+ * マップ情報
+ * ステージ演出
+ * 敵情報
+ * バフデバフ
+ * 報酬
+ *
+ *
 */

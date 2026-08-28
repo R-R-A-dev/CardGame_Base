@@ -6,16 +6,16 @@ public class ModeConfigManager : MonoBehaviour
     public static ModeConfigManager Instance { get; private set; }
     public int LethalPuzzleIndex { get => lethalPuzzleIndex; set => lethalPuzzleIndex = value; }
 
-    [Header("Œ»İ‚ÌƒQ[ƒ€ƒ‚[ƒh")]
+    [Header("ï¿½ï¿½ï¿½İ‚ÌƒQï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½h")]
     public GameMode currentGameMode = GameMode.NONE;
 
-    [Header("‹l«Šûƒf[ƒ^ƒŠƒXƒg")]
+    [Header("ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½Xï¿½g")]
     public List<LethalPuzzleData> lethalPuzzleList = new List<LethalPuzzleData>();
 
-    [Header("2Pickƒf[ƒ^ƒŠƒXƒg")]
+    [Header("2Pickï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½Xï¿½g")]
     public List<TwoPickData> twoPickList = new List<TwoPickData>();
 
-    [Header("ƒ[ƒOƒ‰ƒCƒNƒf[ƒ^ƒŠƒXƒg")]
+    [Header("ï¿½ï¿½ï¿½[ï¿½Oï¿½ï¿½ï¿½Cï¿½Nï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½Xï¿½g")]
     public List<RoguelikeStageData> roguelikeList = new List<RoguelikeStageData>();
 
     int lethalPuzzleIndex = 0;
@@ -35,7 +35,7 @@ public class ModeConfigManager : MonoBehaviour
     }
 
     /// <summary>
-    /// w’èID‚Ì‹l«Šûƒf[ƒ^‚ğæ“¾
+    /// ï¿½wï¿½ï¿½IDï¿½Ì‹lï¿½ï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½æ“¾
     /// </summary>
     public LethalPuzzleData GetLethalPuzzleData(int id)
     {
@@ -43,7 +43,7 @@ public class ModeConfigManager : MonoBehaviour
     }
 
     /// <summary>
-    /// w’èƒCƒ“ƒfƒbƒNƒX‚Ì2Pickƒf[ƒ^‚ğæ“¾
+    /// ï¿½wï¿½ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½ï¿½2Pickï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½æ“¾
     /// </summary>
     public TwoPickData GetTwoPickData(int index)
     {
@@ -53,7 +53,7 @@ public class ModeConfigManager : MonoBehaviour
     }
 
     /// <summary>
-    /// w’èƒCƒ“ƒfƒbƒNƒX‚Ìƒ[ƒOƒ‰ƒCƒNƒf[ƒ^‚ğæ“¾
+    /// ï¿½wï¿½ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½Ìƒï¿½ï¿½[ï¿½Oï¿½ï¿½ï¿½Cï¿½Nï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½æ“¾
     /// </summary>
     public RoguelikeStageData GetRoguelikeData(int index)
     {
@@ -73,16 +73,17 @@ public class ModeConfigManager : MonoBehaviour
 
 public enum GameMode
 {
-    NONE,           // –¢‘I‘ğ
-    LETHAL_PUZZLE,  // ‹l«Šû
+    NONE,           // ï¿½ï¿½ï¿½Iï¿½ï¿½
+    CPU_BATTLE,     // CPUï¿½ï¿½
+    LETHAL_PUZZLE,  // ï¿½lï¿½ï¿½ï¿½ï¿½
     TWO_PICK,       // 2Pick
-    ROGUELIKE       // ƒ[ƒOƒ‰ƒCƒN
+    ROGUELIKE       // ï¿½ï¿½ï¿½[ï¿½Oï¿½ï¿½ï¿½Cï¿½N
 }
 
 /*
- * ‰Ÿ‚³‚ê‚½Œã‚É‚·‚é‚±‚Æ
- * ‰Ÿ‚³‚ê‚½‚à‚Ì‚©‚çƒ‚[ƒh‚Ì€–Ú‚ğæ“¾‚µ‚ÄGameManager‚É“n‚·
- * ƒŠƒXƒgæ“¾ƒNƒ‰ƒX
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ê‚½ï¿½ï¿½É‚ï¿½ï¿½é‚±ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ê‚½ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½çƒ‚ï¿½[ï¿½hï¿½Ìï¿½ï¿½Ú‚ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½GameManagerï¿½É“nï¿½ï¿½
+ * ï¿½ï¿½ï¿½Xï¿½gï¿½æ“¾ï¿½Nï¿½ï¿½ï¿½X
  * 
  * 
  * 

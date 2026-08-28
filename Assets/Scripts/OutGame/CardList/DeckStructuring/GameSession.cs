@@ -4,4 +4,5 @@ using UnityEngine;
 public static class GameSession
 {
     public static List<int> SelectedDeck;
+    public static List<int> EnemyDeck;
 }

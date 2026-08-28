@@ -3,82 +3,107 @@ using UnityEngine.SceneManagement;
 
 public class ModeSelectionUI : MonoBehaviour
 {
-    [Header("�p�l��")]
-    [SerializeField] private GameObject modeSelectPanel;      // ���[�h�I�����C���p�l��
-    [SerializeField] private GameObject lethalPuzzlePanel;    // �l�����I���p�l��
-    [SerializeField] private GameObject twoPickPanel;         // 2Pick�I���p�l��
-    [SerializeField] private GameObject roguelikePanel;       // ���[�O���C�N�I���p�l��
+    [Header("パネル")]
+    [SerializeField] private GameObject modeSelectPanel;      // モード選択メインパネル
+    [SerializeField] private GameObject cpuBattlePanel;       // CPU戦選択パネル
+    [SerializeField] private GameObject lethalPuzzlePanel;    // 詰みパズル選択パネル
+    [SerializeField] private GameObject twoPickPanel;         // 2Pick選択パネル
+    [SerializeField] private GameObject roguelikePanel;       // ローグライク選択パネル
 
-    [Header("�V�[�����ݒ�")]
+    [Header("シーン名設定")]
     [SerializeField] private string battleScene = "Battle";
     [SerializeField] private string titleScene = "Title";
 
     private void Start()
     {
-        // ���퉺�ʁF�퓬�V�[������߂��Ă����ꍇ�A����ɐ�s����RoguelikeSceneController.Awake()��
-        // ���[�O���C�N�p�l����L�������Ă���B(Start()�̎��s���Ԃ͕ی؂���Ȃ���
-        // RoguelikeSession.GameState�̓`�F�b�N�ł͋������邽�߁A���ۂ̃A�N�e�B�u��Ԃ��Q��)
+        // 復帰対応：戦闘シーンから戻ってきた場合、それより先に実行されるRoguelikeSceneController.Awake()が
+        // ローグライクパネルを有効化している。(Start()の実行順序は保証されないため
+        // RoguelikeSession.GameStateのチェックでは弱いため、実際のアクティブ状態を参照)
         if (roguelikePanel.activeSelf)
             return;
 
-        // ������ԁF���[�h�I���p�l���̂ݕ\��
+        // 初期状態：モード選択パネルのみ表示
         ShowModeSelectPanel();
     }
 
     // ========================================
-    // �p�l���\������
+    // パネル表示処理
     // ========================================
 
     /// <summary>
-    /// ���[�h�I���p�l����\��
+    /// モード選択パネルを表示
     /// </summary>
     public void ShowModeSelectPanel()
     {
         modeSelectPanel.SetActive(true);
+        cpuBattlePanel.SetActive(false);
         lethalPuzzlePanel.SetActive(false);
         twoPickPanel.SetActive(false);
         roguelikePanel.SetActive(false);
     }
 
     /// <summary>
-    /// �l�����I���p�l����\��
+    /// CPU戦選択パネルを表示
+    /// </summary>
+    private void ShowCpuBattlePanel()
+    {
+        modeSelectPanel.SetActive(false);
+        cpuBattlePanel.SetActive(true);
+        lethalPuzzlePanel.SetActive(false);
+        twoPickPanel.SetActive(false);
+        roguelikePanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// 詰みパズル選択パネルを表示
     /// </summary>
     private void ShowLethalPuzzlePanel()
     {
         modeSelectPanel.SetActive(false);
+        cpuBattlePanel.SetActive(false);
         lethalPuzzlePanel.SetActive(true);
         twoPickPanel.SetActive(false);
         roguelikePanel.SetActive(false);
     }
 
     /// <summary>
-    /// 2Pick�I���p�l����\��
+    /// 2Pick選択パネルを表示
     /// </summary>
     private void ShowTwoPickPanel()
     {
         modeSelectPanel.SetActive(false);
+        cpuBattlePanel.SetActive(false);
         lethalPuzzlePanel.SetActive(false);
         twoPickPanel.SetActive(true);
         roguelikePanel.SetActive(false);
     }
 
     /// <summary>
-    /// ���[�O���C�N�I���p�l����\��
+    /// ローグライク選択パネルを表示
     /// </summary>
     private void ShowRoguelikePanel()
     {
         modeSelectPanel.SetActive(false);
+        cpuBattlePanel.SetActive(false);
         lethalPuzzlePanel.SetActive(false);
         twoPickPanel.SetActive(false);
         roguelikePanel.SetActive(true);
     }
 
     // ========================================
-    // ���[�h�I���{�^���i���C���p�l���j
+    // モード選択ボタン（メインパネル）
     // ========================================
 
     /// <summary>
-    /// �l�������[�h�{�^��
+    /// CPU戦モードボタン
+    /// </summary>
+    public void OnClickCpuBattleMode()
+    {
+        ShowCpuBattlePanel();
+    }
+
+    /// <summary>
+    /// 詰みパズルモードボタン
     /// </summary>
     public void OnClickLethalPuzzleMode()
     {
@@ -86,7 +111,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 2Pick���[�h�{�^��
+    /// 2Pickモードボタン
     /// </summary>
     public void OnClickTwoPickMode()
     {
@@ -94,7 +119,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ���[�O���C�N���[�h�{�^��
+    /// ローグライクモードボタン
     /// </summary>
     public void OnClickRoguelikeMode()
     {
@@ -102,7 +127,7 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// �^�C�g���ɖ߂�
+    /// タイトルに戻る
     /// </summary>
     public void OnClickBackToTitle()
     {
@@ -110,11 +135,11 @@ public class ModeSelectionUI : MonoBehaviour
     }
 
     // ========================================
-    // �߂�{�^���i�e�T�u�p�l���j
+    // 戻るボタン（各サブパネル）
     // ========================================
 
     /// <summary>
-    /// ���[�h�I���ɖ߂�
+    /// モード選択に戻る
     /// </summary>
     public void OnClickBackToModeSelect()
     {

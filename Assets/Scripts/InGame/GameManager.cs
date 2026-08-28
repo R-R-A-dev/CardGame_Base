@@ -141,12 +141,20 @@ public class GameManager : MonoBehaviour
             StartCoroutine(SettingInitHand());
             StartCoroutine(CountDownChangeCard());
         }
+        else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.CPU_BATTLE)
+        {
+            player.Init(new List<int>(GameSession.SelectedDeck));
+            enemy.Init(new List<int>(GameSession.EnemyDeck));
+            uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+            uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+            TurnEndButtonText.text = "Decide";
+            StartCoroutine(SettingInitHand());
+            StartCoroutine(CountDownChangeCard());
+        }
         else
         {
             player.Init(new List<int>() { 3, 2, 3, 4, 3, 2, 1, 1 });
             enemy.Init(new List<int>() { 2, 2, 2, 2, 4, 4, 4, 4, 1 });
-            //player.Init(GameSession.SelectedDeck);
-            //enemy.Init(new List<int>(GameSession.SelectedDeck));
             uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
