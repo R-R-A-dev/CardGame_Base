@@ -25,6 +25,9 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     [SerializeField] private Button startBattleButton;
     [SerializeField] private string battleScene = "Game";
 
+    [Header("勝利報酬パネル")]
+    [SerializeField] private CpuBattleRewardUI cpuBattleRewardUI;
+
     private const int MIN_DECK_SIZE = 40;
 
     // デッキ選択モーダルを自分用/敵用のどちらのボタンから開いたか
@@ -48,6 +51,16 @@ public class CpuBattleSelectionPanel : MonoBehaviour
 
         UpdateSelectedDeckText();
         UpdateStartBattleButton();
+
+        // 戦闘から戻ってきた場合、勝利していれば報酬パネルを表示する
+        if (GameSession.CpuBattleFinished)
+        {
+            bool won = GameSession.CpuBattleWon;
+            GameSession.CpuBattleFinished = false;
+
+            if (won)
+                cpuBattleRewardUI.Open();
+        }
     }
 
     // 「自分のデッキを変更」ボタン
@@ -134,7 +147,6 @@ public class CpuBattleSelectionPanel : MonoBehaviour
             decidedPlayerDeckId = confirmingDeckId;
 
         deckConfirmPanel.SetActive(false);
-        deckListPanel.SetActive(false);
 
         UpdateSelectedDeckText();
         UpdateStartBattleButton();
@@ -164,6 +176,11 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     private void OnDeckEditClosed()
     {
         gameObject.SetActive(true);
+
+        // デッキ編成前に開いていたデッキ一覧・確認モーダルを表示に戻す
+        deckListPanel.SetActive(true);
+        deckConfirmPanel.SetActive(true);
+        UpdateDecideDeckButton();
 
         UpdateSelectedDeckText();
         UpdateStartBattleButton();

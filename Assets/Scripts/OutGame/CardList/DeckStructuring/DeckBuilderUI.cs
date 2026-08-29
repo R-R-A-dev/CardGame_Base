@@ -29,6 +29,10 @@ public class DeckBuilderUI : MonoBehaviour
 
     [Header("ローグライクモード用UI")]
     [SerializeField] private GameObject roguelikeDecideButton; // ローグライク用の決定ボタン
+
+    [Header("CPU戦モード用UI")]
+    [SerializeField] private GameObject cpuBattleDecideButton; // CPU戦用の決定ボタン
+
     [SerializeField] private GameObject deckEditPanel;         // このデッキ編集画面全体（非表示にする対象）
 
 
@@ -68,14 +72,19 @@ public class DeckBuilderUI : MonoBehaviour
         UpdateModeButtons();
     }
 
-    // ローグライクモードかどうかでボタンの表示を切り替える
+    // 現在のゲームモードに応じて、対応する決定ボタンだけを表示する
     private void UpdateModeButtons()
     {
-        bool isRoguelike = ModeConfigManager.Instance != null &&
-                            ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE;
+        GameMode mode = ModeConfigManager.Instance != null
+            ? ModeConfigManager.Instance.currentGameMode
+            : GameMode.NONE;
 
-        normalGameStartButton.SetActive(!isRoguelike);
+        bool isRoguelike = mode == GameMode.ROGUELIKE;
+        bool isCpuBattle = mode == GameMode.CPU_BATTLE;
+
+        normalGameStartButton.SetActive(!isRoguelike && !isCpuBattle);
         roguelikeDecideButton.SetActive(isRoguelike);
+        cpuBattleDecideButton.SetActive(isCpuBattle);
     }
 
     // ローグライクモードの決定ボタン押下時

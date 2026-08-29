@@ -986,7 +986,9 @@ public class GameManager : MonoBehaviour
     {
         if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
-            
+            GameSession.LethalPuzzleFinished = true;
+            GameSession.LethalPuzzleWon = enemy.heroHp <= 0;
+            SceneManager.LoadScene("Field");
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
@@ -995,6 +997,11 @@ public class GameManager : MonoBehaviour
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
         {
             ReturnRogueLikeMap();
+        }else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.CPU_BATTLE)
+        {
+            GameSession.CpuBattleFinished = true;
+            GameSession.CpuBattleWon = enemy.heroHp <= 0;
+            SceneManager.LoadScene("Field");
         }
     }
 

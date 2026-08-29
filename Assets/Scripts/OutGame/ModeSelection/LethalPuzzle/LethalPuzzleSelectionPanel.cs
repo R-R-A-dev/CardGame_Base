@@ -9,7 +9,27 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
 
     [SerializeField] GameObject ConfirmPanel;
 
+    [Header("クリア報酬パネル")]
+    [SerializeField] private LethalPuzzleRewardUI lethalPuzzleRewardUI;
+
     int selectNum = 0;
+
+    private void Start()
+    {
+        // 戦闘から戻ってきた場合、クリアしていれば報酬パネルを表示する
+        if (GameSession.LethalPuzzleFinished)
+        {
+            bool won = GameSession.LethalPuzzleWon;
+            GameSession.LethalPuzzleFinished = false;
+
+            if (won)
+            {
+                int puzzleId = ModeConfigManager.Instance.lethalPuzzleList[ModeConfigManager.Instance.LethalPuzzleIndex].puzzleId;
+                lethalPuzzleRewardUI.Open(puzzleId);
+            }
+        }
+    }
+
     public void StartPanelOpen()
     {
         ConfirmPanel.SetActive(true);
@@ -38,7 +58,7 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
 
     void OnClickButton(int number)
     {
-        //�V�[���ύX
+        //�V�[���ύX
         ConfirmPanel.SetActive(true);
         selectNum = number;
         ModeConfigManager.Instance.LethalPuzzleIndex = selectNum;

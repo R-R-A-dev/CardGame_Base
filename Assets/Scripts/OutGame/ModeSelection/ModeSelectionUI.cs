@@ -22,6 +22,20 @@ public class ModeSelectionUI : MonoBehaviour
         if (roguelikePanel.activeSelf)
             return;
 
+        // 復帰対応：CPU戦から戻ってきた場合、CPU戦選択パネルを表示（結果パネルはCpuBattleSelectionPanel側で表示）
+        if (GameSession.CpuBattleFinished)
+        {
+            ShowCpuBattlePanel();
+            return;
+        }
+
+        // 復帰対応：詰みパズルから戻ってきた場合、詰みパズル選択パネルを表示（結果パネルはLethalPuzzleSelectionPanel側で表示）
+        if (GameSession.LethalPuzzleFinished)
+        {
+            ShowLethalPuzzlePanel();
+            return;
+        }
+
         // 初期状態：モード選択パネルのみ表示
         ShowModeSelectPanel();
     }
@@ -99,6 +113,9 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickCpuBattleMode()
     {
+        if (ModeConfigManager.Instance != null)
+            ModeConfigManager.Instance.ChangeMode(GameMode.CPU_BATTLE);
+
         ShowCpuBattlePanel();
     }
 
@@ -143,6 +160,17 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickBackToModeSelect()
     {
+        ShowModeSelectPanel();
+    }
+
+    /// <summary>
+    /// CPU戦選択パネルから戻る
+    /// </summary>
+    public void OnClickBackFromCpuBattle()
+    {
+        if (ModeConfigManager.Instance != null)
+            ModeConfigManager.Instance.ChangeMode(GameMode.NONE);
+
         ShowModeSelectPanel();
     }
 }
