@@ -3,7 +3,30 @@ using UnityEngine;
 
 public class GameDataHolder : MonoBehaviour
 {
-    public static GameDataHolder Instance { get; private set; }
+    private static GameDataHolder _instance;
+
+    // アクセス時に未生成なら自動生成する（Lazy初期化）。
+    // GameDataHolderをアタッチしたオブジェクトが非活性（テスト構成でデッキ編集オブジェクトだけを
+    // 活性にした場合など）でもAwake()が呼ばれないため、null事故を防ぐためにここで生成する。
+    // シーン上の既存オブジェクトは親を持つ場合があり、そのままではDontDestroyOnLoadが使えないため、
+    // 見つからない場合は新規のルートオブジェクトとして生成する（Dataはセーブファイルから読み直すため実害なし）
+    public static GameDataHolder Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindFirstObjectByType<GameDataHolder>();
+                if (_instance == null)
+                {
+                    GameObject obj = new GameObject(nameof(GameDataHolder));
+                    _instance = obj.AddComponent<GameDataHolder>();
+                }
+                _instance.Initialize();
+            }
+            return _instance;
+        }
+    }
 
     private SaveData _data;
 
@@ -21,16 +44,21 @@ public class GameDataHolder : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
+        if (_instance == null)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            LoadIntoMemory();
+            _instance = this;
+            Initialize();
         }
-        else
+        else if (_instance != this)
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Initialize()
+    {
+        DontDestroyOnLoad(gameObject);
+        LoadIntoMemory();
     }
 
     public void LoadIntoMemory()
@@ -71,6 +99,35 @@ public class GameDataHolder : MonoBehaviour
 
         Debug.Log($"[BeginDeckEdit] deckNum={deckNum} isRoguelike={isRoguelike} " +
             $"savedCardIds.Count={decks[deckNum].cardIds.Count} EditingDeckCounts合計={SumOf(EditingDeckCounts)}");
+    }
+
+    // デバッグ用：セーブデータ（GameDataHolder.Data）を一切使わず、デッキ編集を開始する。
+    // デッキ一覧は空、所持カード一覧は指定されたcountsから開始する
+    public void DebugBeginDeckEdit(List<int> ownedCounts)
+    {
+        int cardTypeCount = CardDatabase.LoadAllCards().Length;
+        EditingDeckCounts = new List<int>(new int[cardTypeCount]);
+
+        DebugOverrideDisplayPossessionCard(ownedCounts);
+
+        Debug.Log("[DebugBeginDeckEdit] デッキ一覧を空、所持カード一覧をdebugOwnedCardCountsから設定しました（セーブデータ未使用）");
+    }
+
+    // デバッグ用：所持カードの表示用コピー（DisplayPossessionCard）のみを上書きする。
+    // Data.ownedCardCounts（セーブデータ本体）には触れないため、ファイル保存には一切影響しない
+    public void DebugOverrideDisplayPossessionCard(List<int> counts)
+    {
+        int cardTypeCount = CardDatabase.LoadAllCards().Length;
+        List<int> normalized = new List<int>(new int[cardTypeCount]);
+
+        if (counts != null)
+        {
+            for (int i = 0; i < counts.Count && i < cardTypeCount; i++)
+                normalized[i] = counts[i];
+        }
+
+        DisplayPossessionCard = normalized;
+        Debug.Log($"[DebugOverrideDisplayPossessionCard] 表示用の所持カードを上書きしました（セーブデータ非変更）");
     }
 
     public void CommitDeckEdit(int deckNum, bool isRoguelike)

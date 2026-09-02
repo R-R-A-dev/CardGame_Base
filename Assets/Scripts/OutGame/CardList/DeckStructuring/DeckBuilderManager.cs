@@ -43,9 +43,21 @@ public class DeckBuilderManager : MonoBehaviour
     // シーン上のパネルSetActive(true)のみで開かれる（OnEnableが唯一の初期化トリガー）ため維持する。
     // ローグライク側はDeckAndStageSelectUIがOpenDeckEditForDeckを明示的に呼ぶため、
     // ここではその時点のdeckNumで再初期化されるだけで実害はない。
+    //
+    // デバッグ対戦からの復帰もここで検知する：モード選択画面のオブジェクトを非活性にして
+    // デッキ編集オブジェクトだけを活性化するテスト構成でも、このコンポーネント自身がシーン
+    // ロード時に活性であれば必ずOnEnableが呼ばれるため、ModeSelectionUIに依存せず復帰できる。
     private void OnEnable()
     {
-        OpenDeckEditForDeck(deckNum);
+        if (GameSession.DebugReturnToDeckEdit)
+        {
+            GameSession.DebugReturnToDeckEdit = false;
+            OpenDeckEditForDeck(GameSession.DebugReturnDeckNum);
+        }
+        else
+        {
+            OpenDeckEditForDeck(deckNum);
+        }
     }
 
     /// <summary>

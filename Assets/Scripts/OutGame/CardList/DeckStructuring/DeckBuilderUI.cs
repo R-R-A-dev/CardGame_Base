@@ -35,6 +35,13 @@ public class DeckBuilderUI : MonoBehaviour
 
     [SerializeField] private GameObject deckEditPanel;         // このデッキ編集画面全体（非表示にする対象）
 
+    [Header("デバッグ用（所持カード表示の上書き。セーブデータは変更しない）")]
+    // ONにするとStartDeckEdit時にGameDataHolderのセーブデータを使わず、
+    // デッキ一覧は空・所持カード一覧はdebugOwnedCardCountsから開始する
+    [SerializeField] private bool debugMode = false;
+    // 添字＝カードNo-1（0番目がカードNo.1）、値＝表示上の所持枚数
+    [SerializeField] private List<int> debugOwnedCardCounts = new List<int>();
+
 
     private CardFilterSettings cardListFilter = new CardFilterSettings();
     private CardFilterSettings deckFilter = new CardFilterSettings();
@@ -59,7 +66,16 @@ public class DeckBuilderUI : MonoBehaviour
         bool isRoguelike = ModeConfigManager.Instance != null &&
                             ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE;
 
-        GameDataHolder.Instance.BeginDeckEdit(deckNum, isRoguelike);
+        if (debugMode)
+        {
+            // テストモード：セーブデータ（GameDataHolder.Data）は使わず、
+            // デッキ一覧は空、所持カード一覧はdebugOwnedCardCountsから開始する
+            GameDataHolder.Instance.DebugBeginDeckEdit(debugOwnedCardCounts);
+        }
+        else
+        {
+            GameDataHolder.Instance.BeginDeckEdit(deckNum, isRoguelike);
+        }
 
         DisplayDeck();
         DisplayCardList();
@@ -105,6 +121,52 @@ public class DeckBuilderUI : MonoBehaviour
 
         deckEditPanel.SetActive(false);
         DeckBuilderManager.Instance.OnDeckEditClosed?.Invoke();
+    }
+
+    // ========================================
+    // デバッグ用（GameMode未設定のままテスト対戦）
+    // ========================================
+
+    /// <summary>
+    /// 外部（復帰処理）からこのデッキ編成画面パネルを表示するために公開
+    /// </summary>
+    public void ShowDeckEditPanel()
+    {
+        deckEditPanel.SetActive(true);
+    }
+
+    /// <summary>
+    /// テスト対戦ボタン：GameModeやGameDataHolder（セーブデータ）には一切触れず、
+    /// 編集中のデッキ同士で即座に対戦する。対戦後はこのデッキ編成画面へ直接戻る
+    /// </summary>
+    public void OnDebugTestBattleClick()
+    {
+        int deckIndex = DeckBuilderManager.Instance.deckNum;
+
+        // セーブへの保存(CommitDeckEdit)は行わず、編集中のデッキをそのまま読み取って使う
+        List<int> deck = GetDeck();
+        GameSession.SelectedDeck = new List<int>(deck);
+        GameSession.EnemyDeck = new List<int>(deck);
+
+        GameSession.DebugReturnToDeckEdit = true;
+        GameSession.DebugReturnDeckNum = deckIndex;
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+    }
+
+    /// <summary>
+    /// デバッグ用ボタン：Inspectorで設定したdebugOwnedCardCounts（添字＝カードNo-1）の内容で
+    /// 「所持カード一覧」の表示だけを上書きする。セーブデータ（GameDataHolder.Data）には触れない
+    /// </summary>
+    public void OnDebugApplyOwnedCardsClick()
+    {
+        GameDataHolder.Instance.DebugOverrideDisplayPossessionCard(debugOwnedCardCounts);
+
+        // BeginDeckEditは呼ばない（呼ぶとセーブデータからDisplayPossessionCardが再構築され上書きが消えるため）
+        DisplayCardList();
+        PrepareDeck();
+        RefreshAllCardUI();
+        SortCard();
     }
 
     // ===== 表示用の一時変換のみに使う内部メソッド =====

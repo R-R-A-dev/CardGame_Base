@@ -167,8 +167,17 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            player.Init(new List<int>() { 3, 2, 3, 4, 3, 2, 1, 1 });
-            enemy.Init(new List<int>() { 2, 2, 2, 2, 4, 4, 4, 4, 1 });
+            // GameModeが未設定の場合（デバッグ対戦など）。GameSessionにデッキが設定されていればそれを使い、
+            // なければ従来通りの固定デッキにフォールバックする
+            List<int> playerDeck = GameSession.SelectedDeck != null
+                ? new List<int>(GameSession.SelectedDeck)
+                : new List<int>() { 3, 2, 3, 4, 3, 2, 1, 1 };
+            List<int> enemyDeck = GameSession.EnemyDeck != null
+                ? new List<int>(GameSession.EnemyDeck)
+                : new List<int>() { 2, 2, 2, 2, 4, 4, 4, 4, 1 };
+
+            player.Init(playerDeck);
+            enemy.Init(enemyDeck);
             uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
@@ -1029,6 +1038,11 @@ public class GameManager : MonoBehaviour
         {
             GameSession.CpuBattleFinished = true;
             GameSession.CpuBattleWon = enemy.heroHp <= 0;
+            SceneManager.LoadScene("Field");
+        }
+        else if (GameSession.DebugReturnToDeckEdit)
+        {
+            // GameModeが未設定のデバッグ対戦。フラグはField側（ModeSelectionUI）で消費される
             SceneManager.LoadScene("Field");
         }
     }

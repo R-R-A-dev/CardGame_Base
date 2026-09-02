@@ -16,6 +16,25 @@ public class ModeSelectionUI : MonoBehaviour
 
     private void Start()
     {
+        // デバッグ対応：GameModeを設定せずに対戦した場合、モード選択・各サブパネルを
+        // 一切経由せず直接デッキ編成画面へ戻す
+        if (GameSession.DebugReturnToDeckEdit)
+        {
+            GameSession.DebugReturnToDeckEdit = false;
+
+            modeSelectPanel.SetActive(false);
+            cpuBattlePanel.SetActive(false);
+            lethalPuzzlePanel.SetActive(false);
+            twoPickPanel.SetActive(false);
+            roguelikePanel.SetActive(false);
+
+            // DeckEditパネルは既定で非アクティブなため、非アクティブ含めて検索する
+            DeckBuilderUI deckBuilderUI = FindFirstObjectByType<DeckBuilderUI>(FindObjectsInactive.Include);
+            deckBuilderUI.ShowDeckEditPanel();
+            DeckBuilderManager.Instance.OpenDeckEditForDeck(GameSession.DebugReturnDeckNum);
+            return;
+        }
+
         // 復帰対応：戦闘シーンから戻ってきた場合、それより先に実行されるRoguelikeSceneController.Awake()が
         // ローグライクパネルを有効化している。(Start()の実行順序は保証されないため
         // RoguelikeSession.GameStateのチェックでは弱いため、実際のアクティブ状態を参照)

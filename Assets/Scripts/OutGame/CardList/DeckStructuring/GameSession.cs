@@ -24,6 +24,11 @@ public static class GameSession
     // 2Pick：「やめる」を選んだ時点で確定した報酬金額
     public static int TwoPickReward;
 
+    // デバッグ用：GameModeを設定せずに対戦した場合、終了後にモード選択画面を経由せず
+    // 直接デッキ編成画面へ戻すかどうか（表示側で消費したらfalseに戻す）
+    public static bool DebugReturnToDeckEdit;
+    public static int DebugReturnDeckNum;
+
     /// <summary>
     /// 現在の対戦インデックスに対応する敵デッキを取得する（未設定・範囲外ならnull）
     /// </summary>
