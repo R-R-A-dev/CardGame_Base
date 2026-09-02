@@ -294,7 +294,7 @@ public class GameManager : MonoBehaviour
 
         if (isPlayerCard)
         {
-            enemy.manaCost -= cost;
+            player.manaCost -= cost;
         }
         else
         {
@@ -728,6 +728,10 @@ public class GameManager : MonoBehaviour
     //ターン変更時の通常ドロー時もsummonningをtrueにする
     public IEnumerator ChangeTurn()
     {
+        //既に決着がついている場合はターン変更演出を出さない（負け演出とPlayerTurn演出が重複するのを防ぐ）
+        if (player.heroHp <= 0 || enemy.heroHp <= 0)
+            yield break;
+
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
         isSummoning = true;
@@ -777,6 +781,16 @@ public class GameManager : MonoBehaviour
             // 手札が3枚未満ならドロー
             if (GetFriendHandTransform(true).Length < 3)
             {
+                // 山札が0枚の状態でドローしようとした場合はそのまま敗北
+                if (player.deck.Count == 0)
+                {
+                    yield return new WaitForSeconds(1f);
+                    player.heroHp = 0;
+                    uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+                    uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+                    StartCoroutine(ShowResultPanel(player.heroHp, true));
+                    yield break;
+                }
                 BattleAudioManager.Instance.PlaySE("CardCatch");
                 DrawCard(player.deck, playerHandTransform);
             }
@@ -789,6 +803,16 @@ public class GameManager : MonoBehaviour
             // 手札が3枚未満ならドロー
             if (GetEnemyHandTransform(true).Length < 3)
             {
+                // 山札が0枚の状態でドローしようとした場合はそのまま敗北
+                if (enemy.deck.Count == 0)
+                {
+                    yield return new WaitForSeconds(1f);
+                    enemy.heroHp = 0;
+                    uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
+                    uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
+                    StartCoroutine(ShowResultPanel(player.heroHp, true));
+                    yield break;
+                }
                 BattleAudioManager.Instance.PlaySE("CardCatch");
                 DrawCard(enemy.deck, enemyHandTransform);
             }

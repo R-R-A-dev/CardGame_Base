@@ -28,7 +28,7 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     [Header("勝利報酬パネル")]
     [SerializeField] private CpuBattleRewardUI cpuBattleRewardUI;
 
-    private const int MIN_DECK_SIZE = 40;
+    private const int MIN_DECK_SIZE = 0; // TODO: 動作確認用に一旦解除。本来は40
 
     // デッキ選択モーダルを自分用/敵用のどちらのボタンから開いたか
     private bool isSelectingEnemyDeck;
@@ -41,6 +41,10 @@ public class CpuBattleSelectionPanel : MonoBehaviour
 
     private void Start()
     {
+        // シーン上のデッキボタン数に対して保存データの枠が不足している場合、空デッキで埋めておく
+        // （古いセーブデータや初期セーブデータの枠数がボタン数より少ない場合の保険）
+        EnsureDeckSlotsExist();
+
         // シーン上に配置済みの8個のデッキボタンに、一度だけリスナーを登録する
         // （自分用・敵用どちらのモーダルとして開かれたかはisSelectingEnemyDeckをクリック時に参照して判定）
         for (int i = 0; i < deckButtons.Count; i++)
@@ -83,6 +87,14 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     public void CloseDeckListPanel()
     {
         deckListPanel.SetActive(false);
+    }
+
+    // シーン上のデッキボタン数に対して保存データの枠が不足している場合、空デッキで埋めておく
+    private void EnsureDeckSlotsExist()
+    {
+        var decks = GameDataHolder.Instance.Data.cpuBattleDecks;
+        while (decks.Count < deckButtons.Count)
+            decks.Add(new DeckSaveData());
     }
 
     // 各デッキボタンのラベルをcpuBattleDecksのデッキ名で更新する
@@ -196,6 +208,13 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     public void StartBattle()
     {
         var decks = GameDataHolder.Instance.Data.cpuBattleDecks;
+
+        if (decidedPlayerDeckId < 0 || decidedPlayerDeckId >= decks.Count ||
+            decidedEnemyDeckId < 0 || decidedEnemyDeckId >= decks.Count)
+        {
+            Debug.LogWarning("存在しないデッキ枠が選択されているため対戦を開始できません");
+            return;
+        }
 
         GameSession.SelectedDeck = new List<int>(decks[decidedPlayerDeckId].cardIds);
         GameSession.EnemyDeck = new List<int>(decks[decidedEnemyDeckId].cardIds);
