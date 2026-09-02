@@ -17,6 +17,7 @@ MonoBehaviour:
   deckSize: 30
   pickRounds: 15
   cardsPerPick: 2
-  availableCards: 
+  twoPickCards: []
   playerInitialHP: 20
   enemyInitialHP: 20
+  enemyDecks: []

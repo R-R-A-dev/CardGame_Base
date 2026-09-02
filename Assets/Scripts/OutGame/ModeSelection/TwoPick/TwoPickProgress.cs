@@ -19,7 +19,7 @@ public class TwoPickProgress
 
     public List<int> SelectedCards { get => selectedCards; set => selectedCards = value; }
 
-    //selectedCards‰Šú‰»
+    //selectedCardsåˆæœŸåŒ–
     public void InitializeSelectedCards()
     {
         selectedCards = new List<int>();
@@ -29,14 +29,14 @@ public class TwoPickProgress
     {
         int maxCardId = 120;
         List<int> sortedCards = new List<int>(new int[maxCardId]);
-        // addCards‚ÌID‚ğƒJƒEƒ“ƒg
+        // addCardsã®IDã‚’ã‚«ã‚¦ãƒ³ãƒˆ
         foreach (int cardId in addCards)
         {
-            // cardId = 1 ¨ sortedCards[0]
-            // cardId = 2 ¨ sortedCards[1]
+            // cardId = 1 â†’ sortedCards[0]
+            // cardId = 2 â†’ sortedCards[1]
             int index = cardId - 1;
 
-            // ”ÍˆÍƒ`ƒFƒbƒN
+            // ç¯„å›²ãƒã‚§ãƒƒã‚¯
             if (index >= 0 && index < maxCardId)
             {
                 sortedCards[index]++;

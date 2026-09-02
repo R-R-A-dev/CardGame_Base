@@ -4,26 +4,38 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "TwoPickData", menuName = "GameMode/TwoPickData")]
 public class TwoPickData : ScriptableObject
 {
-    [Header("2PickŠî–{İ’è")]
+    [Header("2PickåŸºæœ¬è¨­å®š")]
     public string modeName = "2Pick";
     [TextArea(3, 5)]
     public string description;
 
-    [Header("ƒsƒbƒNİ’è")]
+    [Header("ãƒ”ãƒƒã‚¯è¨­å®š")]
     public int deckSize = 30;
-    public int pickRounds = 15; // ‰½‰ñ‘I‘ğ‚·‚é‚©
-    public int cardsPerPick = 2; // 1‰ñ‚É‚Â‚«‰½–‡‚©‚ç‘I‘ğ
+    public int pickRounds = 15; // ä½•å›é¸æŠã™ã‚‹ã‹
+    public int cardsPerPick = 2; // 1å›ã«ã¤ãã„ãã¤ã‹ã‚‰é¸æŠã™ã‚‹ã‹
 
-    [Header("g—p‰Â”\ƒJ[ƒhƒv[ƒ‹")]
+    [Header("ä½¿ç”¨å¯èƒ½ã‚«ãƒ¼ãƒ‰ãƒ—ãƒ¼ãƒ«")]
     public List<CardGroup> twoPickCards = new List<CardGroup>();
 
-    [Header("ƒQ[ƒ€İ’è")]
+    [Header("ã‚²ãƒ¼ãƒ è¨­å®š")]
     public int playerInitialHP = 20;
     public int enemyInitialHP = 20;
+
+    [Header("æ•µãƒ‡ãƒƒã‚­è¨­å®šï¼ˆ1ã‚¹ãƒ†ãƒ¼ã‚¸åˆ†ã€‚å¯¾æˆ¦ç›¸æ‰‹ã”ã¨ã«é †ã«è¨­å®šï¼‰")]
+    public List<EnemyDeckEntry> enemyDecks = new List<EnemyDeckEntry>();
+
+    [Header("å ±é…¬è¨­å®š")]
+    public int moneyPerWin = 10; // 1å‹ã”ã¨ã«ç²å¾—ã§ãã‚‹ãŠé‡‘
 }
 
 [System.Serializable]
 public class CardGroup
+{
+    public List<int> cards = new List<int>();
+}
+
+[System.Serializable]
+public class EnemyDeckEntry
 {
     public List<int> cards = new List<int>();
 }

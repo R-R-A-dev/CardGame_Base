@@ -25,6 +25,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject attackPanel;
     [SerializeField] GameObject hpPanel;
 
+    [Header("2Pick 勝利後の選択パネル")]
+    [SerializeField] GameObject twoPickResultPanel;
+    [SerializeField] GameObject twoPickNextBattleButton;
+    [SerializeField] TextMeshProUGUI twoPickResultText;
+
 
 
     public void ShowDescriptionPanel(CardController card)
@@ -86,5 +91,24 @@ public class UIManager : MonoBehaviour
         {
             resultText.text = "WIN";
         }
+    }
+
+    /// <summary>
+    /// 2Pick勝利時：「次の対戦へ」「やめる」を選択させるパネルを表示する
+    /// </summary>
+    /// <param name="hasNextBattle">次の対戦（敵デッキ）が残っているか。falseの場合は「次の対戦へ」ボタンを隠す</param>
+    public void ShowTwoPickResultPanel(bool hasNextBattle)
+    {
+        twoPickResultPanel.SetActive(true);
+        if (twoPickNextBattleButton != null)
+            twoPickNextBattleButton.SetActive(hasNextBattle);
+        if (twoPickResultText != null)
+            twoPickResultText.text = hasNextBattle ? "WIN" : "終了";
+    }
+
+    public void HideTwoPickResultPanel()
+    {
+        if (twoPickResultPanel != null)
+            twoPickResultPanel.SetActive(false);
     }
 }

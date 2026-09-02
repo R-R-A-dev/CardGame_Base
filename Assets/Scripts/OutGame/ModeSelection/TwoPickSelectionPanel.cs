@@ -6,6 +6,25 @@ public class TwoPickSelectionPanel : MonoBehaviour
     [SerializeField] private GameObject modeSelectPanel;
     [SerializeField] private GameObject twoPickPanel;
     [SerializeField] private GameObject cardInfoPannel;
+
+    [Header("やめた時の報酬パネル")]
+    [SerializeField] private TwoPickRewardUI twoPickRewardUI;
+
+    private void Start()
+    {
+        // 復帰対応：2Pickの戦闘から戻ってきた場合、フラグを消費する
+        if (GameSession.TwoPickFinished)
+        {
+            GameSession.TwoPickFinished = false;
+
+            if (GameSession.TwoPickReward > 0)
+            {
+                twoPickRewardUI.Open(GameSession.TwoPickReward);
+                GameSession.TwoPickReward = 0;
+            }
+        }
+    }
+
     public void StartPanelOpen()
     {
         cardInfoPannel.SetActive(false);
@@ -25,12 +44,12 @@ public class TwoPickSelectionPanel : MonoBehaviour
         modeSelectPanel.SetActive(false);
         twoPickPanel.SetActive(true);
         TwoPickModeManager.Instance?.StartPick();
-        //�V�[���ύX
+        //シーン遷移
         //UnityEngine.SceneManagement.SceneManager.LoadScene("Battle");
     }
 }
-/*��ʂ̑���ƃV�[���J��
- * �J�ڎ��ɓn�����f�[�^�Ǝ󂯎��@�\
- * 
- * 
+/*画面の操作とシーン遷移
+ * 遷移時に渡すデータと受け取る機能
+ *
+ *
 */

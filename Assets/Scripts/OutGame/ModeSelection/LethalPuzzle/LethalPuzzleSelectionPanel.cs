@@ -58,7 +58,7 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
 
     void OnClickButton(int number)
     {
-        //�V�[���ύX
+        //シーン遷移
         ConfirmPanel.SetActive(true);
         selectNum = number;
         ModeConfigManager.Instance.LethalPuzzleIndex = selectNum;

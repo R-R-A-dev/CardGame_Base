@@ -6,16 +6,16 @@ public class ModeConfigManager : MonoBehaviour
     public static ModeConfigManager Instance { get; private set; }
     public int LethalPuzzleIndex { get => lethalPuzzleIndex; set => lethalPuzzleIndex = value; }
 
-    [Header("���݂̃Q�[�����[�h")]
+    [Header("現在のゲームモード")]
     public GameMode currentGameMode = GameMode.NONE;
 
-    [Header("�l�����f�[�^���X�g")]
+    [Header("詰みパズルデータリスト")]
     public List<LethalPuzzleData> lethalPuzzleList = new List<LethalPuzzleData>();
 
-    [Header("2Pick�f�[�^���X�g")]
+    [Header("2Pickデータリスト")]
     public List<TwoPickData> twoPickList = new List<TwoPickData>();
 
-    [Header("���[�O���C�N�f�[�^���X�g")]
+    [Header("ローグライクデータリスト")]
     public List<RoguelikeStageData> roguelikeList = new List<RoguelikeStageData>();
 
     int lethalPuzzleIndex = 0;
@@ -35,7 +35,7 @@ public class ModeConfigManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �w��ID�̋l�����f�[�^���擾
+    /// 指定IDの詰みパズルデータを取得
     /// </summary>
     public LethalPuzzleData GetLethalPuzzleData(int id)
     {
@@ -43,7 +43,7 @@ public class ModeConfigManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �w��C���f�b�N�X��2Pick�f�[�^���擾
+    /// 指定インデックスの2Pickデータを取得
     /// </summary>
     public TwoPickData GetTwoPickData(int index)
     {
@@ -53,7 +53,7 @@ public class ModeConfigManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �w��C���f�b�N�X�̃��[�O���C�N�f�[�^���擾
+    /// 指定インデックスのローグライクデータを取得
     /// </summary>
     public RoguelikeStageData GetRoguelikeData(int index)
     {
@@ -73,18 +73,18 @@ public class ModeConfigManager : MonoBehaviour
 
 public enum GameMode
 {
-    NONE,           // ���I��
-    CPU_BATTLE,     // CPU��
-    LETHAL_PUZZLE,  // �l����
+    NONE,           // 未選択
+    CPU_BATTLE,     // CPU戦
+    LETHAL_PUZZLE,  // 詰みパズル
     TWO_PICK,       // 2Pick
-    ROGUELIKE       // ���[�O���C�N
+    ROGUELIKE       // ローグライク
 }
 
 /*
- * �����ꂽ��ɂ��邱��
- * �����ꂽ���̂��烂�[�h�̍��ڂ��擾����GameManager�ɓn��
- * ���X�g�擾�N���X
- * 
- * 
- * 
+ * 起動された後にやること
+ * 起動されたものからモードの項目を取得してGameManagerに渡す
+ * リスト取得クラス
+ *
+ *
+ *
 */

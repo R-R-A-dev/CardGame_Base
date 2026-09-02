@@ -6,11 +6,11 @@ public class TwoPickModeManager : MonoBehaviour
 {
     public static TwoPickModeManager Instance { get; private set; }
 
-    [Header("İ’è")]
-    [SerializeField] private int totalPicks = 15; // ‘I‘ğ‰ñ”
-    [SerializeField] private TwoPickData twoPickData; // g—p‚·‚éƒJ[ƒhƒv[ƒ‹ƒf[ƒ^
+    [Header("è¨­å®š")]
+    [SerializeField] private int totalPicks = 15; // é¸æŠå›æ•°
+    [SerializeField] private TwoPickData twoPickData; // ä½¿ç”¨ã™ã‚‹ã‚«ãƒ¼ãƒ‰ãƒ—ãƒ¼ãƒ«ãƒ‡ãƒ¼ã‚¿
 
-    [Header("UIQÆ")]
+    [Header("UIå‚ç…§")]
     [SerializeField] private TwoPickUI twoPickUI;
     [SerializeField] private DeckStatisticsUI deckStatisticsUI;
     [SerializeField] private SortCards sortCards;
@@ -30,20 +30,25 @@ public class TwoPickModeManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        // ŠeƒVƒXƒeƒ€‚ğ‰Šú‰»
+        // å„ã‚·ã‚¹ãƒ†ãƒ ã‚’åˆæœŸåŒ–
         cardSelector = new TwoPickCardSelector();
         pickProgress = new TwoPickProgress();
     }
 
     /// <summary>
-    /// 2PickŠJn
+    /// 2Pické–‹å§‹
     /// </summary>
     public void StartPick()
     {
         //pickProgress.Reset();
         //ShowNextPick();
         PickCountReset();
-        //ŠJn‚ÌƒJ[ƒh•\¦‚Æ
+
+        // ã“ã®ã‚¹ãƒ†ãƒ¼ã‚¸ã®æ•µãƒ‡ãƒƒã‚­æƒ…å ±ã¨å¯¾æˆ¦ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ã‚»ãƒƒã‚·ãƒ§ãƒ³ã«ã‚»ãƒƒãƒˆ
+        GameSession.TwoPickData = twoPickData;
+        GameSession.TwoPickBattleIndex = 0;
+
+        //é–‹å§‹æ™‚ã®ã‚«ãƒ¼ãƒ‰è¡¨ç¤º
         twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
     }
 
@@ -52,7 +57,7 @@ public class TwoPickModeManager : MonoBehaviour
         if (pickCount < 20)
             twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
 
-        //‘I‘ğ‚µ‚½ƒJ[ƒh‚Ì‡Œv‚ğ“n‚·
+        //é¸æŠã—ãŸã‚«ãƒ¼ãƒ‰ã®åˆè¨ˆã‚’æ¸¡ã™
         //TwoPickModeManager.Instance.pickProgress.SelectedCards
         deckStatisticsUI.RefreshStatistics(0, leftCards);
     }
@@ -62,7 +67,7 @@ public class TwoPickModeManager : MonoBehaviour
         if (pickCount < 20)
             twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
 
-        //‘I‘ğ‚µ‚½ƒJ[ƒh‚Ì‡Œv‚ğ“n‚·
+        //é¸æŠã—ãŸã‚«ãƒ¼ãƒ‰ã®åˆè¨ˆã‚’æ¸¡ã™
         //TwoPickModeManager.Instance.pickProgress.SelectedCards
         deckStatisticsUI.RefreshStatistics(0, rightCards);
     }
@@ -86,23 +91,23 @@ public class TwoPickModeManager : MonoBehaviour
 
 
     /// <summary>
-    /// ƒJ[ƒh‚ª‘I‘ğ‚³‚ê‚½
+    /// ã‚«ãƒ¼ãƒ‰ãŒé¸æŠã•ã‚ŒãŸã‚‰
     /// </summary>
 /*    public void OnCardSelected(int cardId)
     {
-        // ‘I‘ğ‚³‚ê‚½ƒJ[ƒh‚ğƒfƒbƒL‚É’Ç‰Á
+        // é¸æŠã•ã‚ŒãŸã‚«ãƒ¼ãƒ‰ã‚’ãƒ‡ãƒƒã‚­ã«è¿½åŠ 
         pickProgress.AddSelectedCard(cardId);
 
-        Debug.Log($"‘I‘ğ: {cardId} ({pickProgress.CurrentPick}/{pickProgress.TotalPicks})");
+        Debug.Log($"é¸æŠ: {cardId} ({pickProgress.CurrentPick}/{pickProgress.TotalPicks})");
 
-        // ‘S‘I‘ğŠ®—¹ƒ`ƒFƒbƒN
+        // å…¨é¸æŠå®Œäº†ãƒã‚§ãƒƒã‚¯
         if (pickProgress.IsComplete())
         {
             OnPickComplete();
         }
         else
         {
-            // Ÿ‚Ì‘I‘ğ‚Ö
+            // æ¬¡ã®é¸æŠã¸
             ShowNextPick();
         }
     }*/
@@ -126,11 +131,11 @@ public class TwoPickModeManager : MonoBehaviour
     }
 
 }
-/*Ÿ‚É‚·‚é‚±‚Æ
- * ƒJ[ƒhƒNƒŠƒbƒNŒã‚É‘‚¦‚é”’l
- * Ÿ‚ÌƒJ[ƒh‚Ì•\¦
- *  ƒ{ƒ^ƒ“‚ğ‰Ÿ‚·
- * •\¦‚³‚ê‚½ƒJ[ƒh‚Ìí—Ş‚ª“Œv‚É’Ç‰Á‚³‚ê‚é
- * 
- * 
+/*å¾Œã«ã‚„ã‚‹ã“ã¨
+ * ã‚«ãƒ¼ãƒ‰ã‚¯ãƒªãƒƒã‚¯æ™‚ã«å¢—ãˆã‚‹æ•°å€¤
+ * æ¬¡ã®ã‚«ãƒ¼ãƒ‰ã®è¡¨ç¤º
+ *  ãƒœã‚¿ãƒ³å‡¦ç†
+ * è¡¨ç¤ºã•ã‚ŒãŸã‚«ãƒ¼ãƒ‰ã®ç¨®é¡ã‚’åˆè¨ˆã«è¿½åŠ ã•ã›ã‚‹
+ *
+ *
 */

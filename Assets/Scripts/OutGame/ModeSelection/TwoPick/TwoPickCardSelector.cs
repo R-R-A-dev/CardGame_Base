@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TwoPickCardSelector 
+public class TwoPickCardSelector
 {
-    private List<int> cardPool; // g—p‰Â”\‚ÈƒJ[ƒh‘S‘Ì
-    private List<int> usedCards; // ¡‰ñ‚ÌƒsƒbƒN‚ÅoŒ»‚µ‚½ƒJ[ƒhid•¡§Œä—pj
+    private List<int> cardPool; // ä½¿ç”¨å¯èƒ½ãªã‚«ãƒ¼ãƒ‰å…¨éƒ¨
+    private List<int> usedCards; // ä»Šå›ã®ãƒ”ãƒƒã‚¯ã§å‡ºç¾ã—ãŸã‚«ãƒ¼ãƒ‰ï¼ˆé‡è¤‡åˆ¤å®šç”¨ï¼‰
 
     public TwoPickCardSelector()
     {
@@ -18,12 +18,12 @@ public class TwoPickCardSelector
     }
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         uiManager.HideResultPanel();
+        uiManager.HideTwoPickResultPanel();
 
         if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
@@ -122,8 +123,21 @@ public class GameManager : MonoBehaviour
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
-            player.deck = GameSession.SelectedDeck;
-            enemy.deck = GameSession.SelectedDeck;
+            player.deck = new List<int>(GameSession.SelectedDeck);
+
+            List<int> enemyDeckForBattle = GameSession.GetTwoPickEnemyDeck();
+            if (enemyDeckForBattle == null)
+            {
+                Debug.LogWarning("2Pick: 敵デッキが設定されていないため、プレイヤーと同じデッキを使用します。");
+                enemyDeckForBattle = new List<int>(GameSession.SelectedDeck);
+            }
+            enemy.deck = enemyDeckForBattle;
+
+            //テスト用: TwoPickモードのマナを最初から10にする
+            player.manaCost = 10;
+            player.defaultManaCost = 10;
+            player.heroHp = 20; // テスト用: TwoPickモードの初期HPを30にする
+            enemy.heroHp = 20;
             uiManager.ShowHeroHP(player.heroHp, enemy.heroHp);
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
@@ -713,8 +727,10 @@ public class GameManager : MonoBehaviour
 
         if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.LETHAL_PUZZLE)
         {
-            //詰将棋モードの場合、ゲームオーバー処理
-            Debug.Log("Lethal Puzzle Mode: Game Over on Turn Change");
+            //詰将棋モードは自分のターン内に敵を倒せなければ敗北（heroHpは実際には減らさず、演出のためだけに0を渡す）
+            //暗転(effectBack)は既にオンなので、遅延なしですぐ負けエフェクトを出す
+            StartCoroutine(ShowResultPanel(0, true));
+            yield break;
         }
         if (!isPlayerTurn)
         {
@@ -959,10 +975,11 @@ public class GameManager : MonoBehaviour
         RoguelikeSession.GameState.CurrentDeck = survivingCards;
     }
 
-    IEnumerator ShowResultPanel(int heroHp)
+    IEnumerator ShowResultPanel(int heroHp, bool skipDelay = false)
     {
         // StopAllCoroutines();
-        yield return new WaitForSeconds(2f);
+        if (!skipDelay)
+            yield return new WaitForSeconds(2f);
         //uiManager.ShowResultPanel(heroHp);
         //TODO:勝利、敗北のエフェクト
         effectBack.SetActive(true);
@@ -992,7 +1009,18 @@ public class GameManager : MonoBehaviour
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
-            
+            if (enemy.heroHp <= 0)
+            {
+                // 勝利：次の対戦に進むか、やめるかをバトル内パネルで選択させる
+                GameSession.TwoPickBattleIndex++;
+                uiManager.ShowTwoPickResultPanel(GameSession.HasNextTwoPickBattle());
+            }
+            else
+            {
+                // 敗北：元のモード選択画面に戻る
+                GameSession.TwoPickFinished = true;
+                SceneManager.LoadScene("Field");
+            }
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
         {
@@ -1003,6 +1031,30 @@ public class GameManager : MonoBehaviour
             GameSession.CpuBattleWon = enemy.heroHp <= 0;
             SceneManager.LoadScene("Field");
         }
+    }
+
+    /// <summary>
+    /// 2Pick勝利パネルの「次の対戦へ」ボタン
+    /// </summary>
+    public void OnTwoPickNextBattle()
+    {
+        uiManager.HideTwoPickResultPanel();
+        SceneManager.LoadScene("Game");
+    }
+
+    /// <summary>
+    /// 2Pick勝利パネルの「やめる」ボタン
+    /// </summary>
+    public void OnTwoPickGiveUp()
+    {
+        uiManager.HideTwoPickResultPanel();
+        GameSession.TwoPickFinished = true;
+
+        // 現在までの勝利数に応じた報酬を確定させる
+        int moneyPerWin = GameSession.TwoPickData != null ? GameSession.TwoPickData.moneyPerWin : 0;
+        GameSession.TwoPickReward = GameSession.TwoPickBattleIndex * moneyPerWin;
+
+        SceneManager.LoadScene("Field");
     }
 
 

@@ -36,6 +36,13 @@ public class ModeSelectionUI : MonoBehaviour
             return;
         }
 
+        // 復帰対応：2Pickから戻ってきた場合（敗北/やめる）、2Pick選択パネルを表示
+        if (GameSession.TwoPickFinished)
+        {
+            ShowTwoPickPanel();
+            return;
+        }
+
         // 初期状態：モード選択パネルのみ表示
         ShowModeSelectPanel();
     }
