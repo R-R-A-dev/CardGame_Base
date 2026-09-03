@@ -390,6 +390,11 @@ public class CardController : MonoBehaviour
         CardController target = null;
         CardController[] targets = null;
         Transform movePosition = null;
+        // DESTROY_ATTACKED_TARGET / DAMAGE_NULLIFY_ONCE / DOUBLE_ACTION / STATS_UP_ON_ATTACK など、
+        // ターゲット選択や専用エフェクトを伴わない「常時パッシブ」系アビリティ単体の場合、
+        // 以降のどの分岐にも該当しない。その場合に isAttacking を戻し忘れると
+        // ドラッグ操作・ターン終了操作がフリーズしたままになるため、実際に効果を発動したかを追跡する。
+        bool actionTaken = false;
 
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
             targets = gameManager.GetEnemyFieldCards(model.isPlayerCard);
@@ -407,89 +412,114 @@ public class CardController : MonoBehaviour
         {
             movePosition = gameManager.enemyHero;
             attackSpellEffectHero(movePosition, true);
+            actionTaken = true;
         }
 
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO))
         {
             movePosition = gameManager.playerHero;
             attackSpellEffectHero(movePosition, true);
+            actionTaken = true;
         }
 
         if (model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
         {
             CardController[] enemyCards = gameManager.GetEnemyHandTransform(this.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            if (enemyCards.Length > 0)
+            {
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
+            }
         }
 
         if (model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
         {
             CardController[] friendCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
-            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
+            if (friendCards.Length > 0)
+            {
+                target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
+            }
         }
 
         if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            if (enemyCards.Length > 0)
+            {
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
+            }
         }
 
         if (model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND))
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length - 1)];
+            if (friendCards.Length > 0)
+            {
+                target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
+            }
         }
 
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS) ||
             model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND) ||
             model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
         {
-            DG.Tweening.Sequence seq = DOTween.Sequence();
-
-            seq.Append(transform
-                .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
-                .OnUpdate(() =>
-                {
-                    float y = transform.localEulerAngles.y;
-                    // Unityでは-90度が270度として表現されることがあるので360でmod取る
-                    if (y >= 90 && y <= 270)
-                    {
-                        view.maskPanel.SetActive(true);  // 裏面
-                    }
-                    else
-                    {
-                        view.maskPanel.SetActive(false); // 表面
-                    }
-                })
-            );
-            seq.Play();
-            for (int i = 0; i < targets.Length; i++)
+            // targetsが空（対象なし）ならAbilityEffectを一度も呼ばないので、
+            // actionTakenもtrueにしない（末尾の保険でisAttackingを戻す）
+            if (targets != null && targets.Length > 0)
             {
-                AbilityEffect(targets[i], true);
+                DG.Tweening.Sequence seq = DOTween.Sequence();
+
+                seq.Append(transform
+                    .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+                    .OnUpdate(() =>
+                    {
+                        float y = transform.localEulerAngles.y;
+                        // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                        if (y >= 90 && y <= 270)
+                        {
+                            view.maskPanel.SetActive(true);  // 裏面
+                        }
+                        else
+                        {
+                            view.maskPanel.SetActive(false); // 表面
+                        }
+                    })
+                );
+                seq.Play();
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    AbilityEffect(targets[i], true);
+                }
+                actionTaken = true;
             }
         }
         else if (model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY) || model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND) ||
                  model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) || model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
         {
-            DG.Tweening.Sequence seq = DOTween.Sequence();
+            // targetがnull（対象なし）ならAbilityEffectを呼ばない（NRE防止・末尾の保険に委ねる）
+            if (target != null)
+            {
+                DG.Tweening.Sequence seq = DOTween.Sequence();
 
-            seq.Append(transform
-                .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
-                .OnUpdate(() =>
-                {
-                    float y = transform.localEulerAngles.y;
-                    // Unityでは-90度が270度として表現されることがあるので360でmod取る
-                    if (y >= 90 && y <= 270)
+                seq.Append(transform
+                    .DORotate(new Vector3(0, 360, 0), 0.3f, RotateMode.LocalAxisAdd)
+                    .OnUpdate(() =>
                     {
-                        view.maskPanel.SetActive(true);  // 裏面
-                    }
-                    else
-                    {
-                        view.maskPanel.SetActive(false); // 表面
-                    }
-                })
-            );
-            seq.Play();
-            AbilityEffect(target, true);
+                        float y = transform.localEulerAngles.y;
+                        // Unityでは-90度が270度として表現されることがあるので360でmod取る
+                        if (y >= 90 && y <= 270)
+                        {
+                            view.maskPanel.SetActive(true);  // 裏面
+                        }
+                        else
+                        {
+                            view.maskPanel.SetActive(false); // 表面
+                        }
+                    })
+                );
+                seq.Play();
+                AbilityEffect(target, true);
+                actionTaken = true;
+            }
         }
         else if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS) || model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
@@ -513,6 +543,23 @@ public class CardController : MonoBehaviour
             );
             seq.Play();
             UseAbilitiesTo(this);
+            // DRAW_CARDSはDrawCard()内でisAttackingをfalseに戻すのでactionTaken扱いにする。
+            // SUMMON_SPECIFIC_UNIT単体はisAttackingに触れる経路がないため、
+            // actionTakenをtrueにせず末尾の保険に委ねる（true固定にすると保険が働かずフリーズする）
+            if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
+            {
+                actionTaken = true;
+            }
+        }
+
+        if (!actionTaken)
+        {
+            // DESTROY_ATTACKED_TARGET / DAMAGE_NULLIFY_ONCE / DOUBLE_ACTION / STATS_UP_ON_ATTACK など、
+            // 常時パッシブ系アビリティ単体の場合はここに来る。
+            // これらは OnFiledAbilities() 内の SetAbility(this) で既にフラグ適用済みなので、
+            // このメソッドでの追加処理は不要。isAttacking を明示的に戻さないと
+            // ドラッグ操作・ターン終了操作がフリーズしたままになる。
+            GameManager.instance.isAttacking = false;
         }
     }
 
@@ -1189,7 +1236,13 @@ public class CardController : MonoBehaviour
         yield return new WaitForSeconds(attackTime);
         GameManager.instance.isAttacking = !isDefense;
         CheckAttackParticle(effect);
-        model.Attack(enemy);
+        // 破壊者(isDestroyer)はDestroys()が既に同期でダメージ無効を含めた結果を確定させている。
+        // ここで通常ダメージを重ねて適用すると、ダメージ無効を1回消費した後の
+        // 2発目が素通りしてしまう（無効化が意味をなさなくなる）ため、破壊者はスキップする。
+        if (!model.isDestroyer)
+        {
+            model.Attack(enemy);
+        }
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
         GameObject textObj = GameManager.instance.GetTextPool();
@@ -1206,7 +1259,12 @@ public class CardController : MonoBehaviour
                 hitEffect(endPos);
                 GameManager.instance.isAttacking = !isDefense;
                 CheckAttackParticle(effect);
-                model.Attack(enemy);
+                // 破壊者はDestroys()が既に結果を確定させているため、重複適用をスキップする
+                // （SpawnEffect側のコメント参照）
+                if (!model.isDestroyer)
+                {
+                    model.Attack(enemy);
+                }
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
                 GameObject textObj = GameManager.instance.GetTextPool();
@@ -1243,7 +1301,12 @@ public class CardController : MonoBehaviour
                     hitEffect(targetPos);
                     GameManager.instance.isAttacking = !isDefense;
                     CheckAttackParticle(target);
-                    model.Attack(enemyCC);
+                    // 破壊者はDestroys()が既に結果を確定させているため、重複適用をスキップする
+                    // （SpawnEffect側のコメント参照）
+                    if (!model.isDestroyer)
+                    {
+                        model.Attack(enemyCC);
+                    }
                     enemyCC.RefreshView();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
                     GameObject textObj = GameManager.instance.GetTextPool();
