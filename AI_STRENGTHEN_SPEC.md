@@ -180,6 +180,16 @@ if (xxx.Length == 0) { /* 対象なし。効果を発動しない */ }
 else target = xxx[UnityEngine.Random.Range(0, xxx.Length)];
 ```
 
+**★注意：`targets` 配列を先に確保してから空チェックするだけでは不十分です。**
+`targets = new CardController[hand.Length]` を空チェックの前に実行すると、
+手札0枚のとき `targets` は「非nullで長さ0」になります。
+この状態は後段の `if (target != null || targets != null)` を通過してしまい、
+`target` が null のまま `card.AbilityEffect(null, true)` が呼ばれて
+`target.transform` で NullReferenceException になります（`isAttacking` が true のまま固まる）。
+
+対象が0件のときは **`targets` にも配列を代入しない**、もしくは後段のガードを
+`if (target != null || (targets != null && targets.Length > 0))` にしてください。
+
 **`CardController.cs` 側（421, 427, 433, 439, 988行目付近）にも同じ不具合がありますが、
 そちらはプレイヤー側の処理なので今回は触らないでください。** 報告だけしてください。
 
@@ -239,7 +249,16 @@ Threat(c) = c.model.at * 1.2f + c.model.hp * 0.8f
 
 Score(attacker a, defender d):
     kill    = a.at >= d.hp   （a が DESTROY_ATTACKED_TARGET を持つなら常に true）
-    survive = d.at <  a.hp   （a が DAMAGE_NULLIFY_ONCE   を持つなら常に true）
+
+    survive = 次の順で判定する（★重要：この順序を守ること）
+        1. d が DESTROY_ATTACKED_TARGET を持つ
+             → a が DAMAGE_NULLIFY_ONCE を「まだ消費していない」なら
+                   破壊は無効化されるが、その直後の通常反撃は素通りする
+                   survive = (d.at < a.hp)
+               そうでなければ survive = false
+        2. d が DESTROY_ATTACKED_TARGET を持たない
+             → a が DAMAGE_NULLIFY_ONCE を「まだ消費していない」なら survive = true
+               そうでなければ survive = (d.at < a.hp)
 
     kill &&  survive →  100 + Threat(d)
     kill && !survive →   50 + Threat(d) - Threat(a)
@@ -252,6 +271,15 @@ Score(attacker a, ヒーロー):
         相手ヒーローHP <= 5              → +1.5
         BoardAdvantage() > 0（盤面有利）  → +0.8
 ```
+
+**「消費していない」の判定には静的な `abilities` フラグではなく、
+ランタイムの `model.isDamageNullifyOnce` / `model.isDestroyer` を使ってください。**
+`DAMAGE_NULLIFY_ONCE` は `CardModel.Damage()` で1回使うと `isDamageNullifyOnce` が false になりますが、
+`abilities` のフラグは立ったままです。フラグで判定すると使用済みのカードを
+「まだ無敵」と誤認して過大評価します。
+（根拠：`CardController.Defense()` は `isDestroyer` なら `Destroys()` を先に同期実行し、
+その後 `attackEffect()` の通常ダメージが遅れて入る。`CardModel.Damage()` は
+`isDamageNullifyOnce` が true のとき1回だけダメージを捨てる）
 
 `NextAttack` は「まだ `canAttack == true` の攻撃可能カード」の全組み合わせから
 最大スコアの1組を返します。スコアが全て負ならヒーローへ（守護がなければ）、
