@@ -23,8 +23,8 @@ public class AI : MonoBehaviour
             continue;
         }
         yield return new WaitForSeconds(1);
-        // フィールドのカードを攻撃可能にする
-        CardController[] enemyFieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
+        // フィールドのカードを攻撃可能にする（破壊演出中で残っているカードは除外）
+        CardController[] enemyFieldCardList = Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
         gameManager.SettingCanAttackView(enemyFieldCardList, true);
 
         /* 場にカードをだす */
@@ -85,8 +85,8 @@ public class AI : MonoBehaviour
 
         yield return new WaitForSeconds(1);
         /* 攻撃 */
-        // フィールドのカードリストを取得
-        fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
+        // フィールドのカードリストを取得（破壊演出中で残っているカードは除外）
+        fieldCardList = Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
 
 
         //攻撃可能カードがあれば攻撃を繰り返す
@@ -100,27 +100,25 @@ public class AI : MonoBehaviour
             }
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
-            CardController[] playerFieldCardList = gameManager.playerFieldTransform.GetComponentsInChildren<CardController>();
+            CardController[] playerFieldCardList = Alive(gameManager.playerFieldTransform.GetComponentsInChildren<CardController>());
 
             // attackerカードを選択
             CardController attacker = enemyCanAttackCardList[0];
+
+            // defenderカードを選択
+            // シールドカードのみ攻撃対象にする（貫通持ちは無視できる）
+            // ※ defenderを決める前に絞り込む（絞り込み後に決めないと守護を無視してしまう）
+            if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
+            {
+                if (Array.Exists(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD)))
+                {
+                    playerFieldCardList = Array.FindAll(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD));
+                }
+            }
             CardController defender = GetFirstZeroOrLess(playerFieldCardList);
 
             if (playerFieldCardList.Length > 0 && defender != null)
             {
-
-                CardController card = new CardController();
-
-                if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
-                {
-                    // defenderカードを選択
-                    // シールドカードのみ攻撃対象にする
-                    if (Array.Exists(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD)))
-                    {
-                        playerFieldCardList = Array.FindAll(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD));
-                    }
-                }
-
                 // attackerとdefenderを戦わせる
                 //StartCoroutine(attacker.movement.MoveToTarget(defender.transform));
                 yield return new WaitForSeconds(0.51f);
@@ -142,12 +140,20 @@ public class AI : MonoBehaviour
             }
             if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
                 yield break;
-            fieldCardList = gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>();
+            fieldCardList = Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
             yield return new WaitForSeconds(2);
         }
 
         yield return new WaitForSeconds(1);
         StartCoroutine(gameManager.ChangeTurn());
+    }
+
+    // 破壊演出中（Destroy()予約済みだが未破棄）のカードを除外する
+    // ※ 手札カードには使わないこと。スペルカードは hp=0 のため isAlive/hp>0 判定に引っかかり、
+    //   手札取得に適用すると敵がスペルを一切使えなくなる（CardView.cs でスペルは hp/at 非表示の仕様）
+    static CardController[] Alive(CardController[] source)
+    {
+        return Array.FindAll(source, c => c != null && c.model != null && c.model.isAlive && c.model.hp > 0);
     }
 
     public CardController GetFirstZeroOrLess(CardController[] array)
@@ -222,7 +228,14 @@ public class AI : MonoBehaviour
         if (card.model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND))
         {
             CardController[] enemyCards = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            if (enemyCards.Length == 0)
+            {
+                // 対象なし。効果を発動しない
+            }
+            else
+            {
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
+            }
         }
 
         if (card.model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
@@ -236,7 +249,14 @@ public class AI : MonoBehaviour
                 targets[index] = hand[i];
                 index++;
             }
-            target = targets[UnityEngine.Random.Range(0, targets.Length - 1)];
+            if (targets.Length == 0)
+            {
+                // 対象なし。効果を発動しない
+            }
+            else
+            {
+                target = targets[UnityEngine.Random.Range(0, targets.Length)];
+            }
         }
 
         if (card.model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY))
@@ -350,7 +370,14 @@ public class AI : MonoBehaviour
         if (card.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND))
         {
             CardController[] enemyCards = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length - 1)];
+            if (enemyCards.Length == 0)
+            {
+                // 対象なし。効果を発動しない
+            }
+            else
+            {
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
+            }
         }
         if (card.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND))
         {
