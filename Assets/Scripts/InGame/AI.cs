@@ -24,7 +24,7 @@ public class AI : MonoBehaviour
         }
         yield return new WaitForSeconds(1);
         // フィールドのカードを攻撃可能にする（破壊演出中で残っているカードは除外）
-        CardController[] enemyFieldCardList = Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
+        CardController[] enemyFieldCardList = AIEvaluator.Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
         gameManager.SettingCanAttackView(enemyFieldCardList, true);
 
         /* 場にカードをだす */
@@ -48,7 +48,7 @@ public class AI : MonoBehaviour
                                                                                                                                                                                                        // 場に出すカードを選択
             CardController selectCard = Array.Find(
                 selectableHandCardList,
-                card => !(gameManager.GetEnemyFieldCards(true).Length > 4 && card.model.spells == SPELLS.NONE)
+                card => !(AIEvaluator.Alive(gameManager.GetEnemyFieldCards(true)).Length > 4 && card.model.spells == SPELLS.NONE)
             );
 
             if (selectCard == null) break;
@@ -86,7 +86,7 @@ public class AI : MonoBehaviour
         yield return new WaitForSeconds(1);
         /* 攻撃 */
         // フィールドのカードリストを取得（破壊演出中で残っているカードは除外）
-        fieldCardList = Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
+        fieldCardList = AIEvaluator.Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
 
 
         //攻撃可能カードがあれば攻撃を繰り返す
@@ -98,6 +98,15 @@ public class AI : MonoBehaviour
                 yield return null;
                 continue;
             }
+
+            // 待機明け直後に取り直す。
+            // ここで取り直さないと、CardsBattleの反撃ダメージが確定する前の古い配列を
+            // 参照し続けてしまい、DOUBLE_ACTION持ちが反撃で死亡した際に
+            // canAttack=true のまま再選択され続けて攻撃ループが無限化する
+            // （isAttackingは反撃ダメージ確定まで true のままなので、
+            // このタイミングで取り直せば必ず最新状態になる）。
+            fieldCardList = AIEvaluator.Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
+
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
 
@@ -105,6 +114,10 @@ public class AI : MonoBehaviour
             AttackPlan plan = AIEvaluator.NextAttack(enemyCanAttackCardList);
             CardController attacker = plan.attacker;
             CardController defender = plan.defender;
+
+            // 攻撃可能なカードがいなくなった場合（直前の反撃等で全滅した等）は攻撃フェーズを終える
+            if (attacker == null)
+                break;
 
             if (defender != null)
             {
@@ -129,7 +142,7 @@ public class AI : MonoBehaviour
             }
             if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
                 yield break;
-            fieldCardList = Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
+            fieldCardList = AIEvaluator.Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
             yield return new WaitForSeconds(2);
         }
 
@@ -137,13 +150,10 @@ public class AI : MonoBehaviour
         StartCoroutine(gameManager.ChangeTurn());
     }
 
-    // 破壊演出中（Destroy()予約済みだが未破棄）のカードを除外する
+    // 破壊演出中（Destroy()予約済みだが未破棄）のカードを除外する処理は
+    // AIEvaluator.Alive() に集約している（AI.cs側の重複定義は削除済み）。
     // ※ 手札カードには使わないこと。スペルカードは hp=0 のため isAlive/hp>0 判定に引っかかり、
     //   手札取得に適用すると敵がスペルを一切使えなくなる（CardView.cs でスペルは hp/at 非表示の仕様）
-    static CardController[] Alive(CardController[] source)
-    {
-        return Array.FindAll(source, c => c != null && c.model != null && c.model.isAlive && c.model.hp > 0);
-    }
 
     public CardController GetFirstZeroOrLess(CardController[] array)
     {
@@ -229,22 +239,27 @@ public class AI : MonoBehaviour
 
         if (card.model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND))
         {
+            // ※ このブロックは単体ターゲット(target)の選出にのみ使う。
+            // 外側スコープの targets（複数対象用）に代入すると、手札0枚のときに
+            // 「非nullで長さ0」の配列が targets に残ってしまい、後段の
+            // if (target != null || targets != null) を誤って通過して
+            // AbilityEffect(null, true) が NRE になる。そのため別名のローカル配列を使う。
             CardController[] hand = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
-            targets = new CardController[hand.Length];
+            CardController[] discardCandidates = new CardController[hand.Length];
 
             int index = 0;
             for (int i = 0; i < hand.Length; i++)
             {
-                targets[index] = hand[i];
+                discardCandidates[index] = hand[i];
                 index++;
             }
-            if (targets.Length == 0)
+            if (discardCandidates.Length == 0)
             {
                 // 対象なし。効果を発動しない
             }
             else
             {
-                target = targets[UnityEngine.Random.Range(0, targets.Length)];
+                target = discardCandidates[UnityEngine.Random.Range(0, discardCandidates.Length)];
             }
         }
 

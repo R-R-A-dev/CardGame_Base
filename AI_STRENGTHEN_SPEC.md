@@ -122,10 +122,25 @@ static CardController[] Alive(CardController[] src)
    `CardController.OnFiledAbilities()` / `ActAbility()`、`AttackedCard.cs`、`AttackedHero.cs`、
    `DropPlace.cs`、`CardMovement.cs`、`CardClickManager.cs` は**変更しないでください**。
    （プレイヤーの操作感が変わってしまうため）
+
+   **※例外：`ActAbility()` は、常時パッシブ系アビリティ（`DESTROY_ATTACKED_TARGET` /
+   `DAMAGE_NULLIFY_ONCE` / `DOUBLE_ACTION` / `STATS_UP_ON_ATTACK` など）単体のカードで
+   `isAttacking` が true のまま戻らず、ドラッグ操作とターン終了がフリーズする既存バグが
+   見つかったため、段階2の後に別件として修正済みです（`actionTaken` フラグ）。
+   この修正の続き以外の目的では、引き続き変更しないでください。**
 5. **`CanUseSpells()` / `CanUseAbilities()` の既存の判定内容**
    プレイヤー側も使っています。AI用の価値判定は**上乗せ**する形にしてください。
 6. **既存 MonoBehaviour の `[SerializeField]` の削除・リネーム**
    Unityの .meta / シーンの参照が切れます。追加は可、削除・改名は不可。
+
+   **※例外：`CardController.cs` の `SpawnEffect` / `DirectAttack` / `LerpThrow`
+   （戦闘エフェクト共通処理。プレイヤー・AI双方のカードが使う）は、
+   `DESTROY_ATTACKED_TARGET` の攻撃が `DAMAGE_NULLIFY_ONCE`（未消費）を貫通して
+   `at` ダメージが素通りするゲームルール上の不整合が見つかったため、
+   段階2の後に別件として修正済みです（`if (!model.isDestroyer)` ガード）。
+   これは「プレイヤー側の処理」ではなく両陣営共通の戦闘ルールの修正であり、
+   AIEvaluator.cs の `kill`/`survive`/`zeroDamage` の式もこの修正後の挙動に
+   合わせて更新済みです。この修正の続き以外の目的では、引き続き変更しないでください。**
 
 ### Unity固有の制約
 
@@ -246,24 +261,36 @@ Threat(c) = c.model.at * 1.2f + c.model.hp * 0.8f
         → SHIELD 持ちのみ（ヒーローは候補に含めない）
     それ以外
         → 相手盤面の全カード + ヒーロー
+```
 
+**前提（`CardController.cs` の仕様。段階2完了後に修正済み）**：
+`DAMAGE_NULLIFY_ONCE` 未消費の相手への攻撃は、`DESTROY_ATTACKED_TARGET`（破壊者）の攻撃も含めて
+**「1回の攻撃イベント」として丸ごと無効化される**。以前は破壊者の攻撃だけ
+「破壊試行(`Destroys()`)が無効化を消費した後、通常ダメージ(`model.Attack()`)が別枠で素通りする」
+という抜け穴があったが、`SpawnEffect`/`DirectAttack`/`LerpThrow` 内の `model.Attack(enemy)` 呼び出しを
+`if (!model.isDestroyer)` で囲み、破壊者の場合はこの重複適用をスキップするよう修正済み。
+そのため `kill`/`survive`/`zeroDamage` の判定は以下のようにシンプルになる。
+
+```
 Score(attacker a, defender d):
-    kill    = a.at >= d.hp   （a が DESTROY_ATTACKED_TARGET を持つなら常に true）
+    zeroDamage = d が DAMAGE_NULLIFY_ONCE を「まだ消費していない」
+        → a の攻撃（破壊者でも）はダメージが1も通らない
 
-    survive = 次の順で判定する（★重要：この順序を守ること）
-        1. d が DESTROY_ATTACKED_TARGET を持つ
-             → a が DAMAGE_NULLIFY_ONCE を「まだ消費していない」なら
-                   破壊は無効化されるが、その直後の通常反撃は素通りする
-                   survive = (d.at < a.hp)
-               そうでなければ survive = false
-        2. d が DESTROY_ATTACKED_TARGET を持たない
-             → a が DAMAGE_NULLIFY_ONCE を「まだ消費していない」なら survive = true
-               そうでなければ survive = (d.at < a.hp)
+    kill = !zeroDamage かつ (a が DESTROY_ATTACKED_TARGET を持つ または a.at >= d.hp)
 
-    kill &&  survive →  100 + Threat(d)
-    kill && !survive →   50 + Threat(d) - Threat(a)
-   !kill &&  survive →   10 + a.at
-   !kill && !survive →  -50
+    survive = 次の順で判定する
+        1. a が DAMAGE_NULLIFY_ONCE を「まだ消費していない」
+             → survive = true（d の反撃も破壊者含めて丸ごと無効化される）
+        2. d が DESTROY_ATTACKED_TARGET を持つ（かつ a の無効化は既に消費済み/持たない）
+             → survive = false（無効化が無いので破壊は必ず通る）
+        3. それ以外
+             → survive = (d.at < a.hp)
+
+    kill  &&  survive                →  100 + Threat(d)
+    kill  && !survive                →   50 + Threat(d) - Threat(a)
+   !kill  &&  survive && zeroDamage  →  -10        ← 何も起きない。ヒーロー攻撃に負けるべき
+   !kill  &&  survive                →   10 + a.at ← 削りダメージは実際に入る
+   !kill  && !survive                →  -50
 
 Score(attacker a, ヒーロー):
     a.at * faceWeight
@@ -277,9 +304,16 @@ Score(attacker a, ヒーロー):
 `DAMAGE_NULLIFY_ONCE` は `CardModel.Damage()` で1回使うと `isDamageNullifyOnce` が false になりますが、
 `abilities` のフラグは立ったままです。フラグで判定すると使用済みのカードを
 「まだ無敵」と誤認して過大評価します。
-（根拠：`CardController.Defense()` は `isDestroyer` なら `Destroys()` を先に同期実行し、
-その後 `attackEffect()` の通常ダメージが遅れて入る。`CardModel.Damage()` は
-`isDamageNullifyOnce` が true のとき1回だけダメージを捨てる）
+（根拠：`Destroys()`（破壊者の攻撃）は常に `Damage()` を呼ぶため、無効化未消費なら必ずここで
+フラグが消費される。`SpawnEffect`/`DirectAttack`/`LerpThrow` 内の通常ダメージ適用は
+`model.isDestroyer` なら重複適用を避けるためスキップされるよう修正済みなので、
+破壊者の攻撃でも「無効化未消費なら結果は不発で確定」となる）
+
+**`zeroDamage` について補足**：ダメージが通らない攻撃でも、相手の
+`isDamageNullifyOnce` は消費されます（`Damage()` はダメージを捨てる際にフラグを落とす）。
+そのため「弱いカードで無効化を剥がし、別のカードで仕留める」という戦術には本来価値がありますが、
+**段階2の `NextAttack` は1手ずつ選ぶ貪欲法なので、この先読みは意図的に実装しません。**
+必要になったら別段階で扱ってください。
 
 `NextAttack` は「まだ `canAttack == true` の攻撃可能カード」の全組み合わせから
 最大スコアの1組を返します。スコアが全て負ならヒーローへ（守護がなければ）、

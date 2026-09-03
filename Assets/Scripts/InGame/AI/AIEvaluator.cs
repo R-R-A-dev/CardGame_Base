@@ -52,26 +52,52 @@ public static class AIEvaluator
         return self - opp;
     }
 
-    // カードを攻撃対象にした場合のスコア
+    // カードを攻撃対象にした場合のスコア。
+    // 判定にはランタイムの isDestroyer / isDamageNullifyOnce を使う
+    // （abilitiesは静的フラグのままで、isDamageNullifyOnceは1回使うと消費されて false に戻るため）。
+    //
+    // CardController.cs側の仕様：DAMAGE_NULLIFY_ONCE未消費の相手への攻撃は、
+    // 破壊者(DESTROY_ATTACKED_TARGET)の攻撃も含めて「1回の攻撃イベント」として
+    // 丸ごと無効化される（Destroys()の破壊試行が無効化を消費した後、
+    // 通常ダメージの重複適用はスキップされるよう修正済み）。
+    // そのため kill/survive の判定はどちらも「相手の無効化が未消費なら結果は確定で不発」に単純化される。
     static float ScoreAgainstCard(CardController attacker, CardController defender)
     {
-        bool kill = attacker.model.abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET)
-            || attacker.model.at >= defender.model.hp;
-        bool survive = attacker.model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE)
-            || defender.model.at < attacker.model.hp;
+        // defenderの無効化が未消費なら、attackerの攻撃（破壊者でも）はダメージが1も通らない
+        bool zeroDamage = defender.model.isDamageNullifyOnce;
+
+        bool kill = !zeroDamage && (attacker.model.isDestroyer || attacker.model.at >= defender.model.hp);
+
+        bool survive;
+        if (attacker.model.isDamageNullifyOnce)
+        {
+            // attacker自身の無効化が未消費なら、defenderの反撃（破壊者でも）は丸ごと無効化され必ず生存する
+            survive = true;
+        }
+        else if (defender.model.isDestroyer)
+        {
+            // 無効化はもう無いので、破壊者の反撃は必ず通る
+            survive = false;
+        }
+        else
+        {
+            survive = defender.model.at < attacker.model.hp;
+        }
 
         if (kill && survive) return 100f + Threat(defender);
         if (kill && !survive) return 50f + Threat(defender) - Threat(attacker);
+        if (!kill && survive && zeroDamage) return -10f;
         if (!kill && survive) return 10f + attacker.model.at;
         return -50f;
     }
 
     // ヒーローを攻撃対象にした場合のスコア
-    static float ScoreAgainstHero(CardController attacker)
+    // boardAdvantage は呼び出し側で1回だけ計算した値を受け取る（attackerごとに再計算しない）
+    static float ScoreAgainstHero(CardController attacker, float boardAdvantage)
     {
         float faceWeight = 1.0f;
         if (GameManager.instance.player.heroHp <= 5) faceWeight += 1.5f;
-        if (BoardAdvantage() > 0f) faceWeight += 0.8f;
+        if (boardAdvantage > 0f) faceWeight += 0.8f;
 
         return attacker.model.at * faceWeight;
     }
@@ -86,6 +112,7 @@ public static class AIEvaluator
 
         CardController[] oppField = OppField();
         bool oppHasShield = Array.Exists(oppField, c => c.model.abilities.HasFlag(ABILITIES.SHIELD));
+        float boardAdvantage = BoardAdvantage(); // attackerごとに再計算しない
 
         CardController bestAttacker = null;
         CardController bestDefender = null;
@@ -116,7 +143,7 @@ public static class AIEvaluator
             // 守護に阻まれていない場合のみヒーローも候補に入れる
             if (!blockedByShield)
             {
-                float score = ScoreAgainstHero(attacker);
+                float score = ScoreAgainstHero(attacker, boardAdvantage);
                 if (score > bestScore)
                 {
                     bestScore = score;
