@@ -1229,6 +1229,16 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator GenDamageText(GameObject text, int damage, Transform cardTransform)
     {
+        if (cardTransform == null) yield break;
+        // ★yieldする前に座標を確定させる。
+        //   この後の待機中に対象カードが破棄されても、既に値を持っているので例外にならない
+        //   （CheckAlive()経由の同期Destroyと、Addressables生成時のyield待ちが重なると
+        //   破棄済みTransformにアクセスしてMissingReferenceExceptionになっていたため）
+        yield return StartCoroutine(GenDamageText(text, damage, cardTransform.position));
+    }
+
+    public IEnumerator GenDamageText(GameObject text, int damage, Vector3 position)
+    {
         // 1. 生成処理（Addressables化）
         if (text == null)
         {
@@ -1251,7 +1261,7 @@ public class GameManager : MonoBehaviour
 
         // 2. 初期設定
         text.transform.SetParent(textPool.transform);
-        text.transform.position = cardTransform.position;
+        text.transform.position = position;
 
         TextMeshProUGUI tmp = text.GetComponent<TextMeshProUGUI>();
         tmp.text = damage.ToString();

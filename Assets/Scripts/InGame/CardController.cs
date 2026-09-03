@@ -1861,7 +1861,10 @@ public class CardController : MonoBehaviour
                 UseSpellTo(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-                if (model.effectDmg != 0)
+                // DESTROY_ENEMY_CARD（破壊）はダメージではないため数字を出さない。
+                // DAMAGE_NULLIFY_ONCEに吸収された場合も数字だけ出て「効いたのに死なない」
+                // ように見えるため（4-D）
+                if (model.effectDmg != 0 && !model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
                 {
                     GameObject textObj = GameManager.instance.GetTextPool();
                     GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
@@ -1879,10 +1882,12 @@ public class CardController : MonoBehaviour
         //model.Attack(enemy);
         UseSpellTo(enemy);
         CheckAttackParticle(effect);
-        if (model.effectDmg != 0)
+        // DESTROY_ENEMY_CARD（破壊）はダメージではないため数字を出さない（4-D）。
+        // あわせて表示値をmodel.atからmodel.effectDmgに統一（DirectSpellAttack側と食い違っていたバグ）
+        if (model.effectDmg != 0 && !model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
         {
             GameObject textObj = GameManager.instance.GetTextPool();
-            GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
+            GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
         }
         if (model.hitAudio != null)
             audioSource.PlayOneShot(model.hitAudio);
