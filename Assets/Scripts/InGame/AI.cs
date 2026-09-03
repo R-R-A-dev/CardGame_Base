@@ -38,7 +38,7 @@ public class AI : MonoBehaviour
         // コスト以下のカードがあれば、カードをフィールドに出し続ける
         // 条件：モンスターカードならコストのみ
         // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
-        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells()))) && gameManager.timeCount > 0)
+        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells() && AIEvaluator.HasValidSpellTarget(card)))) && gameManager.timeCount > 0)
         {
             while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
             {
@@ -50,7 +50,7 @@ public class AI : MonoBehaviour
                 yield break;
 
             // コスト以下のカードリストを取得
-            CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells())));//CanUseSpell()
+            CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells() && AIEvaluator.HasValidSpellTarget(card))));//CanUseSpell()
                                                                                                                                                                                                        // 場に出すカードを選択
             CardController selectCard = null;
             // リーサルターンはバーンスペル（DAMAGE_ENEMY_HERO）を最優先で選ぶ
@@ -203,10 +203,13 @@ public class AI : MonoBehaviour
             card.model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD) ||
             card.model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
         {
-            target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
+            if (card.model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
+                target = AIEvaluator.SelectDestroyTarget(card);
+            else
+                target = AIEvaluator.SelectDamageTarget(card);
         }
         else if (card.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) && card.model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARD))
-            target = gameManager.GetFriendFieldCards(card.model.isPlayerCard)[0];
+            target = AIEvaluator.SelectHealTarget(card);
 
         else if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS))
             targets = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
@@ -292,12 +295,14 @@ public class AI : MonoBehaviour
         if (card.model.abilities.HasFlag(ABILITIES.RANDOM_ENEMY))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
+            if (enemyCards.Length > 0)
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
         }
         else if (card.model.abilities.HasFlag(ABILITIES.RANDOM_FRIEND))
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
-            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
+            if (friendCards.Length > 0)
+                target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
         }
 
         if (target != null || targets != null)
@@ -331,12 +336,18 @@ public class AI : MonoBehaviour
         if (card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF) ||
             card.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.SWAP_HP_ATK) && card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY))
         {
-            target = gameManager.GetEnemyFieldCards(card.model.isPlayerCard)[0];
+            if (card.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD))
+                target = AIEvaluator.SelectDestroyTarget(card);
+            else
+                target = AIEvaluator.SelectDamageTarget(card);
         }
         else if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD) || card.model.spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF) &&
                 card.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_FRIEND))
         {
-            target = gameManager.GetFriendFieldCards(card.model.isPlayerCard)[0];
+            if (card.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARD))
+                target = AIEvaluator.SelectHealTarget(card);
+            else
+                target = AIEvaluator.SelectBuffTarget(card);
         }
         else if (card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
         {
@@ -423,18 +434,21 @@ public class AI : MonoBehaviour
                 targets[index] = hand[i];
                 index++;
             }
-            target = targets[0];
+            if (targets.Length > 0)
+                target = targets[0];
         }
 
         if (card.model.spells.HasFlag(SPELLS.RANDOM_ENEMY))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
-            target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
+            if (enemyCards.Length > 0)
+                target = enemyCards[UnityEngine.Random.Range(0, enemyCards.Length)];
         }
         else if (card.model.spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
-            target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
+            if (friendCards.Length > 0)
+                target = friendCards[UnityEngine.Random.Range(0, friendCards.Length)];
         }
         //Debug.Log(targets[0]);
         //　ターゲット/それぞれのフィールド/それぞれのHeroのTransformが必要
@@ -454,7 +468,10 @@ public class AI : MonoBehaviour
         else
         {
             gameManager.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
-            card.spellEffect(target, true);
+            // targetがnull（対象0件）のまま呼ぶとspellEffect内でtarget.transformが
+            // NullReferenceExceptionになり、isAttackingがtrueのまま固まるため必ずガードする
+            if (target != null)
+                card.spellEffect(target, true);
         }
 
         //card.UseSpellTo(target);//スペルエフェクト

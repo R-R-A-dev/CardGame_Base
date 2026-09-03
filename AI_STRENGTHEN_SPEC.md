@@ -142,6 +142,15 @@ static CardController[] Alive(CardController[] src)
    AIEvaluator.cs の `kill`/`survive`/`zeroDamage` の式もこの修正後の挙動に
    合わせて更新済みです。この修正の続き以外の目的では、引き続き変更しないでください。**
 
+   **※例外3：`CardController.cs` の `DirectSpellAttack` / `SpawnSpellEffect`
+   （スペルがカードに当たったときのダメージ数字表示）は、
+   `DESTROY_ENEMY_CARD`（破壊）が「ダメージ」ではないのに `effectDmg` の数字を表示し、
+   `DAMAGE_NULLIFY_ONCE` に吸収されたときも数字だけ出て
+   「効いたのに死なない」ように見える問題があったため、
+   ユーザー承認のうえ表示条件を修正しました（詳細は段階4の 4-D）。
+   これは両陣営共通の表示ルールの変更です。
+   この修正の続き以外の目的では、引き続き変更しないでください。**
+
 ### Unity固有の制約
 
 - **あなたはUnityでコンパイル・実行できません。** 型・メソッド名は実コードから正確に写してください。
@@ -157,6 +166,23 @@ static CardController[] Alive(CardController[] src)
 
 **必ず1段階ずつ実装し、その都度コミットしてください。** まとめて実装しないでください。
 各段階の「完了条件」を満たさない限り次に進まないでください。
+
+### 進捗（新しいセッションはここを最初に見ること）
+
+| 段階 | 状態 |
+|---|---|
+| 段階1：バグ修正 | **完了・コミット済み** |
+| 段階2：`AIEvaluator` + 攻撃対象スコアリング | **完了・コミット済み**（レビュー指摘の修正も反映済み） |
+| 段階3：リーサル判定（3-B の決着チェック含む） | **完了・コミット済み** |
+| 段階4：対象選択（4-B/4-C/4-D/4-E 含む） | **完了・Unity確認済み** |
+| 段階5：出すカードの選択（マナ最大化） | 未着手 ← **次はここ** |
+| 段階6：スペル価値関数 + `maxHp` | 未着手 |
+| 段階7：難易度パラメータ | 未着手 |
+| 段階8：クリーンアップ | 未着手 |
+
+**この指示書に書かれている `AI.cs:NNN` などの行番号は、書かれた時点のものです。
+編集のたびにズレるので、行番号ではなく「どのメソッドの、どのフラグの分岐か」で
+場所を特定してください。**
 
 ---
 
@@ -455,13 +481,24 @@ if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp
 
 | 場所 | 現在 | 置き換え後 |
 |---|---|---|
-| `AI.cs:206`（`CastAbilityOf`） | `GetEnemyFieldCards(...)[0]` | `AIEvaluator.SelectDamageTarget(card)` |
+| `AI.cs:206`（`CastAbilityOf`） | `GetEnemyFieldCards(...)[0]` | `DESTROY_ENEMY_CARD`/`STEAL_ENEMY_CARD`なら`SelectDestroyTarget(card)`、それ以外は`SelectDamageTarget(card)` |
 | `AI.cs:209`（`CastAbilityOf`） | `GetFriendFieldCards(...)[0]` | `AIEvaluator.SelectHealTarget(card)` |
-| `AI.cs:334`（`CastSpellOf`） | `GetEnemyFieldCards(...)[0]` | `AIEvaluator.SelectDamageTarget(card)` |
-| `AI.cs:339`（`CastSpellOf`） | `GetFriendFieldCards(...)[0]` | `AIEvaluator.SelectBuffTarget(card)` |
+| `AI.cs:334`（`CastSpellOf`） | `GetEnemyFieldCards(...)[0]` | `DESTROY_ENEMY_CARD`/`STEAL_ENEMY_CARD`なら`SelectDestroyTarget(card)`、それ以外は`SelectDamageTarget(card)` |
+| `AI.cs:339`（`CastSpellOf`） | `GetFriendFieldCards(...)[0]` | `HEAL_FRIEND_CARD`なら`SelectHealTarget(card)`、`CONDITIONAL_FRIEND_BUFF`なら`SelectBuffTarget(card)` |
 
-**※`AI.cs:206` / `AI.cs:334` の分岐は `DESTROY_ENEMY_CARD` / `STEAL_ENEMY_CARD` も
-同じ `if` に入っています。それらのフラグを持つ場合は `SelectDestroyTarget` を使ってください。**
+**実装時の補足（実コードとの差分）**：
+- `AI.cs:206` / `AI.cs:334` の分岐は `DESTROY_ENEMY_CARD` / `STEAL_ENEMY_CARD` も同じ `if` に
+  入っているため、フラグで分岐して使い分けます（実装済み）。
+- `AI.cs:339` の分岐は `HEAL_FRIEND_CARD` と `CONDITIONAL_FRIEND_BUFF` が同じ `if` に
+  入っており、当初の表では `SelectBuffTarget` 一本化としていましたが、それだと
+  `HEAL_FRIEND_CARD` 持ちの回復スペルにバフ用の選択（`hp`最大）が使われてしまいます。
+  `CastAbilityOf` 側と同じくフラグで分岐し、`HEAL_FRIEND_CARD` → `SelectHealTarget`、
+  `CONDITIONAL_FRIEND_BUFF` → `SelectBuffTarget` に修正して実装しています。
+- `CastSpellOf` の同じ`if`には `SWAP_HP_ATK && EFFECT_SELECTION_ENEMY` も含まれますが、
+  専用の選択ルールを定義していなかったため、`DESTROY_ENEMY_CARD`/`STEAL_ENEMY_CARD`で
+  なければ`SelectDamageTarget`を使う扱いにしています（現状のテストカードには
+  `SWAP_HP_ATK` を持つものがなく実害なし。将来このフラグ用のカードを追加する際は
+  専用の選択ルールを検討してください）。
 
 #### 4-B. 同時に潰す例外リスク（段階1で残っていた分）
 
@@ -479,6 +516,13 @@ true のまま固まる」パターンなので、段階4で一緒に直して�
 `min` を返します。**したがって「長さ0の配列」は `Random.Range` では防げず、
 必ず呼び出し前に `Length == 0` を判定してください。**
 
+**実装時に追加で見つかったリスク（4-Bには元々含まれていなかった分）**：
+`CastSpellOf` 末尾の `else` 節が `card.spellEffect(target, true)` を**無条件**で呼んでいます。
+`SelectDamageTarget` 等が `null` を返せるようになったことで、ここで `target == null` のまま
+呼ばれると `spellEffect` 内の `target.transform` で `NullReferenceException` になり、
+`isAttacking` が true のまま固まります（`spellEffect` は関数の一番最初で
+`isAttacking = true` にするため）。`if (target != null)` でガードして修正済みです。
+
 選択ルール：
 
 - **`SelectDamageTarget`**（`DAMAGE_ENEMY_CARD` / `CONDITIONAL_ENEMY_DEBUFF`）
@@ -495,17 +539,200 @@ true のまま固まる」パターンなので、段階4で一緒に直して�
 **対象が0体のときは必ず `null` を返し、呼び出し側で効果を発動しないようにしてください。**
 現状は空配列に `[0]` でアクセスして例外になる可能性があります。
 
+#### 4-C. 対象がいないスペルを最初から出さない（段階4の動作確認で発覚）
+
+**症状**：`DESTROY_ENEMY_CARD` + `EFFECT_SELECTION_ENEMY` のスペルで、
+「ダメージ表示が出ない」「2枚目でダメージだけ出て相手が死なない」が発生。
+
+**根本原因：`CanUseSpells()` と `Select系` で見ている盤面が違う。**
+
+| | 使っている取得方法 | 破壊演出中（`hp==0`/`isAlive==false`）のカード |
+|---|---|---|
+| `CardController.CanUseSpells()` | `GetEnemyFieldCards(...)` を**そのまま** | **対象として数える** |
+| `AIEvaluator.SelectDestroyTarget` 等（段階4） | `OppField()` = `Alive()` 済み | 除外する |
+
+そのため「`CanUseSpells()` は true（＝AIがそのスペルを選ぶ）→ `Select系` は `null` を返す」
+という食い違いが起きます。こうなると `CastSpellOf` は次の状態で終了します。
+
+1. `MoveLeftSpell` でスペルカードが画面中央へ移動する（演出だけ進む）
+2. `ReduceManaCost` が呼ばれ、**マナだけ消費される**
+3. `target == null` なので `spellEffect` がスキップされる
+4. `spellEffect` → `UseSpellTo` が呼ばれないため、その末尾にある
+   **`Destroy(this.gameObject)` も実行されず、スペルカードが消えずに残る**
+5. カードは手札に残ったままなので、次のループで再び選ばれうる
+
+**修正方針（AI側のみ。`CanUseSpells()` は変更しない）**：
+
+`AIEvaluator` に「そのスペルが実際に効果を発揮できるか」を判定するメソッドを追加し、
+`AI.cs` の `selectableHandCardList` の絞り込み条件に **`CanUseSpells()` との AND** で足します。
+
+```csharp
+// AIEvaluator
+// 効果の対象が1つでも欠けているスペルは選ばない（＝カード自体を出さない）
+public static bool HasValidSpellTarget(CardController card);
+```
+
+判定ルール（**対象が必要な効果が1つでも成立しないなら false**。
+`EFFECT_SELECTION_*` との組み合わせかどうかで区別せず、どちらの場合もカード自体を出さない）：
+
+| 必要な対象 | 対象のフラグ |
+|---|---|
+| 相手盤面に1体以上（`OppField()`） | `DAMAGE_ENEMY_CARD` / `DAMAGE_ENEMY_CARDS` / `DESTROY_ENEMY_CARD` / `CONDITIONAL_ENEMY_DEBUFF` / `STEAL_ENEMY_CARD` / `RANDOM_ENEMY` / `SWAP_HP_ATK` |
+| 自盤面に1体以上（`SelfField()`） | `HEAL_FRIEND_CARD` / `HEAL_FRIEND_CARDS` / `CONDITIONAL_FRIEND_BUFF` / `RANDOM_FRIEND` |
+| どちらかの盤面に1体以上 | `DESTROY_ALL_FIELD_CARDS` |
+| 相手手札が1枚以上（`OppHand()`） | `INCREASE_ENEMY_COST` / `DISCARD_ENEMY_HAND` / `DISCARD_ALL_ENEMY_HAND` |
+| 自手札が**自分以外に**1枚以上（`SelfHand()`） | `REDUCE_HAND_COST` / `DISCARD_FRIEND_HAND` / `DISCARD_ALL_FRIEND_HAND` |
+| 自盤面に空きがある（4体以下） | `STEAL_ENEMY_CARD` / `SUMMON_SPECIFIC_UNIT` |
+| 対象不要（常に true） | `DAMAGE_ENEMY_HERO` / `HEAL_FRIEND_HERO` / `DRAW_CARDS` / `HEAL_BY_DAMAGE` / `EFFECT_SELECTION_ENEMY` / `EFFECT_SELECTION_FRIEND` |
+
+**★盤面の判定には必ず `OppField()` / `SelfField()`（`Alive()` 済み）を使ってください。**
+`GetEnemyFieldCards` を直接使うと `CanUseSpells()` と同じ「死にかけのカードを数える」問題が
+再発し、この修正の意味がなくなります。
+
+**★手札の判定に `Alive()` を通さないでください**（スペルは `hp==0` のため消えます。1-3参照）。
+`REDUCE_HAND_COST` / `DISCARD_FRIEND_HAND` 系は**そのスペルカード自身を除いて**数えること
+（`CastSpellOf` が `hand.Length - 1` で自分を除外しているため）。
+
 #### 完了条件
 - 敵AIが除去スペルを最大の脅威に撃つこと
 - 盤面が空のときに例外が出ないこと
 - 手札がそのスペル1枚だけのときに `DISCARD_FRIEND_HAND` で例外が出ないこと
 - 例外で `isAttacking` が true のまま固まらないこと
+- **対象がいないスペルを敵AIが選ばないこと（マナだけ消費してカードが画面に residual として残らないこと）**
+
+#### 4-D. 破壊スペルのダメージ数字表示（4-C後の動作確認で判明）
+
+**報告された症状**：`DESTROY_ENEMY_CARD` + `EFFECT_SELECTION_ENEMY` のスペルで
+「1枚目はダメージ表示が出ない」「2枚目はダメージだけ出て相手が死なない」。
+
+**調査結果：どちらもロジックのバグではなく、表示の問題だった。**
+
+**(1) 1枚目で数字が出ず、2枚目で出る理由 → ダメージテキストのプールの有無**
+
+`DirectSpellAttack` / `SpawnSpellEffect` は、対象を破壊した**後**に
+破壊済みの Transform を渡してダメージテキストを出そうとしている。
+
+```csharp
+UseSpellTo(enemy);          // ← CheckAlive()が Destroy(enemy.gameObject) を同期実行
+...
+GameObject textObj = GameManager.instance.GetTextPool();
+GameManager.instance.StartCoroutine(GenDamageText(textObj, model.effectDmg, endPos));  // endPos は破壊済み
+```
+
+`GameManager.GetTextPool()` は**プールが空だと `null` を返す**。
+`GenDamageText` は `text == null` のとき `Addressables.InstantiateAsync` で
+**`yield return handle` を挟む**ため1フレーム以上待ち、その間に対象が実際に破棄されて
+`cardTransform.position` で `MissingReferenceException` になる。
+
+| | `GetTextPool()` | フレーム待機 | 結果 |
+|---|---|---|---|
+| 1枚目（プールが空） | `null` | **待つ** | 対象が破棄済みになり例外 → **表示されない** |
+| 2枚目以降（プールに在庫あり） | オブジェクト | 待たない | 同フレーム内なので Transform が有効 → **表示される** |
+
+**(2) 「死ななかった」は仕様通り（バグではない）**
+
+対象が `DAMAGE_NULLIFY_ONCE`（未消費）を持っていたことを確認済み。
+`Destroys()` → `CardModel.Destroy()` → `Damage(hp)` と辿るため、
+`Damage()` 先頭の無効化チェックで**破壊が丸ごと吸収される**。
+これは「無効化は1イベントとして扱う」という既存の決定と整合している。
+
+問題は、**ダメージ数字が「実際にダメージが入ったか」と無関係に
+`model.effectDmg != 0` だけで出る**ため、無効化されたのに数字だけ出て
+「効いたのに死なない」ように見えてしまうこと。
+
+**修正方針（ユーザー決定：破壊は数字を出さない）**
+
+`DESTROY_ENEMY_CARD` は「ダメージ」ではないので、ダメージ数字を出さないようにする。
+対象は**スペルがカードに当たる2箇所のみ**：
+
+| 場所 | 現在の条件 | 修正後 |
+|---|---|---|
+| `CardController.DirectSpellAttack` の `OnComplete` 内 | `if (model.effectDmg != 0)` | `if (model.effectDmg != 0 && !model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))` |
+| `CardController.SpawnSpellEffect` | `if (model.effectDmg != 0)` | 同上 |
+
+**※`SpawnSpellEffect` の表示値のバグも同時に直すこと。**
+表示条件は `model.effectDmg` を見ているのに、実際に表示している数値が `model.at` になっている
+（`DirectSpellAttack` 側は `effectDmg` で統一されている）。`model.effectDmg` に揃える。
+
+**※`CardController.cs` はプレイヤーと共通だが、これは「破壊は数字を出さない」という
+両陣営共通の表示ルールの変更であり、ユーザー承認済みの例外**（2. の例外3として記載）。
+
+#### 4-E. `GenDamageText` の `MissingReferenceException`（実機で例外を確認）
+
+4-D の調査で「表示されないだけ」と書いた現象は、実際には**例外が出ていた**ことが
+ユーザーの実行ログで確認されました。
+
+```
+MissingReferenceException: The object of type 'UnityEngine.RectTransform' has been destroyed
+UnityEngine.Transform.get_position ()
+GameManager+<GenDamageText>d__112.MoveNext () (at Assets/Scripts/InGame/GameManager.cs:1254)
+```
+
+`GameManager.cs:1254` は `text.transform.position = cardTransform.position;` です。
+
+**原因**：`GenDamageText` は `text == null`（＝テキストプールが空）のとき
+`Addressables.InstantiateAsync` で **`yield return handle` を挟んでから**
+`cardTransform.position` を読みます。その待機の間に、
+呼び出し元が `UseSpellTo` / `UseAbilitiesTo` → `CheckAlive()` → `Destroy(gameObject)` で
+**対象カードを同期的に破棄している**ため、再開時には Transform が存在しません。
+
+**影響範囲は破壊スペルだけではありません。** `CheckAlive()` を同期で呼ぶ経路すべてが対象で、
+`DAMAGE_ENEMY_CARD` のスペルやアビリティでも「そのダメージで相手が死んだ」場合に同じ例外が出ます。
+
+| メソッド | 直前に対象を破棄しうる処理 | テキストのアンカー |
+|---|---|---|
+| `DirectSpellAttack` | `UseSpellTo` | `endPos` |
+| `SpawnSpellEffect` | `UseSpellTo` | `targetPos` |
+| `SpawnEffectAbility` | `UseAbilitiesTo` | `targetPos` |
+| `DirectAttackAbility` | `UseAbilitiesTo` | `endPos` |
+| `LerpThrowAbility` | `UseAbilitiesTo` | `targetPos` |
+
+※通常攻撃（`SpawnEffect`/`DirectAttack`/`LerpThrow`）は `CheckAlive()` が
+`GameManager.CardsBattle` 側で待機を挟んでから呼ばれるため、この問題は起きません。
+
+**修正方針：`GameManager.GenDamageText` 側だけを直す（呼び出し元5箇所は変更しない）**
+
+`Transform` を受け取る既存のオーバーロードを、**yield する前に座標を確定させてから**
+`Vector3` 版へ委譲する形にします。これで呼び出し元を1つも変えずに全経路が直ります。
+
+```csharp
+// 既存シグネチャは維持（呼び出し元の変更不要）
+public IEnumerator GenDamageText(GameObject text, int damage, Transform cardTransform)
+{
+    if (cardTransform == null) yield break;
+    // ★yieldする前に座標を確定させる。
+    //   この後に対象カードが破棄されても、既に値を持っているので例外にならない
+    yield return StartCoroutine(GenDamageText(text, damage, cardTransform.position));
+}
+
+// 新規追加：座標で受け取る版
+public IEnumerator GenDamageText(GameObject text, int damage, Vector3 position)
+{
+    // 既存の中身をそのまま移し、cardTransform.position を position に置き換える
+}
+```
+
+`GenHealText` も同じ構造ですが、そちらは `Instantiate` を同期で行っており
+`yield` を挟まないため現状は例外になりません（将来 Addressables 化する場合は要注意）。
+
+#### 参考：今回の調査で見つかった別件（今は直さない・報告のみ）
+
+- `UseSpellTo` は各分岐で `return` しており、`return` した場合は末尾の
+  `Destroy(this.gameObject)`（スペルカード自身の破棄）に到達しない。
+- `spellEffect` の `switch` は `ATTACKTYPE.THROW` を処理していない。
+  THROW のスペルカードを作ると `UseSpellTo` が呼ばれず、
+  `isAttacking` が true のまま固まる（現状 THROW のスペルカードが無いため未発生）。
+- ダメージテキストを破壊済み Transform に紐づけている構造自体は残る。
+  `DESTROY_ENEMY_CARD` 以外でも「対象が死ぬ攻撃」では同じ理由で
+  数字が出たり出なかったりしうる（プールの在庫次第）。根本的に直すなら
+  `GenDamageText` に Transform ではなく座標(`Vector3`)を渡す形にする必要がある。
 
 ---
 
 ### 段階5：出すカードの選択（マナ最大化）
 
-`AI.cs:49-52` の `Array.Find`（先頭から貪欲）を置き換えます。
+`AI.cs` の召喚ループにある `selectCard` の決定部分（`Array.Find` を2回使って
+「リーサル時はバーンスペル優先 → それ以外は先頭から貪欲」で選んでいる箇所）を置き換えます。
 
 ```csharp
 // AIEvaluator
@@ -518,7 +745,7 @@ public static List<CardController> ChoosePlayPlan(CardController[] hand, int man
 制約:
     Σ cost <= mana
     モンスターの枚数 <= freeSlots  （freeSlots = 5 - 自陣のカード数）
-    スペルは CanUseSpells() が true のもののみ候補に入れる
+    スペルは CanUseSpells() が true かつ HasValidSpellTarget() が true のもののみ候補に入れる
 最大化:
     Σ Value(card)
 
@@ -542,9 +769,34 @@ Value(スペル)     = 段階6まで暫定で card.model.cost * 1.0f
 ただし、消費前に「まだマナが足りるか」「まだ盤面に空きがあるか」は毎回チェックしてください
 （スペルの効果で盤面が変わるため）。
 
+#### 5-B. 段階3・段階4で入れた処理を壊さないこと（重要）
+
+段階5は召喚ループの選択部分を丸ごと置き換えるため、以下を**必ず引き継いで**ください。
+
+1. **リーサル時のバーンスペル最優先（段階3）**
+   現在は `AIEvaluator.isLethalTurn` が true のとき `SPELLS.DAMAGE_ENEMY_HERO` 持ちを
+   `Array.Find` で先に選んでいます。`ChoosePlayPlan` に置き換えた後も、
+   **リーサル時はバーンスペルが最優先で全て使われる**ようにしてください
+   （例：`isLethalTurn` のとき `Value(DAMAGE_ENEMY_HERO持ち)` を極端に大きくする、
+   あるいは実行順のリストの先頭に固定する）。
+2. **`HasValidSpellTarget` による除外（段階4-C）**
+   候補に入れる条件は `CanUseSpells() && HasValidSpellTarget(card)` です。
+   これを落とすと「対象がいないスペルを出してマナだけ消費し、カードが画面に残る」
+   不具合が再発します。
+3. **`while` の継続条件と候補の絞り込み条件を一致させること**
+   現在この2つは同じ式になっています。片方だけ変えると
+   「ループは回るが選ばれるカードが無い」状態になります。
+4. **盤面5体の上限（1-4）**
+   既存の `Alive(...).Length > 4 && card.model.spells == SPELLS.NONE` の意味
+   （＝盤面が埋まっていてもスペルは使える）を変えないでください。
+5. **決着チェック（段階3-B）**
+   待機ループ直後の `heroHp <= 0` の `yield break` を消さないでください。
+
 #### 完了条件
 - マナ5・手札[3,3,5] のとき、3ではなく5を出すこと
 - 盤面が5体埋まっているとき、モンスターを出そうとしないこと（スペルは使う）
+- リーサルターンにバーンスペルが最優先で使われること（段階3の挙動が維持されている）
+- 対象がいないスペルを出さないこと（段階4-Cの挙動が維持されている）
 - 無限ループしないこと（**必ずUnityで1試合通して確認してもらうこと**）
 
 ---

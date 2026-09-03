@@ -101,6 +101,158 @@ public static class AIEvaluator
         isLethalTurn = totalDamage >= GameManager.instance.player.heroHp;
     }
 
+    // スペルが実際に効果を発揮できる対象を持っているかどうか（段階4-C）。
+    // CardController.CanUseSpells() は GetEnemyFieldCards(...) をそのまま使うため、
+    // 破壊演出中（hp==0/isAlive==false）のカードも対象として数えてしまい、
+    // Select系（Alive()済みのSelfField()/OppField()を使う）とズレが生じる。
+    // そのズレを埋めるため、AI.cs側でCanUseSpells()とのANDとしてこちらを使う。
+    // ★対象が必要な効果が1つでも成立しないなら false を返す。
+    //   EFFECT_SELECTION_ENEMY/FRIENDと組み合わさっているかどうかは区別しない
+    //   （どちらの場合もカード自体を出さない仕様）。
+    public static bool HasValidSpellTarget(CardController card)
+    {
+        SPELLS spells = card.model.spells;
+
+        if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) ||
+            spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF) ||
+            spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || spells.HasFlag(SPELLS.RANDOM_ENEMY) ||
+            spells.HasFlag(SPELLS.SWAP_HP_ATK))
+        {
+            if (OppField().Length == 0) return false;
+        }
+
+        if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARD) || spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS) ||
+            spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF) || spells.HasFlag(SPELLS.RANDOM_FRIEND))
+        {
+            if (SelfField().Length == 0) return false;
+        }
+
+        if (spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        {
+            if (OppField().Length == 0 && SelfField().Length == 0) return false;
+        }
+
+        if (spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) || spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) ||
+            spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        {
+            if (OppHand().Length == 0) return false;
+        }
+
+        if (spells.HasFlag(SPELLS.REDUCE_HAND_COST) || spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) ||
+            spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        {
+            // 自手札は Alive() を通さない（スペルは hp==0 のため消えてしまう）。
+            // CastSpellOf が hand.Length - 1 で自分自身を除外しているのに合わせ、
+            // ここでも自分自身を除いて1枚以上あるかを数える。
+            int othersInHand = Array.FindAll(SelfHand(), c => c != card).Length;
+            if (othersInHand == 0) return false;
+        }
+
+        if (spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || spells.HasFlag(SPELLS.SUMMON_SPECIFIC_UNIT))
+        {
+            if (SelfField().Length > 4) return false;
+        }
+
+        return true;
+    }
+
+    // ---- スペル/アビリティの効果対象選択（段階4） ----
+    // 対象が0件のときは必ず null を返す。呼び出し側（AI.cs）は null を効果不発として扱う。
+
+    // ダメージ系（DAMAGE_ENEMY_CARD / CONDITIONAL_ENEMY_DEBUFF）の対象を選ぶ。
+    // card.model.effectDmg で倒せる相手がいればその中でThreat最大、いなければ全体でThreat最大。
+    public static CardController SelectDamageTarget(CardController card)
+    {
+        CardController[] candidates = OppField();
+        if (candidates.Length == 0) return null;
+
+        CardController best = null;
+        float bestThreat = float.NegativeInfinity;
+        foreach (CardController c in candidates)
+        {
+            if (card.model.effectDmg < c.model.hp) continue;
+            float t = Threat(c);
+            if (t > bestThreat)
+            {
+                bestThreat = t;
+                best = c;
+            }
+        }
+        if (best != null) return best;
+
+        // 倒せる相手がいなければThreat最大
+        foreach (CardController c in candidates)
+        {
+            float t = Threat(c);
+            if (t > bestThreat)
+            {
+                bestThreat = t;
+                best = c;
+            }
+        }
+        return best;
+    }
+
+    // 除去/奪取系（DESTROY_ENEMY_CARD / STEAL_ENEMY_CARD）の対象を選ぶ。Threat最大。
+    public static CardController SelectDestroyTarget(CardController card)
+    {
+        CardController[] candidates = OppField();
+        if (candidates.Length == 0) return null;
+
+        CardController best = null;
+        float bestThreat = float.NegativeInfinity;
+        foreach (CardController c in candidates)
+        {
+            float t = Threat(c);
+            if (t > bestThreat)
+            {
+                bestThreat = t;
+                best = c;
+            }
+        }
+        return best;
+    }
+
+    // 回復系（HEAL_FRIEND_CARD）の対象を選ぶ。
+    // 段階6でmaxHpを追加するまでは暫定的にhpが最小の味方を返す。
+    public static CardController SelectHealTarget(CardController card)
+    {
+        CardController[] candidates = SelfField();
+        if (candidates.Length == 0) return null;
+
+        CardController best = null;
+        int bestHp = int.MaxValue;
+        foreach (CardController c in candidates)
+        {
+            if (c.model.hp < bestHp)
+            {
+                bestHp = c.model.hp;
+                best = c;
+            }
+        }
+        return best;
+    }
+
+    // バフ系（CONDITIONAL_FRIEND_BUFF）の対象を選ぶ。
+    // canAttack==trueの味方のうちhp最大（生き残りやすい＝バフが無駄にならない）。
+    public static CardController SelectBuffTarget(CardController card)
+    {
+        CardController[] candidates = Array.FindAll(SelfField(), c => c.model.canAttack);
+        if (candidates.Length == 0) return null;
+
+        CardController best = null;
+        int bestHp = int.MinValue;
+        foreach (CardController c in candidates)
+        {
+            if (c.model.hp > bestHp)
+            {
+                bestHp = c.model.hp;
+                best = c;
+            }
+        }
+        return best;
+    }
+
     // カードを攻撃対象にした場合のスコア。
     // 判定にはランタイムの isDestroyer / isDamageNullifyOnce を使う
     // （abilitiesは静的フラグのままで、isDamageNullifyOnceは1回使うと消費されて false に戻るため）。
