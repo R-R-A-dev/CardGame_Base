@@ -100,24 +100,13 @@ public class AI : MonoBehaviour
             }
             // 攻撃可能カードを取得
             CardController[] enemyCanAttackCardList = Array.FindAll(fieldCardList, card => card.model.canAttack); // 検索：Array.FindAll
-            CardController[] playerFieldCardList = Alive(gameManager.playerFieldTransform.GetComponentsInChildren<CardController>());
 
-            // attackerカードを選択
-            CardController attacker = enemyCanAttackCardList[0];
+            // attacker/defenderをスコアリングで選択（AIEvaluator）
+            AttackPlan plan = AIEvaluator.NextAttack(enemyCanAttackCardList);
+            CardController attacker = plan.attacker;
+            CardController defender = plan.defender;
 
-            // defenderカードを選択
-            // シールドカードのみ攻撃対象にする（貫通持ちは無視できる）
-            // ※ defenderを決める前に絞り込む（絞り込み後に決めないと守護を無視してしまう）
-            if (!attacker.model.abilities.HasFlag(ABILITIES.PIERCE))
-            {
-                if (Array.Exists(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD)))
-                {
-                    playerFieldCardList = Array.FindAll(playerFieldCardList, card => card.model.abilities.HasFlag(ABILITIES.SHIELD));
-                }
-            }
-            CardController defender = GetFirstZeroOrLess(playerFieldCardList);
-
-            if (playerFieldCardList.Length > 0 && defender != null)
+            if (defender != null)
             {
                 // attackerとdefenderを戦わせる
                 //StartCoroutine(attacker.movement.MoveToTarget(defender.transform));
