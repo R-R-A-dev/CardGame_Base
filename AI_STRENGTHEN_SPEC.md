@@ -351,7 +351,7 @@ CardController defender = plan.defender;
 
 ### 段階3：リーサル判定
 
-ターン開始直後（`AI.cs` の最初の `WaitForSeconds(1)` の後、召喚ループの前）に一度だけ計算します。
+**★1ターンに2回計算します。** 1回目だけでは足りないことが動作確認で判明したためです（後述）。
 
 ```
 到達可能打点 =
@@ -359,11 +359,31 @@ CardController defender = plan.defender;
         Σ 自陣の canAttack カードの at
     (SHIELD 持ちがいる場合)
         Σ 自陣の canAttack かつ PIERCE 持ちカードの at
-  + Σ (手札にある SPELLS.DAMAGE_ENEMY_HERO 持ちのうち、マナ内で撃てるものの effectDmg)
+  + (includeHandBurn が true のときのみ)
+    Σ (手札にある SPELLS.DAMAGE_ENEMY_HERO 持ちのうち、マナ内で撃てるものの effectDmg)
 
 if (到達可能打点 >= gameManager.player.heroHp)
     → isLethalTurn = true
 ```
+
+| 計算タイミング | 場所 | `includeHandBurn` | 目的 |
+|---|---|---|---|
+| 1回目：ターン開始直後 | 最初の `WaitForSeconds(1)` の後、`SettingCanAttackView` の直後、召喚ループの前 | **true** | 召喚フェーズでバーンスペルを優先するかを決める |
+| 2回目：攻撃フェーズ直前 | 召喚ループの後、攻撃ループの `while` の前 | **false** | 実際にヒーローを殴り切れるかを最新の盤面で決める |
+
+**2回目が必須な理由（動作確認で発覚した不具合）**：
+1. **`INIT_ATTACKABLE`（速攻）持ちを召喚したケース**
+   `CardMovement.cs:277` で速攻持ちは召喚した瞬間に `SetCanAttack(true)` されるため、
+   **そのターン中に攻撃できます**。しかしターン開始時点の計算では場にいないので打点に数えられず、
+   `isLethalTurn = false` のままになります。その結果、攻撃フェーズで段階2の通常スコアになり、
+   有利トレード（`100 + Threat`）がヒーロー攻撃（`at * faceWeight` = 数十）に勝ってしまい、
+   **勝てるターンなのに敵AIがプレイヤーのカードを殴る**という挙動になります。
+2. **バーンスペルを撃った後のHP減少が反映されない**
+   1回目の計算は「これから撃つバーン」を打点に含めた見積もりです。実際に撃った後は
+   `player.heroHp` が減っているので、盤面打点だけで足りるかを計算し直すほうが正確です。
+
+**2回目で `includeHandBurn` を false にする理由**：召喚フェーズが終わった後は
+もうスペルを撃てないため、手札のバーンを打点に数えると過大評価になります。
 
 `isLethalTurn` が true のとき：
 - 召喚フェーズでは **バーンスペル（`DAMAGE_ENEMY_HERO`）を最優先で全て使う**
@@ -375,9 +395,54 @@ if (到達可能打点 >= gameManager.player.heroHp)
 マナの計算は `gameManager.enemy.manaCost` を使います（`defaultManaCost` ではない）。
 バーンスペルを複数使う場合、合計コストがマナを超えないよう貪欲に選んでください。
 
+**既知の割り切り（不具合ではないので直さないこと）**：`at == 0` のカードは
+`ScoreAgainstHero` が `0 * 1000 = 0` になるため、リーサルターンでもヒーローではなく
+相手カードを攻撃します。打点0なのでどちらを殴っても勝敗に影響せず、
+また `at > 0` のカードのヒーロー攻撃スコア（`at * 1000`）が必ず上回るので
+リーサル自体は阻害しません。
+
+#### 3-B. 決着後に行動を続けてしまう問題（段階3で同時に修正）
+
+ヒーローへのダメージは**非同期で適用されます**。
+`CastSpellOf` は `StartCoroutine` で起動され、その中でさらに `WaitForSeconds(0.9f)` を挟んでから
+`attackSpellEffectHero()` を呼び、実際に `player.heroHp` が減るのは
+`SpawnSpellEffectHero` / `DirectSpellAttackHero` / `LerpThrowSpellHero` の中（さらに `attackTime` 後）です。
+
+そのため `AI.cs` の既存のチェック
+
+```csharp
+StartCoroutine(CastSpellOf(selectCard));
+...
+if (GameManager.instance.player.heroHp <= 0 || ...) yield break;   // ← まだHPが減っていない
+```
+
+は**必ず素通りします**。結果、バーンスペルで勝敗が決まって結果演出が出た後も、
+敵AIが手札のスペルを撃ち続けます。
+
+修正方針：**召喚ループと攻撃ループそれぞれの先頭**、
+`while (isAttacking || isSummoning)` の待機ループを抜けた直後に、決着チェックを追加してください。
+
+```csharp
+while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
+{
+    yield return null;
+    continue;
+}
+// 決着済みなら以降の行動を止める
+if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+    yield break;
+```
+
+この位置なら、直前の行動（スペル・攻撃）のダメージ適用が完了してから判定されます
+（`attackSpellEffectHero` は開始時に `isAttacking = true` にし、ダメージ適用時に false へ戻すため）。
+**既存の `yield break` チェックは残したままで構いません**（重複しても害はありません）。
+
 #### 完了条件
 - プレイヤーHPが残り少ないとき、敵AIが確実に詰めてくること
+- **速攻持ちを召喚して初めてリーサルが成立するターンでも、ヒーローを殴り切ること**
+- 守護がいるときは、リーサルでも守護を無視しないこと
 - リーサルが成立しないとき、従来通りの評価（段階2）で動くこと
+- **勝敗が決まった後、敵AIが追加でスペルを撃ったり攻撃したりしないこと**
 
 ---
 
@@ -385,12 +450,34 @@ if (到達可能打点 >= gameManager.player.heroHp)
 
 `AI.cs` の以下をすべて置き換えます。
 
+**★行番号は段階3完了時点の実測値です。編集で必ずズレるので、行番号ではなく
+「どのメソッドの、どのフラグの分岐か」で場所を特定してください。**
+
 | 場所 | 現在 | 置き換え後 |
 |---|---|---|
-| `AI.cs:175` | `GetEnemyFieldCards(...)[0]` | `AIEvaluator.SelectDamageTarget(card)` |
-| `AI.cs:178` | `GetFriendFieldCards(...)[0]` | `AIEvaluator.SelectHealTarget(card)` |
-| `AI.cs:284` | `GetEnemyFieldCards(...)[0]` | `AIEvaluator.SelectDamageTarget(card)` |
-| `AI.cs:289` | `GetFriendFieldCards(...)[0]` | `AIEvaluator.SelectBuffTarget(card)` |
+| `AI.cs:206`（`CastAbilityOf`） | `GetEnemyFieldCards(...)[0]` | `AIEvaluator.SelectDamageTarget(card)` |
+| `AI.cs:209`（`CastAbilityOf`） | `GetFriendFieldCards(...)[0]` | `AIEvaluator.SelectHealTarget(card)` |
+| `AI.cs:334`（`CastSpellOf`） | `GetEnemyFieldCards(...)[0]` | `AIEvaluator.SelectDamageTarget(card)` |
+| `AI.cs:339`（`CastSpellOf`） | `GetFriendFieldCards(...)[0]` | `AIEvaluator.SelectBuffTarget(card)` |
+
+**※`AI.cs:206` / `AI.cs:334` の分岐は `DESTROY_ENEMY_CARD` / `STEAL_ENEMY_CARD` も
+同じ `if` に入っています。それらのフラグを持つ場合は `SelectDestroyTarget` を使ってください。**
+
+#### 4-B. 同時に潰す例外リスク（段階1で残っていた分）
+
+段階1では `DISCARD_ENEMY_HAND` / `DISCARD_FRIEND_HAND` にだけ空チェックを入れましたが、
+以下は**未対応のまま残っています**。すべて「対象0件のときに例外で落ちて `isAttacking` が
+true のまま固まる」パターンなので、段階4で一緒に直してください。
+
+| 場所 | 内容 | 起きること |
+|---|---|---|
+| `AI.cs:295` / `AI.cs:300`（`CastAbilityOf` の `RANDOM_ENEMY` / `RANDOM_FRIEND`） | 空チェックなしで `array[Random.Range(0, array.Length)]` | 盤面0体のとき `Random.Range(0,0)` が 0 を返し `array[0]` で `IndexOutOfRangeException` |
+| `AI.cs:432` / `AI.cs:437`（`CastSpellOf` の `RANDOM_ENEMY` / `RANDOM_FRIEND`） | 同上 | 同上 |
+| `AI.cs:426`（`CastSpellOf` の `DISCARD_FRIEND_HAND`） | `targets = new CardController[hand.Length - 1];` の直後に無条件で `target = targets[0];` | 手札がそのスペル1枚だけのとき `targets.Length == 0` となり `IndexOutOfRangeException` |
+
+`Random.Range(int min, int max)` は `max` を含まず、`min == max` のときは例外を投げずに
+`min` を返します。**したがって「長さ0の配列」は `Random.Range` では防げず、
+必ず呼び出し前に `Length == 0` を判定してください。**
 
 選択ルール：
 
@@ -411,6 +498,8 @@ if (到達可能打点 >= gameManager.player.heroHp)
 #### 完了条件
 - 敵AIが除去スペルを最大の脅威に撃つこと
 - 盤面が空のときに例外が出ないこと
+- 手札がそのスペル1枚だけのときに `DISCARD_FRIEND_HAND` で例外が出ないこと
+- 例外で `isAttacking` が true のまま固まらないこと
 
 ---
 

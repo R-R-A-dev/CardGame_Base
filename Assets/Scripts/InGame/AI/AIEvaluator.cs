@@ -52,6 +52,55 @@ public static class AIEvaluator
         return self - opp;
     }
 
+    // このターン、プレイヤーのヒーローを打点で倒し切れるかどうか（段階3）。
+    // AI.cs のターン開始直後（canAttack が立った直後）と、攻撃フェーズ直前の2回計算する
+    // （速攻(INIT_ATTACKABLE)持ちを召喚した場合、召喚前の1回目だけでは打点に数えられないため）。
+    public static bool isLethalTurn;
+
+    // 到達可能打点（盤面の攻撃打点 + includeHandBurnがtrueなら手札のバーンスペルのeffectDmg）
+    // を計算し、isLethalTurn を更新する。
+    // includeHandBurn: true  … ターン開始直後用。これから撃つバーンスペルの分も見積もりに含める
+    //                  false … 攻撃フェーズ直前用。召喚フェーズが終わった後はもうスペルを
+    //                          撃てないため、手札のバーンを含めると過大評価になる
+    // ★呼び出すたびに必ず false へリセットしてから再計算する
+    //   （リセットを忘れると、一度リーサルが成立した後は永久にヒーローだけを
+    //   殴り続けるAIになってしまうため）。
+    public static void CalculateLethalTurn(bool includeHandBurn)
+    {
+        isLethalTurn = false;
+
+        // 盤面の攻撃打点。相手に守護がいれば貫通持ちの分しか通らない。
+        CardController[] oppField = OppField();
+        bool oppHasShield = Array.Exists(oppField, c => c.model.abilities.HasFlag(ABILITIES.SHIELD));
+
+        int boardDamage = 0;
+        foreach (CardController c in SelfField())
+        {
+            if (!c.model.canAttack) continue;
+            // DOUBLE_ACTIONの2回目は数えない（安全側の見積もり）
+            if (oppHasShield && !c.model.abilities.HasFlag(ABILITIES.PIERCE)) continue;
+            boardDamage += c.model.at;
+        }
+
+        // 手札のバーンスペル（マナ内で撃てる分だけ、貪欲に加算）
+        int burnDamage = 0;
+        if (includeHandBurn)
+        {
+            int remainingMana = GameManager.instance.enemy.manaCost;
+            foreach (CardController c in SelfHand())
+            {
+                if (!c.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO)) continue;
+                if (c.model.cost > remainingMana) continue;
+
+                burnDamage += c.model.effectDmg;
+                remainingMana -= c.model.cost;
+            }
+        }
+
+        int totalDamage = boardDamage + burnDamage;
+        isLethalTurn = totalDamage >= GameManager.instance.player.heroHp;
+    }
+
     // カードを攻撃対象にした場合のスコア。
     // 判定にはランタイムの isDestroyer / isDamageNullifyOnce を使う
     // （abilitiesは静的フラグのままで、isDamageNullifyOnceは1回使うと消費されて false に戻るため）。
@@ -95,6 +144,11 @@ public static class AIEvaluator
     // boardAdvantage は呼び出し側で1回だけ計算した値を受け取る（attackerごとに再計算しない）
     static float ScoreAgainstHero(CardController attacker, float boardAdvantage)
     {
+        // リーサルターンは他のどんな選択肢よりヒーロー攻撃を優先させる。
+        // NextAttack()側の「守護がいてPIERCEを持たない場合はヒーローを候補に入れない」判定は
+        // ここより前段で行われるため、リーサルでも守護を無視することはない。
+        if (isLethalTurn) return attacker.model.at * 1000f;
+
         float faceWeight = 1.0f;
         if (GameManager.instance.player.heroHp <= 5) faceWeight += 1.5f;
         if (boardAdvantage > 0f) faceWeight += 0.8f;

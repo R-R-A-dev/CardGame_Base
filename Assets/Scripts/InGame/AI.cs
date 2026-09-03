@@ -27,6 +27,9 @@ public class AI : MonoBehaviour
         CardController[] enemyFieldCardList = AIEvaluator.Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
         gameManager.SettingCanAttackView(enemyFieldCardList, true);
 
+        // リーサル判定（段階3・1回目）。canAttackが立った直後、これから撃つバーンスペルも見積もりに含める。
+        AIEvaluator.CalculateLethalTurn(true);
+
         /* 場にカードをだす */
         // 手札のカードリストを取得
         CardController[] handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
@@ -42,14 +45,29 @@ public class AI : MonoBehaviour
                 yield return null;
                 continue;
             }
+            // 決着済みなら以降の行動を止める
+            if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+                yield break;
 
             // コスト以下のカードリストを取得
             CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells())));//CanUseSpell()
                                                                                                                                                                                                        // 場に出すカードを選択
-            CardController selectCard = Array.Find(
-                selectableHandCardList,
-                card => !(AIEvaluator.Alive(gameManager.GetEnemyFieldCards(true)).Length > 4 && card.model.spells == SPELLS.NONE)
-            );
+            CardController selectCard = null;
+            // リーサルターンはバーンスペル（DAMAGE_ENEMY_HERO）を最優先で選ぶ
+            if (AIEvaluator.isLethalTurn)
+            {
+                selectCard = Array.Find(
+                    selectableHandCardList,
+                    card => card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO)
+                );
+            }
+            if (selectCard == null)
+            {
+                selectCard = Array.Find(
+                    selectableHandCardList,
+                    card => !(AIEvaluator.Alive(gameManager.GetEnemyFieldCards(true)).Length > 4 && card.model.spells == SPELLS.NONE)
+                );
+            }
 
             if (selectCard == null) break;
 
@@ -88,6 +106,11 @@ public class AI : MonoBehaviour
         // フィールドのカードリストを取得（破壊演出中で残っているカードは除外）
         fieldCardList = AIEvaluator.Alive(gameManager.enemyFieldTransform.GetComponentsInChildren<CardController>());
 
+        // リーサル判定（段階3・2回目）。召喚フェーズ後はもうスペルを撃てないため、
+        // 手札のバーンスペルは見積もりに含めず、最新の盤面の打点だけで判定し直す
+        // （速攻(INIT_ATTACKABLE)持ちを召喚した場合、1回目の時点では場にいないため
+        // 打点に数えられていない）。
+        AIEvaluator.CalculateLethalTurn(false);
 
         //攻撃可能カードがあれば攻撃を繰り返す
         while (Array.Exists(fieldCardList, card => card.model.canAttack) && gameManager.timeCount > 0)
@@ -98,6 +121,9 @@ public class AI : MonoBehaviour
                 yield return null;
                 continue;
             }
+            // 決着済みなら以降の行動を止める
+            if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
+                yield break;
 
             // 待機明け直後に取り直す。
             // ここで取り直さないと、CardsBattleの反撃ダメージが確定する前の古い配列を
