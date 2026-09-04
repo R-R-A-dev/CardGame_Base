@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   no: 3
   name: test3
-  hp: 6
-  at: 0
-  cost: 10
+  hp: 5
+  at: 5
+  cost: 0
   effectDmg: 1
   effectHeal: 1
   price: 0
@@ -38,5 +38,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 1
+  abilities: 0
   targetCardID: 

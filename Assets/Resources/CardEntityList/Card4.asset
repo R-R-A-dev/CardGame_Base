@@ -16,8 +16,8 @@ MonoBehaviour:
   name: SPELL
   hp: 5
   at: 3
-  cost: 8
-  effectDmg: 10
+  cost: 1
+  effectDmg: 1
   effectHeal: 1
   price: 0
   description: spell
@@ -37,6 +37,6 @@ MonoBehaviour:
   rare: 3
   ability: 0
   spell: 0
-  spells: 4
+  spells: 65536
   abilities: 0
   targetCardID: 
