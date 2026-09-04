@@ -379,7 +379,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 7; i++)
         {
             //GiveCardToHand(player.deck, playerHandTransform);
             //GiveCardToHand(enemy.deck, enemyHandTransform);

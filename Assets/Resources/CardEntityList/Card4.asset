@@ -16,9 +16,10 @@ MonoBehaviour:
   name: SPELL
   hp: 5
   at: 3
-  cost: 4
-  effectDmg: 1
+  cost: 8
+  effectDmg: 10
   effectHeal: 1
+  price: 0
   description: spell
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
@@ -36,6 +37,6 @@ MonoBehaviour:
   rare: 3
   ability: 0
   spell: 0
-  spells: 2056
+  spells: 4
   abilities: 0
   targetCardID: 

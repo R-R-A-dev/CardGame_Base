@@ -15,8 +15,8 @@ MonoBehaviour:
   no: 2
   name: test2
   hp: 10
-  at: 0
-  cost: 2
+  at: 10
+  cost: 0
   effectDmg: 1
   effectHeal: 1
   price: 0
@@ -38,5 +38,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 3
+  abilities: 1048577
   targetCardID: 0100000001000000

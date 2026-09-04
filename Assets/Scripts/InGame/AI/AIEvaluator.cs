@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 // 敵AIの盤面評価・攻撃対象選択を担当する純粋ロジッククラス。
 // MonoBehaviour / ScriptableObject ではないため .asset の作成やInspector割り当ては不要。
@@ -154,6 +155,159 @@ public static class AIEvaluator
         }
 
         return true;
+    }
+
+    // 出すカードの価値。モンスターはThreat + 速攻ボーナス、スペルはコストに比例（段階6まで暫定）。
+    // ★リーサルターン（isLethalTurn）のバーンスペル(DAMAGE_ENEMY_HERO)は、
+    //   他のどの選択肢よりも優先して部分集合探索で選ばれるよう極端に大きくする（段階3の維持）。
+    static float Value(CardController card)
+    {
+        if (card.IsSpell)
+        {
+            if (isLethalTurn && card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
+                return 10000f;
+            return card.model.cost * 1.0f;
+        }
+        return Threat(card) + (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE) ? card.model.at : 0);
+    }
+
+    // マナ消費ボーナスの重み。基本は盤面価値（Value）を優先しつつ、
+    // 僅差ならマナを使い切る組み合わせを選ぶために使う（段階5の動作確認で追加）。
+    const float MANA_WEIGHT = 1.0f;
+
+    // 手札から「このターンに出すカードの計画」をマナ最大化で選ぶ（段階5）。
+    // ターン開始時に1回だけ呼び出し、返したリストを先頭から消費する想定。
+    // 部分集合の全探索で Σcost<=mana かつ モンスター数<=freeSlots のもとで
+    // ΣValue + Σcost*MANA_WEIGHT（＝盤面価値優先、僅差ならマナ消費量で決める）を最大化する。
+    public static List<CardController> ChoosePlayPlan(CardController[] hand, int mana, int freeSlots)
+    {
+        List<CardController> result = new List<CardController>();
+
+        // freeSlotsが負（自陣が6体以上等）だと、空集合(monsterCount==0)すら
+        // 「0 > freeSlots」で弾かれてしまい、有効な組み合わせが1つも無くなる
+        // （＝召喚フェーズでスペルも含めて一切何も出さなくなる）ため、0未満を許さない
+        if (freeSlots < 0) freeSlots = 0;
+
+        // 使用可能な候補だけに絞る。スペルは CanUseSpells() と HasValidSpellTarget() の両方が必要
+        // （段階4-C：対象がいないスペルを選ぶとマナだけ消費して不発になるため）。
+        List<CardController> candidates = new List<CardController>();
+        foreach (CardController card in hand)
+        {
+            if (card.IsSpell)
+            {
+                if (card.CanUseSpells() && HasValidSpellTarget(card))
+                    candidates.Add(card);
+            }
+            else
+            {
+                candidates.Add(card);
+            }
+        }
+
+        if (candidates.Count == 0) return result;
+
+        // 手札が多い場合はコスト効率（Value/cost）上位8枚に絞ってから全探索する（2^nの爆発防止）
+        if (candidates.Count > 8)
+        {
+            candidates.Sort((a, b) =>
+            {
+                float effA = Value(a) / Math.Max(a.model.cost, 1);
+                float effB = Value(b) / Math.Max(b.model.cost, 1);
+                return effB.CompareTo(effA);
+            });
+            candidates = candidates.GetRange(0, 8);
+        }
+
+        // 部分集合の全探索で最大価値の組み合わせを選ぶ。
+        // 空集合(mask=0)は常にcostSum==0/monsterCount==0で制約を満たすため必ず候補に入り、
+        // found は必ず true になる（＝呼び出し側が予期しないnullを受け取ることはない）。
+        int n = candidates.Count;
+        int bestMask = 0;
+        float bestValue = 0f;
+        int bestCount = 0;
+        bool found = false;
+
+        for (int mask = 0; mask < (1 << n); mask++)
+        {
+            int costSum = 0;
+            int monsterCount = 0;
+            int cardCount = 0;
+            float valueSum = 0f;
+
+            for (int i = 0; i < n; i++)
+            {
+                if ((mask & (1 << i)) == 0) continue;
+                CardController c = candidates[i];
+                costSum += c.model.cost;
+                if (!c.IsSpell) monsterCount++;
+                valueSum += Value(c);
+                cardCount++;
+            }
+
+            if (costSum > mana) continue;
+            if (monsterCount > freeSlots) continue;
+
+            // 盤面価値（valueSum）を優先しつつ、僅差ならマナを多く使うほうを選ぶ
+            float score = valueSum + costSum * MANA_WEIGHT;
+            // スコア同点（例：コスト0のスペルだけの組み合わせ vs 空集合、どちらもscore==0）
+            // のときは、枚数が多いほうを採用する。これが無いとコスト0のスペルが
+            // 常に空集合と同点扱いになり永久に選ばれない
+            bool isBetter = !found || score > bestValue || (score == bestValue && cardCount > bestCount);
+            if (isBetter)
+            {
+                bestValue = score;
+                bestMask = mask;
+                bestCount = cardCount;
+                found = true;
+            }
+        }
+
+        if (!found) return result;
+
+        List<CardController> selected = new List<CardController>();
+        for (int i = 0; i < n; i++)
+        {
+            if ((bestMask & (1 << i)) != 0)
+                selected.Add(candidates[i]);
+        }
+
+        // グループ内でValue降順（強いカードから先）になるよう並べ替えておく。
+        // 下の4つのforeachはこの順序のまま各グループに振り分けるので、
+        // ここでソートするだけでグループ内の順序も降順になる。
+        selected.Sort((a, b) => Value(b).CompareTo(Value(a)));
+
+        // 実行順を組み立てる：
+        // 0. （リーサルターンのみ）バーンスペルを最優先で先頭に（段階3の維持）
+        // 1. 除去スペル（DAMAGE_ENEMY_CARD / DAMAGE_ENEMY_CARDS / DESTROY_ENEMY_CARD）
+        // 2. モンスター
+        // 3. その他のスペル（バフ / ドロー / ヒーロー系）
+        if (isLethalTurn)
+        {
+            foreach (CardController c in selected)
+                if (c.IsSpell && c.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
+                    result.Add(c);
+        }
+        foreach (CardController c in selected)
+        {
+            if (result.Contains(c)) continue;
+            if (c.IsSpell && (c.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) ||
+                               c.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) ||
+                               c.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD)))
+                result.Add(c);
+        }
+        foreach (CardController c in selected)
+        {
+            if (result.Contains(c)) continue;
+            if (!c.IsSpell)
+                result.Add(c);
+        }
+        foreach (CardController c in selected)
+        {
+            if (!result.Contains(c))
+                result.Add(c);
+        }
+
+        return result;
     }
 
     // ---- スペル/アビリティの効果対象選択（段階4） ----

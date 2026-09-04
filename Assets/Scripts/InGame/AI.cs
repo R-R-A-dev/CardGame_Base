@@ -35,10 +35,18 @@ public class AI : MonoBehaviour
         CardController[] handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
         CardController[] fieldCardList = gameManager.GetEnemyFieldCards(true);
 
-        // コスト以下のカードがあれば、カードをフィールドに出し続ける
-        // 条件：モンスターカードならコストのみ
-        // 条件：スペルならコストと、使用可能かどうか（CanUseSpell）
-        while (Array.Exists(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells() && AIEvaluator.HasValidSpellTarget(card)))) && gameManager.timeCount > 0)
+        // 出すカードの計画をターン開始時に1回だけ計算する（段階5）。
+        // 毎ループで再計算すると盤面変化で不整合が起きるため、リストを先頭から消費する形にする。
+        // ※盤面上限は5体だが、SUMMON_SPECIFIC_UNIT等で6体以上になる場合もあるため0未満に丸める
+        // （負のままだと空集合すら弾かれ、召喚フェーズで一切何も出さなくなるため）。
+        int freeSlots = Math.Max(0, 5 - AIEvaluator.Alive(gameManager.GetEnemyFieldCards(true)).Length);
+        List<CardController> playPlan = AIEvaluator.ChoosePlayPlan(handCardList, gameManager.enemy.manaCost, freeSlots);
+        int playPlanIndex = 0;
+
+        // 計画したカードを先頭から順番に出し続ける。
+        // playPlanIndexは毎回必ず1つ以上進むため、このループは有限回で必ず終了する
+        // （playPlan.Countは最初に固定した有限のリストで、再計算しない）。
+        while (playPlanIndex < playPlan.Count && gameManager.timeCount > 0)
         {
             while (GameManager.instance.isAttacking || GameManager.instance.isSummoning)
             {
@@ -49,28 +57,28 @@ public class AI : MonoBehaviour
             if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0)
                 yield break;
 
-            // コスト以下のカードリストを取得
-            CardController[] selectableHandCardList = Array.FindAll(handCardList, card => (card.model.cost <= gameManager.enemy.manaCost) && (!card.IsSpell || (card.IsSpell && card.CanUseSpells() && AIEvaluator.HasValidSpellTarget(card))));//CanUseSpell()
-                                                                                                                                                                                                       // 場に出すカードを選択
-            CardController selectCard = null;
-            // リーサルターンはバーンスペル（DAMAGE_ENEMY_HERO）を最優先で選ぶ
-            if (AIEvaluator.isLethalTurn)
-            {
-                selectCard = Array.Find(
-                    selectableHandCardList,
-                    card => card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO)
-                );
-            }
+            // 場に出すカードを選択（計画から1枚消費する）
+            CardController selectCard = playPlan[playPlanIndex];
+            playPlanIndex++;
+
+            // 直前のスペルの効果（手札全破棄など）で既に消滅している場合はスキップする
             if (selectCard == null)
+                continue;
+
+            // 消費前に、まだマナが足りるか／まだ盤面に空きがあるか／まだ対象がいるかを再チェックする
+            // （直前に実行したカードの効果でマナ・盤面・対象が変化している可能性があるため）
+            if (selectCard.model.cost > gameManager.enemy.manaCost)
+                continue;
+            if (!selectCard.IsSpell)
             {
-                selectCard = Array.Find(
-                    selectableHandCardList,
-                    card => !(AIEvaluator.Alive(gameManager.GetEnemyFieldCards(true)).Length > 4 && card.model.spells == SPELLS.NONE)
-                );
+                if (AIEvaluator.Alive(gameManager.GetEnemyFieldCards(true)).Length > 4)
+                    continue;
             }
-
-            if (selectCard == null) break;
-
+            else
+            {
+                if (!(selectCard.CanUseSpells() && AIEvaluator.HasValidSpellTarget(selectCard)))
+                    continue;
+            }
 
             //　カードを表にする
             selectCard.Show();
@@ -96,7 +104,6 @@ public class AI : MonoBehaviour
                 yield break;
 
             yield return new WaitForSeconds(2);
-            handCardList = gameManager.enemyHandTransform.GetComponentsInChildren<CardController>();
         }
 
 

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   no: 3
   name: test3
-  hp: 10
+  hp: 6
   at: 0
-  cost: 3
+  cost: 10
   effectDmg: 1
   effectHeal: 1
   price: 0
