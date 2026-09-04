@@ -175,14 +175,32 @@ static CardController[] Alive(CardController[] src)
 | 段階2：`AIEvaluator` + 攻撃対象スコアリング | **完了・コミット済み**（レビュー指摘の修正も反映済み） |
 | 段階3：リーサル判定（3-B の決着チェック含む） | **完了・コミット済み** |
 | 段階4：対象選択（4-B/4-C/4-D/4-E 含む） | **完了・コミット済み** |
-| 段階5：出すカードの選択（5-B/5-C 含む） | **完了・Unity確認済み** |
-| 段階6：スペル価値関数 + `maxHp` | 未着手 ← **次はここ** |
+| 段階5：出すカードの選択（5-B/5-C 含む） | **コミット済み**。ただし **5-D の指摘が未対応** ← **次はここ** |
+| 段階6：スペル価値関数 + `maxHp` | 未着手（5-D の修正後） |
 | 段階7：難易度パラメータ | 未着手 |
 | 段階8：クリーンアップ | 未着手 |
 
 **この指示書に書かれている `AI.cs:NNN` などの行番号は、書かれた時点のものです。
 編集のたびにズレるので、行番号ではなく「どのメソッドの、どのフラグの分岐か」で
 場所を特定してください。**
+
+### ★コミット前に必ず確認すること（検証用の値の混入）
+
+動作確認のために書き換えた値が、**実際に2回コミットに混入しました**。
+`git add -A` や `git commit -a` は使わず、**変更したファイルを個別に `git add`** してください。
+
+コミット前に必ず `git status` を見て、以下が含まれていないか確認すること。
+
+| ファイル | 検証で書き換わりやすい値 | 本来の値 |
+|---|---|---|
+| `Assets/Scripts/InGame/GamePlayerManager.cs` | `manaCost` / `defaultManaCost` | どちらも `10` |
+| `Assets/Scripts/InGame/GameManager.cs` | `SettingInitHand` の draw 回数 | `2` |
+| `Assets/Resources/CardEntityList/Card*.asset` | hp / at / cost / abilities / spells | 検証用に書き換えないこと |
+| `Assets/Scenes/Field.unity` | `DeckBuilderUI.debugMode` / `debugOwnedCardCounts` | `debugMode: 0` |
+
+**特に `debugMode: 1` が入ると、プレイヤーがデッキ編集画面を開いたときに
+`BeginDeckEdit()` ではなく `DebugBeginDeckEdit()` が呼ばれ、
+セーブデータが一切読まれずデッキ空・全カード所持の状態で始まります。**
 
 ---
 
@@ -787,6 +805,51 @@ Value(スペル)     = 段階6まで暫定で card.model.cost * 1.0f
 手札順のままにすると、弱いカードが先に出てしまいます。
 ターン制限時間（`timeCount`）で打ち切られた場合や、途中でスペルの効果によって
 盤面が埋まった場合に、**強いカードが出せずに残る**のを避けるためです。
+
+#### 5-D. コードレビューで見つかった不具合（段階5コミット後）
+
+**(1) `CONDITIONAL_FRIEND_BUFF` がマナだけ消費して不発になる**
+
+`HasValidSpellTarget()` の `CONDITIONAL_FRIEND_BUFF` 判定は `SelfField().Length == 0` しか見ていませんが、
+実際に対象を選ぶ `SelectBuffTarget()` は **さらに `canAttack == true` で絞り込みます**。
+この粒度の違いが、以下の順序で必ず踏まれます。
+
+1. 自陣が空の状態でターンが始まる
+2. プランが「モンスター + バフスペル」になる（実行順は グループ2 モンスター → グループ3 その他スペル）
+3. モンスターを召喚する。**`SettingCanAttackView` はターン先頭で1回しか呼ばれない**ので、
+   このモンスターは（速攻でなければ）`canAttack == false` のまま
+4. バフスペルを撃つ時点で `SelfField()` は非空なので、`AI.cs` の再チェックも通過する
+5. しかし `SelectBuffTarget()` は `canAttack == true` の味方がおらず `null` を返す
+
+結果、`CastSpellOf` 末尾の `else` 節で **`ReduceManaCost()` だけ実行され、
+`spellEffect()` はスキップ**されます。さらに `UseSpellTo` 末尾の
+`Destroy(this.gameObject)` に到達しないため、**スペルカード自身が破棄されません**。
+`MoveLeftSpell` の `HideCard()` は CanvasGroup の alpha を 0 にするだけで
+GameObject を非アクティブにしないため、そのカードは alpha=0 のまま手札に残り、
+`GetComponentsInChildren` で毎ターン拾われて再選択され、**毎ターン不発＋マナ消費を繰り返します**。
+
+→ 4-C で潰したはずの「対象がいないスペルを出してマナだけ消費し、カードが画面に残る」が
+そのまま再現しています。
+
+**修正方針**：`HasValidSpellTarget()` の判定粒度を `Select系` に揃えてください。
+`CONDITIONAL_FRIEND_BUFF` は「`canAttack == true` の味方が1体以上いるか」を条件にします。
+
+**★同じ「判定粒度のズレ」は他にもあります。`HasValidSpellTarget()` の各条件が、
+対応する `Select系` の絞り込みと一致しているかを全フラグで確認してください。**
+
+**(2) `DESTROY_ALL_FIELD_CARDS` が自分の召喚直後に自陣を巻き込む**
+
+実行順のグループ1（除去スペル）は
+`DAMAGE_ENEMY_CARD` / `DAMAGE_ENEMY_CARDS` / `DESTROY_ENEMY_CARD` しか見ておらず、
+**`DESTROY_ALL_FIELD_CARDS` がグループ3（その他スペル）に落ちます**。
+
+そのため同じターンのプランに「モンスター + 全体破壊」が入ると、
+**マナを払って召喚した直後に全体破壊を撃ち、自分の新しいモンスターごと壊します**
+（`CastSpellOf` の対象は `enemys.Concat(friends)` で自陣も含むため）。
+部分集合探索は `Value` を単純加算するだけで、この相互作用を考慮していません。
+
+**修正方針**：`DESTROY_ALL_FIELD_CARDS` を**グループ1（モンスターより前）**に移してください。
+盤面を流してから召喚するのが正しい順序です。
 
 #### 5-C. 探索の実装で必ず守ること（動作確認で見つかった不具合）
 

@@ -123,9 +123,18 @@ public static class AIEvaluator
         }
 
         if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARD) || spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS) ||
-            spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF) || spells.HasFlag(SPELLS.RANDOM_FRIEND))
+            spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
             if (SelfField().Length == 0) return false;
+        }
+
+        if (spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF))
+        {
+            // SelectBuffTarget() は canAttack==true の味方だけを候補にするため、
+            // ここも同じ粒度でチェックする。SelfField().Length==0 だけを見ていると、
+            // 自陣にcanAttack==falseのカードしかいないときに「対象あり」と誤判定し、
+            // SelectBuffTargetがnullを返してマナだけ消費・カードが手札に残ってしまう（5-D）。
+            if (Array.FindAll(SelfField(), c => c.model.canAttack).Length == 0) return false;
         }
 
         if (spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
@@ -278,9 +287,13 @@ public static class AIEvaluator
 
         // 実行順を組み立てる：
         // 0. （リーサルターンのみ）バーンスペルを最優先で先頭に（段階3の維持）
-        // 1. 除去スペル（DAMAGE_ENEMY_CARD / DAMAGE_ENEMY_CARDS / DESTROY_ENEMY_CARD）
+        // 1. 除去スペル（DAMAGE_ENEMY_CARD / DAMAGE_ENEMY_CARDS / DESTROY_ENEMY_CARD / DESTROY_ALL_FIELD_CARDS）
         // 2. モンスター
         // 3. その他のスペル（バフ / ドロー / ヒーロー系）
+        //
+        // ★DESTROY_ALL_FIELD_CARDSは自陣も巻き込む全体破壊のため、モンスターより前
+        //   （グループ1）に置く。モンスターの後（グループ3）だと、召喚した直後に
+        //   全体破壊を撃って自分の新しいモンスターごと壊してしまう（5-D）。
         if (isLethalTurn)
         {
             foreach (CardController c in selected)
@@ -292,7 +305,8 @@ public static class AIEvaluator
             if (result.Contains(c)) continue;
             if (c.IsSpell && (c.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) ||
                                c.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) ||
-                               c.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD)))
+                               c.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) ||
+                               c.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS)))
                 result.Add(c);
         }
         foreach (CardController c in selected)
