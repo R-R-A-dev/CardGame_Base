@@ -354,6 +354,50 @@ Value(スペル)     = SpellValue(card)（4-6参照）
 **ループは `playPlanIndex < playPlan.Count` で回し、本体の先頭で必ずインデックスを進めます。**
 `playPlan` はターン開始時に固定した有限リストなので、最大 `Count` 回で必ず終了します。
 
+#### ★対象を取らないスペル（`DRAW_CARDS` など）の扱い
+
+**カードデータ側の必須条件：対象を取らないスペルは `attackType` を `NONE` にすること。**
+
+`spellEffect` の `switch` は `DIRECT` / `SPAWN` のとき `target.transform` を触るため、
+対象なしでは必ず NRE になります。`NONE` だけが `UseSpellTo(target)` を呼ぶ形で、
+`UseSpellTo` は対象が要る効果ごとに `if (target == null) return;` を持っています。
+
+そのうえで `CastSpellOf` 側は次の3点を満たす必要があります。
+
+**(1) `spellEffect` のガードに `NONE` を通す**
+
+```csharp
+if (target != null || card.model.attackType == ATTACKTYPE.NONE)
+    card.spellEffect(target, true);
+```
+
+`target != null` だけで弾くと、`DRAW_CARDS` は以下の連鎖で壊れます。
+
+1. マナだけ消費される
+2. `UseSpellTo` に到達しないので**カードが破棄されない**
+   （破棄しているのは `UseSpellTo` → `DrawCard` の `Destroy(card.gameObject)` と、
+   `UseSpellTo` 末尾の `Destroy(this.gameObject)`）
+3. `MoveLeftSpell` は `DOFade` で薄くするだけなので、カードは手札の子のまま残る
+4. 手札が3枚未満にならず**ドローも止まる**、かつ毎ターン再選択される
+5. さらに `spellEffect` 冒頭の `isAttacking = true` を戻すのも
+   `DrawCard` 側なので、**`isAttacking` が true のまま固まる**
+
+**(2) `MoveLeftSpell` を二重に呼ばない**
+
+`DRAW_CARDS` の分岐は `yield break` せず下まで流れるため、
+分岐内の `StartCoroutine(card.movement.MoveLeftSpell(card));` と、
+その後の共通処理にある同じ呼び出しの**2回**実行されます。
+分岐内の呼び出しを削除し、共通処理側の1回だけにしてください
+（ヒーロー狙いのスペルは `yield break` するので二重にならず、この問題は起きません）。
+
+**(3) `transform` ではなく `card.transform` を操作する**
+
+`CastSpellOf` は `AI` クラスのメソッドなので、素の `transform` は
+**カードではなく AI の GameObject** を指します。
+`DRAW_CARDS` の分岐にある `transform.SetParent(transform.parent.parent);` は
+AI 自身を親から外してしまうため、`card.transform` を対象にし、
+`parent.parent` が null のときは何もしないようにしてください。
+
 ### 4-6. スペルの価値（`SpellValue`）とダメージ数字の表示
 
 `SPELLS` は `[Flags]` なので、**該当する全フラグの価値を合計**します（`if / else if` にしない）。
@@ -381,6 +425,28 @@ Value(スペル)     = SpellValue(card)（4-6参照）
 **★役割分担**：「対象が存在するか」は `HasValidSpellTarget()` の責務なので、
 `SpellValue` 側で再実装しないこと（「相手盤面が空」等は上表の0条件に出てきません）。
 `SpellValue` は「対象はいるが撃つ価値があるか」だけを判定します。
+
+**★`SpellValue` が知らないフラグのスペルを、永久に手札で腐らせないこと。**
+
+`ChoosePlayPlan` の候補条件が `Value > 0` なので、
+**上表のどのフラグにも当てはまらないスペルは `Value = 0` となり、二度と出せなくなります。**
+出せないカードは手札を占有し続け、手札が3枚未満にならないため**ドローも止まります**。
+（現状 `RANDOM_DAMAGE` と `HEAL_BY_DAMAGE` が上表に無く、これに該当します）
+
+対策：`SpellValue` の中で「どれか1つでもフラグを認識したか」を記録し、
+**1つも認識しなかった場合は最低限の価値（`1f`）を返す**ようにしてください。
+
+```
+recognized = false
+（各フラグの分岐で recognized = true にする）
+...
+if (!recognized) return 1f;   // 未知のフラグ。小さい値だが候補には残す
+return total;
+```
+
+**★`DISCARD_FRIEND_HAND` / `DISCARD_ALL_FRIEND_HAND` は「認識したうえで価値0」**に
+してください（`recognized = true` にするが加算しない）。
+これらは「撃つと損だから撃たない」が正しいので、上の救済措置の対象にしてはいけません。
 
 **★0にしていいのは「撃つと損」または「完全に無駄」のときだけです。**
 `ChoosePlayPlan` は `Value > 0` を候補条件にしているため、
@@ -444,6 +510,19 @@ INCREASE_ENEMY_COST / REDUCE_HAND_COST
   取得順によっては最適な組み合わせを見逃すことがあります（安全側の誤りです）。
 - **`CardController.cs` の `Random.Range(0, len - 1)`（`ActAbility` 以外）は未修正です。**
   プレイヤー側の処理なので、段階8で報告のみ行います。
+- **`SUMMON_SPECIFIC_UNIT` は `SpellValue` で加点されますが、`UseSpellTo` に
+  スペル版の実装がありません**（実装があるのは `UseAbilitiesTo` 側だけ）。
+  **スペルとして `SUMMON_SPECIFIC_UNIT` を持つカードは作らない方針**なので、
+  現状のままとします（ユーザー決定）。もしスペル版を作る場合は、
+  `UseSpellTo` に分岐を足すまで `SpellValue` から外してください。
+- **`DRAW_CARDS` スペルは作る方針です**（ユーザー決定）。
+  カード側は `attackType = NONE` にすること。4-5 の
+  「★対象を取らないスペルの扱い」の3点が前提になります。
+- **`CONDITIONAL_ENEMY_DEBUFF` / `CONDITIONAL_FRIEND_BUFF` は
+  `ShowsDamageNumber()` の除外リストに入れません。**
+  `effectDmg` は ATK の増減量ですが、**数字が出てよい**というユーザー判断です。
+- **`Assets/Scenes/Field.unity` の `debugMode` は現在 `1` のままです。**
+  検証中のため意図的に残しています。リリース前に `0` に戻してください。
 
 ---
 
