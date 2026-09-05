@@ -45,6 +45,9 @@ public class CardController : MonoBehaviour
     {
         model = new CardModel(cardID, isPlayer);
         ApplyRoguelike(model);
+        // ApplyRoguelikeがhpを書き換える場合があるため、その後にmaxHpを追従させる
+        // （AIの評価にのみ使う参照値。段階6）
+        model.maxHp = model.hp;
         view.SetCard(model);
     }
 

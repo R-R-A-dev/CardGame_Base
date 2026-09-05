@@ -8,6 +8,9 @@ public class CardModel
     public int no;
     public string name;
     public int hp;
+    // AIの評価にのみ使う参照値（段階6）。回復の上限には使わない
+    // （回復に上限をつけるとプレイヤー側のゲームバランスが変わるため、絶対にclampしないこと）。
+    public int maxHp;
     public int at;
     public int effectDmg;
     public int effectHeal;
@@ -49,6 +52,7 @@ public class CardModel
         no = cardID;
         name = cardEntity.name;
         hp = cardEntity.hp;
+        maxHp = cardEntity.hp;
         at = cardEntity.at;
         effectDmg = cardEntity.effectDmg;
         effectHeal = cardEntity.effectHeal;
@@ -83,6 +87,7 @@ public class CardModel
                 targetCards[i].no = cardEntity.targetCardID[i];
                 targetCards[i].name = targetEntity.name;
                 targetCards[i].hp = targetEntity.hp;
+                targetCards[i].maxHp = targetEntity.hp;
                 targetCards[i].at = targetEntity.at;
                 targetCards[i].effectDmg = targetEntity.effectDmg;
                 targetCards[i].effectHeal = targetEntity.effectHeal;
@@ -204,6 +209,10 @@ public class CardModel
     void RecoveryHP(int point)
     {
         hp += point;
+        // maxHpはAIの評価にのみ使う参照値。回復・バフでhpがmaxHpを超えたら
+        // maxHpをそれに追従させるだけで、hpを上限でclampする処理は入れない
+        // （clampするとプレイヤー側のゲームバランスが変わってしまうため）。
+        if (hp > maxHp) maxHp = hp;
     }
 
     public void Heal(CardController card)

@@ -26,13 +26,21 @@ public static class AIEvaluator
     public static float Threat(CardController c)
     {
         if (c == null || c.model == null) return 0f;
+        return Threat(c.model);
+    }
 
-        float score = c.model.at * 1.2f + c.model.hp * 0.8f;
-        ABILITIES abilities = c.model.abilities;
+    // CardModel版（段階6：SUMMON_SPECIFIC_UNITのtargetCardsはCardController化されていない
+    // CardModel[]のため、CardController版から計算ロジックを共通化して呼べるようにする）。
+    public static float Threat(CardModel model)
+    {
+        if (model == null) return 0f;
+
+        float score = model.at * 1.2f + model.hp * 0.8f;
+        ABILITIES abilities = model.abilities;
 
         if (abilities.HasFlag(ABILITIES.SHIELD)) score += 3f;
         if (abilities.HasFlag(ABILITIES.DESTROY_ATTACKED_TARGET)) score += 4f;
-        if (abilities.HasFlag(ABILITIES.DOUBLE_ACTION)) score += c.model.at;
+        if (abilities.HasFlag(ABILITIES.DOUBLE_ACTION)) score += model.at;
         if (abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE)) score += 2f;
         if (abilities.HasFlag(ABILITIES.STATS_UP_ON_ATTACK)) score += 2f;
         if (abilities.HasFlag(ABILITIES.PIERCE)) score += 1f;
@@ -122,19 +130,13 @@ public static class AIEvaluator
             if (OppField().Length == 0) return false;
         }
 
+        // CONDITIONAL_FRIEND_BUFF（AttackBuff）は target.model.at += effectDmg という
+        // 恒久的なATK上昇で、そのターンに攻撃できるか（canAttack）は無関係。
+        // SelectBuffTarget() も SelfField() 全体を候補にするため、粒度はここで揃う。
         if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARD) || spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS) ||
-            spells.HasFlag(SPELLS.RANDOM_FRIEND))
+            spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF) || spells.HasFlag(SPELLS.RANDOM_FRIEND))
         {
             if (SelfField().Length == 0) return false;
-        }
-
-        if (spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF))
-        {
-            // SelectBuffTarget() は canAttack==true の味方だけを候補にするため、
-            // ここも同じ粒度でチェックする。SelfField().Length==0 だけを見ていると、
-            // 自陣にcanAttack==falseのカードしかいないときに「対象あり」と誤判定し、
-            // SelectBuffTargetがnullを返してマナだけ消費・カードが手札に残ってしまう（5-D）。
-            if (Array.FindAll(SelfField(), c => c.model.canAttack).Length == 0) return false;
         }
 
         if (spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
@@ -166,18 +168,187 @@ public static class AIEvaluator
         return true;
     }
 
-    // 出すカードの価値。モンスターはThreat + 速攻ボーナス、スペルはコストに比例（段階6まで暫定）。
-    // ★リーサルターン（isLethalTurn）のバーンスペル(DAMAGE_ENEMY_HERO)は、
-    //   他のどの選択肢よりも優先して部分集合探索で選ばれるよう極端に大きくする（段階3の維持）。
+    // 出すカードの価値。モンスターはThreat + 速攻ボーナス、スペルはSpellValue()（段階6本実装）。
     static float Value(CardController card)
     {
         if (card.IsSpell)
-        {
-            if (isLethalTurn && card.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
-                return 10000f;
-            return card.model.cost * 1.0f;
-        }
+            return SpellValue(card);
         return Threat(card) + (card.model.abilities.HasFlag(ABILITIES.INIT_ATTACKABLE) ? card.model.at : 0);
+    }
+
+    // スペルの価値（段階6本実装）。SPELLSは[Flags]なので、該当する全フラグの価値を合計する。
+    //
+    // ★役割分担：ここでの「0にする」条件は「対象はいるが撃つ価値があるか」の判定。
+    //   「対象が物理的に存在するか」はHasValidSpellTarget()（段階4-C）が既に保証しているので
+    //   ここで再チェックしない（二重実装すると条件が食い違ったときに原因追跡が難しくなるため）。
+    //   例：相手盤面が空/相手手札0枚/自盤面が5体などは4-Cの責務なのでここには出てこない。
+    //
+    // ★リーサルターン（isLethalTurn）のDAMAGE_ENEMY_HEROは、他のどの選択肢よりも
+    //   優先して部分集合探索で選ばれるよう、従来通り10000fを返す（段階3の維持）。
+    //   他の全フラグの値は最大でも数十〜百程度のスケールなので、この優先度は揺るがない。
+    static float SpellValue(CardController card)
+    {
+        SPELLS spells = card.model.spells;
+        float total = 0f;
+
+        if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD))
+        {
+            // 倒せる相手がいればその中でThreat最大、いなければ削りダメージとしてeffectDmg*0.5f
+            CardController killTarget = null;
+            float killThreat = float.NegativeInfinity;
+            foreach (CardController c in OppField())
+            {
+                if (card.model.effectDmg < c.model.hp) continue;
+                float t = Threat(c);
+                if (t > killThreat)
+                {
+                    killThreat = t;
+                    killTarget = c;
+                }
+            }
+            total += killTarget != null ? Threat(killTarget) : card.model.effectDmg * 0.5f;
+        }
+
+        if (spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
+        {
+            // 最大脅威が低すぎる（雑魚）なら温存して撃たない
+            float maxThreat = 0f;
+            foreach (CardController c in OppField())
+            {
+                float t = Threat(c);
+                if (t > maxThreat) maxThreat = t;
+            }
+            if (maxThreat >= 6f) total += maxThreat;
+        }
+
+        if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
+        {
+            // 倒せるのが1体以下なら価値なしとみなす（全体攻撃を1体だけに使うのは非効率）
+            float sum = 0f;
+            int killCount = 0;
+            foreach (CardController c in OppField())
+            {
+                if (card.model.effectDmg < c.model.hp) continue;
+                sum += Threat(c);
+                killCount++;
+            }
+            if (killCount > 1) total += sum;
+        }
+
+        if (spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
+        {
+            // 盤面有利（自陣のThreatが相手以上）なら自分から壊す必要はない
+            float oppThreat = 0f;
+            foreach (CardController c in OppField()) oppThreat += Threat(c);
+            float selfThreat = 0f;
+            foreach (CardController c in SelfField()) selfThreat += Threat(c);
+            float diff = oppThreat - selfThreat;
+            if (diff > 0f) total += diff;
+        }
+
+        // CardModel.RecoveryHP()はhp+=pointで上限が無く（maxHpはAIの参照値であって
+        // 回復の上限ではない）、回復スペルは実質「HPを恒久的に上げるバフ」なので、
+        // 全快の味方に撃っても無駄にはならない。傷の深さは見ず、対象1体につき
+        // effectHeal*0.8f（Threatのhp係数0.8fに合わせたスケール）で評価する。
+        if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARD))
+        {
+            CardController target = SelectHealTarget(card);
+            if (target != null) total += card.model.effectHeal * 0.8f;
+        }
+
+        if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
+        {
+            total += card.model.effectHeal * 0.8f * SelfField().Length;
+        }
+
+        if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
+        {
+            if (isLethalTurn)
+                total += 10000f;
+            else
+                total += card.model.effectDmg * (GameManager.instance.player.heroHp <= 5 ? 2.0f : 0.8f);
+        }
+
+        if (spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
+        {
+            // 自ヒーローHPが満タン付近（初期値10に対して8以上）なら撃たない
+            int selfHeroHp = GameManager.instance.enemy.heroHp;
+            if (selfHeroHp < 8)
+                total += card.model.effectDmg * (selfHeroHp <= 4 ? 2.0f : 0.5f);
+        }
+
+        if (spells.HasFlag(SPELLS.STEAL_ENEMY_CARD))
+        {
+            float maxThreat = 0f;
+            foreach (CardController c in OppField())
+            {
+                float t = Threat(c);
+                if (t > maxThreat) maxThreat = t;
+            }
+            total += maxThreat * 2f;
+        }
+
+        if (spells.HasFlag(SPELLS.DRAW_CARDS))
+        {
+            // 手札が既に多いなら（溢れる/腐る）撃たない
+            if (SelfHand().Length < 5)
+                total += card.model.effectDmg * 2f;
+        }
+
+        if (spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
+        {
+            total += card.model.effectDmg * 1.0f;
+        }
+
+        if (spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF))
+        {
+            total += card.model.effectDmg * 1.0f;
+        }
+
+        if (spells.HasFlag(SPELLS.SWAP_HP_ATK))
+        {
+            // at > hp の相手がいれば、スワップで奪えるThreat差分（0.4*(at-hp)）が最大のものを採用
+            float bestDiff = 0f;
+            foreach (CardController c in OppField())
+            {
+                if (c.model.at > c.model.hp)
+                {
+                    float diff = 0.4f * (c.model.at - c.model.hp);
+                    if (diff > bestDiff) bestDiff = diff;
+                }
+            }
+            total += bestDiff;
+        }
+
+        if (spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
+        {
+            total += OppHand().Length * 1.5f;
+        }
+
+        if (spells.HasFlag(SPELLS.INCREASE_ENEMY_COST))
+        {
+            total += OppHand().Length * 1.0f;
+        }
+
+        if (spells.HasFlag(SPELLS.REDUCE_HAND_COST))
+        {
+            total += SelfHand().Length * 0.8f;
+        }
+
+        // DISCARD_FRIEND_HAND / DISCARD_ALL_FRIEND_HAND は常に0（自分の首を絞めるだけ）なので加算しない
+
+        if (spells.HasFlag(SPELLS.SUMMON_SPECIFIC_UNIT))
+        {
+            float sum = 0f;
+            if (card.model.targetCards != null)
+            {
+                foreach (CardModel t in card.model.targetCards)
+                    sum += Threat(t);
+            }
+            total += sum;
+        }
+
+        return total;
     }
 
     // マナ消費ボーナスの重み。基本は盤面価値（Value）を優先しつつ、
@@ -199,12 +370,17 @@ public static class AIEvaluator
 
         // 使用可能な候補だけに絞る。スペルは CanUseSpells() と HasValidSpellTarget() の両方が必要
         // （段階4-C：対象がいないスペルを選ぶとマナだけ消費して不発になるため）。
+        // ★スペルはさらに Value(card) > 0 も必要（段階6-C）。
+        //   ChoosePlayPlanのスコアは valueSum + costSum*MANA_WEIGHT なので、
+        //   Valueが0以下のスペルでもコスト分のボーナスだけで空集合に勝ってしまい、
+        //   「盤面有利ならDESTROY_ALL_FIELD_CARDSを撃たない」等の0判定が無効化されていた。
+        //   モンスターはThreatベースで必ず正になるため、この除外は不要（適用しない）。
         List<CardController> candidates = new List<CardController>();
         foreach (CardController card in hand)
         {
             if (card.IsSpell)
             {
-                if (card.CanUseSpells() && HasValidSpellTarget(card))
+                if (card.CanUseSpells() && HasValidSpellTarget(card) && Value(card) > 0f)
                     candidates.Add(card);
             }
             else
@@ -402,10 +578,11 @@ public static class AIEvaluator
     }
 
     // バフ系（CONDITIONAL_FRIEND_BUFF）の対象を選ぶ。
-    // canAttack==trueの味方のうちhp最大（生き残りやすい＝バフが無駄にならない）。
+    // AttackBuff()はat+=effectDmgという恒久的な効果でcanAttackとは無関係なため、
+    // 自陣の味方全体（SelfField()）のうちhp最大（生き残りやすい＝バフが無駄になりにくい）を選ぶ。
     public static CardController SelectBuffTarget(CardController card)
     {
-        CardController[] candidates = Array.FindAll(SelfField(), c => c.model.canAttack);
+        CardController[] candidates = SelfField();
         if (candidates.Length == 0) return null;
 
         CardController best = null;

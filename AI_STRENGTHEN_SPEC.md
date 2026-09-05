@@ -175,8 +175,9 @@ static CardController[] Alive(CardController[] src)
 | 段階2：`AIEvaluator` + 攻撃対象スコアリング | **完了・コミット済み**（レビュー指摘の修正も反映済み） |
 | 段階3：リーサル判定（3-B の決着チェック含む） | **完了・コミット済み** |
 | 段階4：対象選択（4-B/4-C/4-D/4-E 含む） | **完了・コミット済み** |
-| 段階5：出すカードの選択（5-B/5-C 含む） | **コミット済み**。ただし **5-D の指摘が未対応** ← **次はここ** |
-| 段階6：スペル価値関数 + `maxHp` | 未着手（5-D の修正後） |
+| 段階5：出すカードの選択（5-B/5-C/5-D 含む） | **完了・コミット済み** |
+| 段階6：スペル価値関数 + `maxHp`（6-C 含む） | **完了・Unity確認済み** |
+| 4-F：ダメージ数字を出すのは「ダメージ」だけにする | 未着手 ← **次はここ**（段階7の前に実施） |
 | 段階7：難易度パラメータ | 未着手 |
 | 段階8：クリーンアップ | 未着手 |
 
@@ -552,7 +553,12 @@ true のまま固まる」パターンなので、段階4で一緒に直して�
   `maxHp - hp`（傷の深さ）が最大の味方。段階6で `maxHp` を追加するまでは
   **暫定的に `hp` が最小の味方**を返してください
 - **`SelectBuffTarget`**（`CONDITIONAL_FRIEND_BUFF`）
-  `canAttack == true` の味方のうち `hp` 最大（生き残りやすい＝バフが無駄にならない）
+  **自陣の味方のうち `hp` 最大**（生き残りやすい＝バフが無駄になりにくい）
+  **※旧版では「`canAttack == true` の味方のうち」としていましたが誤りです。**
+  `CardController.AttackBuff()` は `target.model.at += effectDmg` という**恒久的なATK上昇**で、
+  そのターンに攻撃できるかは関係ありません。`canAttack` で絞ると、
+  召喚したてのカードにバフを乗せられず、対象存在判定（`HasValidSpellTarget`）とも
+  食い違って不発の原因になります（5-D で一度その形に直しましたが、仕様誤認でした）。
 
 **対象が0体のときは必ず `null` を返し、呼び出し側で効果を発動しないようにしてください。**
 現状は空配列に `[0]` でアクセスして例外になる可能性があります。
@@ -671,6 +677,40 @@ GameManager.instance.StartCoroutine(GenDamageText(textObj, model.effectDmg, endP
 **※`SpawnSpellEffect` の表示値のバグも同時に直すこと。**
 表示条件は `model.effectDmg` を見ているのに、実際に表示している数値が `model.at` になっている
 （`DirectSpellAttack` 側は `effectDmg` で統一されている）。`model.effectDmg` に揃える。
+
+#### 4-F. ダメージ数字を出すのは「ダメージ」だけにする（段階6の動作確認で追加依頼）
+
+4-D では `DESTROY_ENEMY_CARD`（スペル版）だけ数字を止めましたが、
+**`effectDmg` を「ダメージ以外の意味」で使う効果が他にもあります**。
+それらも数字を出さないようにしてください。
+
+| フラグ | `effectDmg` の実際の意味 | 数字を出す？ |
+|---|---|---|
+| `DISCARD_ENEMY_HAND` / `DISCARD_ALL_ENEMY_HAND` | （未使用。手札を捨てるだけ） | **出さない** |
+| `DISCARD_FRIEND_HAND` / `DISCARD_ALL_FRIEND_HAND` | 同上 | **出さない** |
+| `INCREASE_ENEMY_COST` | 相手手札の**コスト増加量** | **出さない** |
+| `REDUCE_HAND_COST` | 自手札の**コスト減少量** | **出さない** |
+| `DESTROY_ENEMY_CARD` | （未使用。破壊するだけ） | **出さない**（4-Dで対応済み） |
+| `DAMAGE_ENEMY_CARD` / `DAMAGE_ENEMY_CARDS` | ダメージ量 | 出す |
+| `HEAL_FRIEND_CARD` / `HEAL_FRIEND_CARDS` | 回復量 | 出す |
+
+**★対象は5箇所すべてです。** 4-D ではスペルの2箇所しか直しておらず、
+**アビリティ版の3箇所（`SpawnEffectAbility` / `DirectAttackAbility` / `LerpThrowAbility`）が
+漏れています**（コードレビューでも指摘済み）。アビリティ版には
+`ABILITIES.DESTROY_ENEMY_CARD` の抑制も入っていないので、あわせて揃えてください。
+
+| メソッド | 種別 | 判定に使うenum |
+|---|---|---|
+| `SpawnEffectAbility` | アビリティ | `model.abilities` |
+| `DirectAttackAbility` | アビリティ | `model.abilities` |
+| `LerpThrowAbility` | アビリティ | `model.abilities` |
+| `DirectSpellAttack` | スペル | `model.spells` |
+| `SpawnSpellEffect` | スペル | `model.spells` |
+
+**★5箇所に同じ条件式をコピペしないでください。**
+`CardController` に判定用のヘルパー（例：`bool ShowsDamageNumber()`）を1つ作り、
+`spells` と `abilities` の両方を見て判定させ、5箇所からはそれを呼ぶ形にしてください。
+4-D でスペル側だけ直してアビリティ側が漏れたのは、条件が分散していたためです。
 
 **※`CardController.cs` はプレイヤーと共通だが、これは「破壊は数字を出さない」という
 両陣営共通の表示ルールの変更であり、ユーザー承認済みの例外**（2. の例外3として記載）。
@@ -998,7 +1038,7 @@ public int maxHp;
 | `DESTROY_ENEMY_CARD` | `Threat(最大脅威)` | 最大 `Threat` < 6（雑魚に温存） |
 | `DAMAGE_ENEMY_CARDS` | `Σ Threat(effectDmgで倒せる相手)` | 倒せるのが1体以下 |
 | `DESTROY_ALL_FIELD_CARDS` | `Σ Threat(相手盤面) - Σ Threat(自盤面)` | **上式が 0 以下（＝盤面有利なら撃たない）** |
-| `HEAL_FRIEND_CARD` / `HEAL_FRIEND_CARDS` | `Σ min(effectHeal, maxHp - hp)` | 上式が2未満（傷が浅い） |
+| `HEAL_FRIEND_CARD` / `HEAL_FRIEND_CARDS` | **`effectHeal * 0.8f`（対象1体につき）。傷の深さは見ない** | **なし（全快でも撃つ）** |
 | `DAMAGE_ENEMY_HERO` | **リーサル時は現在の実装（`10000f`）をそのまま維持**。それ以外は `effectDmg * (プレイヤーHP <= 5 ? 2.0f : 0.8f)` | なし |
 | `HEAL_FRIEND_HERO` | 自HPが低いほど加点：`effectDmg * (自HP <= 4 ? 2.0f : 0.5f)` | 自HPが満タン付近 |
 | `STEAL_ENEMY_CARD` | `Threat(最大脅威) * 2f` | 自盤面が5体で埋まっている |
@@ -1015,6 +1055,36 @@ public int maxHp;
 **注意：`SPELLS` は `[Flags]` なので複数フラグを持つカードがあります。**
 `if / else if` ではなく **すべてのフラグを走査して Value を合計**してください。
 
+**★回復について（動作確認を受けて変更）**：
+`CardModel.RecoveryHP()` は `hp += point` で**上限がありません**（`maxHp` は AI の参照値であって
+回復の上限ではない）。つまり回復スペルは実質「HPを恒久的に上げるバフ」です。
+そのため**全快の味方に撃っても無駄にはならない**ので、
+「傷が浅いなら撃たない」というルールは入れないでください。
+`maxHp - hp`（傷の深さ）で価値を測るのもやめ、`effectHeal * 0.8f` で評価します
+（`Threat` の hp 係数 0.8 に合わせ、モンスターの価値と同じ土俵に乗せるため）。
+
+#### 6-C. ★`MANA_WEIGHT` が「価値0のスペル」を蘇らせる問題（最重要）
+
+`ChoosePlayPlan` のスコアは `valueSum + costSum * MANA_WEIGHT` です。
+そのため **`Value` が 0 のカードでも、コスト分のボーナスだけで空集合に勝ってしまいます。**
+
+| 選択肢 | valueSum | costSum × 1.0 | スコア |
+|---|---|---|---|
+| 何も出さない（空集合） | 0 | 0 | **0** |
+| 価値0のスペル（コスト4）を出す | 0 | 4 | **4** ← こちらが勝つ |
+
+これにより、上表で苦労して定義した**「0にする条件」がすべて無効化されます**。
+実際に「自陣3体・相手1体（＝盤面有利）で `DESTROY_ALL_FIELD_CARDS` を撃つ」
+「全快の味方に回復を撃つ」が発生しました。`DISCARD_FRIEND_HAND`（常に0）も同様に撃たれます。
+
+**修正方針**：`ChoosePlayPlan` の候補作成時に、
+**`Value` が 0 以下のスペルは候補に入れない**でください。
+
+- モンスターの `Value` は `Threat` ベースで必ず正になるため、この除外はスペルにのみ効きます。
+- コスト0のスペルでも `Value` が正なら候補に残るので、5-C(2) のタイブレークは壊れません。
+- 「対象が存在するか」＝`HasValidSpellTarget()`、「撃つ価値があるか」＝`Value`、
+  という 4-C との役割分担はそのまま維持されます（除外の実行場所が候補作成時になるだけ）。
+
 **★段階5で入れた仕組みを壊さないこと**
 - `MANA_WEIGHT`（マナ消費ボーナス）と、スコア同点時の「枚数が多いほう」タイブレークは維持する
 - リーサル時のバーンスペル最優先（実行順の先頭固定）は維持する
@@ -1022,8 +1092,10 @@ public int maxHp;
 - `Value(モンスター)` の式は変更しない（今回はスペル側のスケールを合わせるのが目的）
 
 #### 完了条件
-- 全快の味方に回復スペルを撃たなくなること
-- 盤面有利なときに `DESTROY_ALL_FIELD_CARDS` を撃たなくなること
+- **全快の味方にも回復スペルを撃つこと**（回復＝HPバフなので撃って良い。旧版の条件は誤り）
+- **盤面有利なとき（例：自陣3体・相手1体）に `DESTROY_ALL_FIELD_CARDS` を撃たないこと**
+- **`DISCARD_FRIEND_HAND` / `DISCARD_ALL_FRIEND_HAND` を撃たないこと**（`Value` が常に0のため）
+- `CONDITIONAL_FRIEND_BUFF` が、`canAttack` に関係なく自陣の味方を対象に選べること
 - 相手手札0枚のときにハンデスを撃たなくなること
 - **盤面に空きがあるときでも、価値の高いスペルがモンスターに埋もれず選ばれること**
   （段階5で判明したスケール不一致が解消されていること）

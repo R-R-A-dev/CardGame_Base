@@ -25098,8 +25098,8 @@ MonoBehaviour:
   roguelikeDecideButton: {fileID: 2040571034}
   cpuBattleDecideButton: {fileID: 1343535369}
   deckEditPanel: {fileID: 1924591634}
-  debugMode: 0
-  debugOwnedCardCounts: 04000000040000000400000004000000
+  debugMode: 1
+  debugOwnedCardCounts: 06000000060000000600000006000000
 --- !u!114 &95958319
 MonoBehaviour:
   m_ObjectHideFlags: 0
