@@ -46,6 +46,8 @@ public class GachaOpenUI : MonoBehaviour
 
     private Vector3 packInitialPos;
     private Vector3 packTopInitialPos;
+    private Vector3 packTopOriginalLocalPos;
+    private Vector3 packOriginalPos;
 
     private void Start()
     {
@@ -56,6 +58,9 @@ public class GachaOpenUI : MonoBehaviour
         packButton.onClick.AddListener(OnPackClicked);
         skipButton.onClick.AddListener(OnSkipButtonClick);
         nextButton.onClick.AddListener(OnNextButtonClick);
+
+        packTopOriginalLocalPos = packTopPart.transform.localPosition;
+        packOriginalPos = packTransform.position;
 
         gameObject.SetActive(false);
     }
@@ -78,10 +83,11 @@ public class GachaOpenUI : MonoBehaviour
         packCountText.text = $"{currentPackIndex + 1} / {packResults.Count} パック目";
 
         packObject.SetActive(true);
-        packTransform.position = packPosition.position;
+        packTransform.position = packOriginalPos;
         packInitialPos = packTransform.position;
 
         packTopPart.SetActive(true);
+        packTopPart.transform.localPosition = packTopOriginalLocalPos;
         packTopInitialPos = packTopPart.transform.localPosition;
 
         packButton.interactable = true;

@@ -17,7 +17,7 @@ MonoBehaviour:
   hp: 5
   at: 3
   cost: 1
-  effectDmg: 1
+  effectDmg: 20
   effectHeal: 1
   price: 0
   description: spell
@@ -37,6 +37,6 @@ MonoBehaviour:
   rare: 3
   ability: 0
   spell: 0
-  spells: 65536
+  spells: 1024
   abilities: 0
   targetCardID: 
