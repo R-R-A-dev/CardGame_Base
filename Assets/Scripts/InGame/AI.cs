@@ -4,8 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
-using static UnityEngine.Rendering.GPUSort;
 
 public class AI : MonoBehaviour
 {
@@ -187,18 +185,6 @@ public class AI : MonoBehaviour
     // AIEvaluator.Alive() に集約している（AI.cs側の重複定義は削除済み）。
     // ※ 手札カードには使わないこと。スペルカードは hp=0 のため isAlive/hp>0 判定に引っかかり、
     //   手札取得に適用すると敵がスペルを一切使えなくなる（CardView.cs でスペルは hp/at 非表示の仕様）
-
-    public CardController GetFirstZeroOrLess(CardController[] array)
-    {
-        for (int i = 0; i < array.Length; i++)
-        {
-            if (array[i].model.hp > 0)
-            {
-                return array[i];
-            }
-        }
-        return null;
-    }
 
     IEnumerator CastAbilityOf(CardController card)
     {
