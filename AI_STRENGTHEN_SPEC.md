@@ -137,9 +137,14 @@ Array.FindAll(src, c => c != null && c.model != null && c.model.isAlive && c.mod
 | 段階4：対象選択 | 完了・コミット済み |
 | 段階5：出すカードの選択 | 完了・コミット済み |
 | 段階6：スペル価値関数 + `maxHp` | 完了・コミット済み |
-| 4-6：ダメージ数字の表示範囲 | 完了・Unity確認済み |
-| **段階7：難易度パラメータ** | **未着手 ← 次はここ** |
-| 段階8：クリーンアップ | 未着手 |
+| 4-6：ダメージ数字の表示範囲 | 完了・コミット済み |
+| 段階7：難易度パラメータ | **見送り（実装しない）** |
+| **段階8：クリーンアップ** | **未着手 ← 次はここ（最後）** |
+
+**段階7を見送った理由**：難易度は作らず統一する方針になったため（ユーザー判断）。
+`AIProfile` / `AIDifficulty` は作りません。将来必要になったら
+「4-1 の `faceWeight`」「4-2 のリーサル判定の有効/無効」「`NextAttack` のランダム化」の
+3点に差し込む形になります。
 
 ### ★コミット前に必ず確認すること
 
@@ -444,40 +449,7 @@ INCREASE_ENEMY_COST / REDUCE_HAND_COST
 
 ## 5. これから実装する段階
 
-### 段階7：難易度パラメータ
-
-**ScriptableObject にはしないでください。** `.asset` の作成と Inspector 割り当てが必要になり、
-あなたの手では完結できません。プレーンな enum + static テーブルにします。
-
-```csharp
-// Assets/Scripts/InGame/AI/AIProfile.cs
-public enum AIDifficulty { EASY, NORMAL, HARD }
-
-public class AIProfile
-{
-    public float mistakeRate;   // この確率で最善手ではなくランダムな合法手を選ぶ
-    public float faceWeight;    // ヒーローを狙う重み
-    public bool  useLethalCheck;
-
-    public static AIProfile Get(AIDifficulty d) { /* switch でハードコード */ }
-}
-```
-
-適用方法：
-
-1. `AI.cs` に `public AIDifficulty difficulty = AIDifficulty.NORMAL;` を追加
-   （public フィールドなので Inspector に露出するが、デフォルト値で動くため手作業は不要）
-2. `EnemyData`（ローグライク用SO）に `public AIDifficulty aiDifficulty = AIDifficulty.NORMAL;` を追加
-   （既存の `.asset` はデフォルト値でデシリアライズされるため作り直し不要）
-3. 戦闘開始時に `EnemyData` から `AI.difficulty` へ流し込む
-   → **どこで `EnemyData` が戦闘シーンに渡っているかを `RoguelikeSession` /
-     `GameManager.StartGame` 周辺で必ず実コードで確認してから実装すること。** 推測で書かないこと。
-
-#### 完了条件
-- 難易度を変えても、4章の確定仕様（リーサル・対象選択・マナ最大化）が壊れないこと
-- `mistakeRate` が0のとき、従来と完全に同じ挙動になること
-
-### 段階8：クリーンアップ
+### 段階8：クリーンアップ（最後）
 
 - `AI.GetFirstZeroOrLess` が本当に未使用なら削除（**先に全プロジェクトを grep して確認**）
 - `AI.cs` 冒頭の未使用 `using`（`static UnityEngine.Rendering.GPUSort` 等）の整理
