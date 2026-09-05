@@ -1371,7 +1371,7 @@ public class CardController : MonoBehaviour
         UseAbilitiesTo(enemy);
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-        if (model.effectDmg != 0)
+        if (model.effectDmg != 0 && ShowsDamageNumber())
         {
             GameObject textObj = GameManager.instance.GetTextPool();
             StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
@@ -1391,7 +1391,7 @@ public class CardController : MonoBehaviour
                 UseAbilitiesTo(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-                if (model.effectDmg != 0)
+                if (model.effectDmg != 0 && ShowsDamageNumber())
                 {
                     GameObject textObj = GameManager.instance.GetTextPool();
                     StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
@@ -1428,7 +1428,7 @@ public class CardController : MonoBehaviour
                     UseAbilitiesTo(enemyCC);
                     enemyCC.RefreshView();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
-                    if (model.effectDmg != 0)
+                    if (model.effectDmg != 0 && ShowsDamageNumber())
                     {
                         GameObject textObj = GameManager.instance.GetTextPool();
                         StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
@@ -1853,21 +1853,56 @@ public class CardController : MonoBehaviour
     }
 
 
+    // effectDmg が「ダメージ量」以外の意味（コスト増減量など）で使われている効果や、
+    // 破壊のように数値そのものが存在しない効果では、ダメージ数字を表示しない（4-F）。
+    // effectDmg != 0 の判定はここに含めない（「値が0だから出さない」と
+    // 「そもそもダメージではない」は別の理由のため、呼び出し側で別途チェックする）。
+    bool ShowsDamageNumber()
+    {
+        if (model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) ||
+            model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) ||
+            model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND) ||
+            model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) ||
+            model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND) ||
+            model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) ||
+            model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
+        {
+            return false;
+        }
+
+        if (model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) ||
+            model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) ||
+            model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND) ||
+            model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND) ||
+            model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND) ||
+            model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) ||
+            model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public void DirectSpellAttack(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
     {
         effect.DOMove(endPos.position, attackTime)
             .OnComplete(() =>
             {
+                // 通常攻撃(DirectAttack)・アビリティ(DirectAttackAbility)・
+                // スペルのヒーロー攻撃(DirectSpellAttackHero)はいずれもヒットエフェクトを
+                // 出すのに、スペルのカード攻撃だけ抜けていたので合わせる
+                hitEffect(endPos);
                 GameManager.instance.isAttacking = !isDefense;
                 //model.Attack(enemy);
                 CheckAttackParticle(effect);
                 UseSpellTo(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-                // DESTROY_ENEMY_CARD（破壊）はダメージではないため数字を出さない。
-                // DAMAGE_NULLIFY_ONCEに吸収された場合も数字だけ出て「効いたのに死なない」
-                // ように見えるため（4-D）
-                if (model.effectDmg != 0 && !model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
+                // DESTROY_ENEMY_CARD（破壊）やDISCARD/コスト変更系はダメージではないため
+                // 数字を出さない（4-D/4-F）。DAMAGE_NULLIFY_ONCEに吸収された場合も
+                // 数字だけ出て「効いたのに死なない」ように見えるため
+                if (model.effectDmg != 0 && ShowsDamageNumber())
                 {
                     GameObject textObj = GameManager.instance.GetTextPool();
                     GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
@@ -1885,9 +1920,10 @@ public class CardController : MonoBehaviour
         //model.Attack(enemy);
         UseSpellTo(enemy);
         CheckAttackParticle(effect);
-        // DESTROY_ENEMY_CARD（破壊）はダメージではないため数字を出さない（4-D）。
+        // DESTROY_ENEMY_CARD（破壊）やDISCARD/コスト変更系はダメージではないため
+        // 数字を出さない（4-D/4-F）。
         // あわせて表示値をmodel.atからmodel.effectDmgに統一（DirectSpellAttack側と食い違っていたバグ）
-        if (model.effectDmg != 0 && !model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
+        if (model.effectDmg != 0 && ShowsDamageNumber())
         {
             GameObject textObj = GameManager.instance.GetTextPool();
             GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));

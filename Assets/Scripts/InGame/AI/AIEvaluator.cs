@@ -211,28 +211,32 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
         {
-            // 最大脅威が低すぎる（雑魚）なら温存して撃たない
+            // ★「雑魚なら温存」で0にしないこと。0にすると Value>0 の候補フィルタで弾かれ、
+            //   そのカードが永久に出せなくなる。低い相手なら Value が小さくなるだけでよく、
+            //   実際に温存するかどうかは他の選択肢とのスコア比較に任せる。
             float maxThreat = 0f;
             foreach (CardController c in OppField())
             {
                 float t = Threat(c);
                 if (t > maxThreat) maxThreat = t;
             }
-            if (maxThreat >= 6f) total += maxThreat;
+            total += maxThreat;
         }
 
         if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
         {
-            // 倒せるのが1体以下なら価値なしとみなす（全体攻撃を1体だけに使うのは非効率）
+            // 倒せる相手がいればその合計Threat、いなければ削りダメージとして評価する。
+            // （DESTROY_ENEMY_CARDと同じ理由で、0にして候補から弾かない）
+            CardController[] opp = OppField();
             float sum = 0f;
             int killCount = 0;
-            foreach (CardController c in OppField())
+            foreach (CardController c in opp)
             {
                 if (card.model.effectDmg < c.model.hp) continue;
                 sum += Threat(c);
                 killCount++;
             }
-            if (killCount > 1) total += sum;
+            total += killCount > 0 ? sum : card.model.effectDmg * 0.5f * opp.Length;
         }
 
         if (spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
