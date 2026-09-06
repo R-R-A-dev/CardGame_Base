@@ -190,9 +190,16 @@ public static class AIEvaluator
     {
         SPELLS spells = card.model.spells;
         float total = 0f;
+        // どれか1つでも下の分岐でフラグを認識したかを記録する。
+        // ChoosePlayPlanの候補条件がValue>0のため、1つも認識しなかった場合にtotal=0の
+        // ままだと、そのスペルは永久に候補から外れて手札で腐り続ける
+        // （現状 RANDOM_DAMAGE / HEAL_BY_DAMAGE 等がこれに該当）。
+        // そのため末尾で recognized==false のときは最低限の価値(1f)を返す。
+        bool recognized = false;
 
         if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD))
         {
+            recognized = true;
             // 倒せる相手がいればその中でThreat最大、いなければ削りダメージとしてeffectDmg*0.5f
             CardController killTarget = null;
             float killThreat = float.NegativeInfinity;
@@ -211,6 +218,7 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
         {
+            recognized = true;
             // ★「雑魚なら温存」で0にしないこと。0にすると Value>0 の候補フィルタで弾かれ、
             //   そのカードが永久に出せなくなる。低い相手なら Value が小さくなるだけでよく、
             //   実際に温存するかどうかは他の選択肢とのスコア比較に任せる。
@@ -225,6 +233,7 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS))
         {
+            recognized = true;
             // 倒せる相手がいればその合計Threat、いなければ削りダメージとして評価する。
             // （DESTROY_ENEMY_CARDと同じ理由で、0にして候補から弾かない）
             CardController[] opp = OppField();
@@ -241,6 +250,7 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
         {
+            recognized = true;
             // 盤面有利（自陣のThreatが相手以上）なら自分から壊す必要はない
             float oppThreat = 0f;
             foreach (CardController c in OppField()) oppThreat += Threat(c);
@@ -256,17 +266,20 @@ public static class AIEvaluator
         // effectHeal*0.8f（Threatのhp係数0.8fに合わせたスケール）で評価する。
         if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARD))
         {
+            recognized = true;
             CardController target = SelectHealTarget(card);
             if (target != null) total += card.model.effectHeal * 0.8f;
         }
 
         if (spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
         {
+            recognized = true;
             total += card.model.effectHeal * 0.8f * SelfField().Length;
         }
 
         if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
         {
+            recognized = true;
             if (isLethalTurn)
                 total += 10000f;
             else
@@ -275,6 +288,7 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
         {
+            recognized = true;
             // 自ヒーローHPが満タン付近（初期値10に対して8以上）なら撃たない
             int selfHeroHp = GameManager.instance.enemy.heroHp;
             if (selfHeroHp < 8)
@@ -283,6 +297,7 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.STEAL_ENEMY_CARD))
         {
+            recognized = true;
             float maxThreat = 0f;
             foreach (CardController c in OppField())
             {
@@ -294,6 +309,7 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.DRAW_CARDS))
         {
+            recognized = true;
             // 手札が既に多いなら（溢れる/腐る）撃たない
             if (SelfHand().Length < 5)
                 total += card.model.effectDmg * 2f;
@@ -301,16 +317,19 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
         {
+            recognized = true;
             total += card.model.effectDmg * 1.0f;
         }
 
         if (spells.HasFlag(SPELLS.CONDITIONAL_FRIEND_BUFF))
         {
+            recognized = true;
             total += card.model.effectDmg * 1.0f;
         }
 
         if (spells.HasFlag(SPELLS.SWAP_HP_ATK))
         {
+            recognized = true;
             // at > hp の相手がいれば、スワップで奪えるThreat差分（0.4*(at-hp)）が最大のものを採用
             float bestDiff = 0f;
             foreach (CardController c in OppField())
@@ -326,23 +345,32 @@ public static class AIEvaluator
 
         if (spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
         {
+            recognized = true;
             total += OppHand().Length * 1.5f;
         }
 
         if (spells.HasFlag(SPELLS.INCREASE_ENEMY_COST))
         {
+            recognized = true;
             total += OppHand().Length * 1.0f;
         }
 
         if (spells.HasFlag(SPELLS.REDUCE_HAND_COST))
         {
+            recognized = true;
             total += SelfHand().Length * 0.8f;
         }
 
-        // DISCARD_FRIEND_HAND / DISCARD_ALL_FRIEND_HAND は常に0（自分の首を絞めるだけ）なので加算しない
+        if (spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) || spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND))
+        {
+            // 常に0（自分の首を絞めるだけ）。ただし「認識はしている」ので
+            // 末尾のフォールバック（1f）の対象にはしない。
+            recognized = true;
+        }
 
         if (spells.HasFlag(SPELLS.SUMMON_SPECIFIC_UNIT))
         {
+            recognized = true;
             float sum = 0f;
             if (card.model.targetCards != null)
             {
@@ -351,6 +379,12 @@ public static class AIEvaluator
             }
             total += sum;
         }
+
+        // どのフラグも認識できなかった場合（例：RANDOM_DAMAGE / HEAL_BY_DAMAGE 単体など）は、
+        // total=0のままChoosePlayPlanのValue>0フィルタで永久に弾かれるのを防ぐため、
+        // 最低限の価値(1f)を返す。DISCARD_FRIEND_HAND系は上でrecognized=trueにしているため
+        // このフォールバックの対象にはならない。
+        if (!recognized) return 1f;
 
         return total;
     }

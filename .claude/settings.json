@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(awk '/static float SpellValue/,/^    \\\\}$/' Assets/Scripts/InGame/AI/AIEvaluator.cs)"
+    ]
+  }
+}

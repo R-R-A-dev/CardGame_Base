@@ -370,8 +370,11 @@ public class AI : MonoBehaviour
         }
         else if (card.model.spells.HasFlag(SPELLS.DRAW_CARDS))
         {
-            transform.SetParent(transform.parent.parent);
-            StartCoroutine(card.movement.MoveLeftSpell(card));
+            // card.transform（AIではなくカード自身）を対象にする。
+            // MoveLeftSpell の呼び出しは下の共通処理（448行目付近）で1回だけ行われるため、
+            // ここでは呼ばない（二重に呼ぶとMoveLeftSpellのアニメーションが2回走る）。
+            if (card.transform.parent != null && card.transform.parent.parent != null)
+                card.transform.SetParent(card.transform.parent.parent);
             //yield return new WaitForSeconds(0.9f);
 
         }
@@ -461,9 +464,15 @@ public class AI : MonoBehaviour
         else
         {
             gameManager.ReduceManaCost(card.model.cost, card.model.isPlayerCard);
-            // targetがnull（対象0件）のまま呼ぶとspellEffect内でtarget.transformが
-            // NullReferenceExceptionになり、isAttackingがtrueのまま固まるため必ずガードする
-            if (target != null)
+            // targetがnull（対象0件）でも、attackType==NONEなら spellEffect の switch は
+            // target.transformを触らずUseSpellTo(target)だけを呼ぶため安全に実行できる。
+            // DRAW_CARDSのように対象を取らないスペルはこの経路でしか成立せず
+            // （UseSpellTo内でドロー・カード自身の破棄・isAttackingのfalse復帰が行われる）、
+            // target != null だけでガードするとマナだけ消費して不発になり、
+            // カードが破棄されずisAttackingがtrueのまま固まる。
+            // DIRECT/SPAWNはtarget.transformを触るため、target==nullなら従来通りスキップする
+            // （NullReferenceExceptionになり、isAttackingがtrueのまま固まるため必ずガードする）。
+            if (target != null || card.model.attackType == ATTACKTYPE.NONE)
                 card.spellEffect(target, true);
         }
 

@@ -1237,6 +1237,10 @@ public class CardController : MonoBehaviour
     {
         effect.position = targetPos.position;
         yield return new WaitForSeconds(attackTime);
+        // 通常攻撃(DirectAttack)・アビリティ(DirectAttackAbility)・
+        // スペル(DirectSpellAttack)はいずれもヒットエフェクトを出すのに、
+        // 通常攻撃のSPAWN版だけ抜けていたので合わせる
+        hitEffect(targetPos);
         GameManager.instance.isAttacking = !isDefense;
         CheckAttackParticle(effect);
         // 破壊者(isDestroyer)はDestroys()が既に同期でダメージ無効を含めた結果を確定させている。
@@ -1489,6 +1493,9 @@ public class CardController : MonoBehaviour
     {
         effect.position = targetPos.position;
         yield return new WaitForSeconds(attackTime);
+        // DirectAttackHero・LerpThrowHeroはヒットエフェクトを出すのに、
+        // ヒーロー攻撃のSPAWN版だけ抜けていたので合わせる
+        hitEffect(targetPos);
         GameManager.instance.isAttacking = !isDefense;
         CheckAttackParticle(effect);
         if (model.isPlayerCard)
@@ -1646,6 +1653,9 @@ public class CardController : MonoBehaviour
     {
         effect.position = targetPos.position;
         yield return new WaitForSeconds(attackTime);
+        // DirectSpellAttackHero・LerpThrowSpellHeroはヒットエフェクトを出すのに、
+        // スペルのヒーロー攻撃のSPAWN版だけ抜けていたので合わせる
+        hitEffect(targetPos);
         GameManager.instance.isAttacking = !isDefense;
         CheckAttackParticle(effect);
         if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
@@ -1936,6 +1946,11 @@ public class CardController : MonoBehaviour
 
     public void hitEffect(Transform target)
     {
+        // model.hitEffect（ヒットエフェクトのParticleSystem）が未設定のカードでは、
+        // EffectController.HitEffect内のInstantiate(null)でエラーになるため、
+        // 全ATTACKTYPE共通でここでガードする（表示しないだけで済ませる）
+        if (model.hitEffect == null) return;
+
         Transform hitEffect = effect.HitEffect(model.hitEffect, target.transform);
         CheckAnyParticle(hitEffect);
     }
