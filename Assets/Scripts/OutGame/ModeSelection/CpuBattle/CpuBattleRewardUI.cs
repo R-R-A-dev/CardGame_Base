@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // CPU戦に勝利した際に表示される報酬パネル
 public class CpuBattleRewardUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private Text goldText;
     [SerializeField] private Button closeButton;
     [SerializeField] private int rewardGold = 100;
 

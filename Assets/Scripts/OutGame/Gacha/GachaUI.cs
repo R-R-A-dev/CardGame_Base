@@ -12,8 +12,8 @@ public class GachaUI : MonoBehaviour
 
     private void Start()
     {
-        closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(Close);
+        // closeButton.onClick.RemoveAllListeners();
+        // closeButton.onClick.AddListener(Close);
         gameObject.SetActive(false);
     }
 

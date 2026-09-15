@@ -24,6 +24,8 @@ public class RoguelikeManager : MonoBehaviour
     [SerializeField] private BattleRewardUI battleRewardUI;
     [SerializeField] private RoguelikeStageClearUI stageClearUI;
 
+    [SerializeField] private GameObject Header;
+
     private RoguelikeGameState gameState;
     private RoguelikeStageData currentStageData;
     private int currentMapIndex = 0;
@@ -311,5 +313,14 @@ public class RoguelikeManager : MonoBehaviour
             ReturnToMap();
             return;
         }
+    }
+
+    // ========================================
+    // パネルを閉じるボタンから呼ぶ
+    // ========================================
+    public void ClosePanel()
+    {
+        gameObject.SetActive(false);
+        Header.SetActive(false);
     }
 }

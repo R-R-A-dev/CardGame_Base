@@ -19,7 +19,8 @@ public class TwoPickSelectionPanel : MonoBehaviour
 
             if (GameSession.TwoPickReward > 0)
             {
-                twoPickRewardUI.Open(GameSession.TwoPickReward);
+                twoPickRewardUI.SetRewardGold(GameSession.TwoPickReward);
+                twoPickRewardUI.Open();
                 GameSession.TwoPickReward = 0;
             }
         }

@@ -18,8 +18,8 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     [SerializeField] private GameObject deckEditPanel;
 
     [Header("選択結果表示")]
-    [SerializeField] private TextMeshProUGUI selectedPlayerDeckText;
-    [SerializeField] private TextMeshProUGUI selectedEnemyDeckText;
+    [SerializeField] private Text selectedPlayerDeckText;
+    [SerializeField] private Text selectedEnemyDeckText;
 
     [Header("対戦開始")]
     [SerializeField] private Button startBattleButton;
@@ -27,6 +27,8 @@ public class CpuBattleSelectionPanel : MonoBehaviour
 
     [Header("勝利報酬パネル")]
     [SerializeField] private CpuBattleRewardUI cpuBattleRewardUI;
+
+    [SerializeField] private GameObject Header;
 
     private const int MIN_DECK_SIZE = 0; // TODO: 動作確認用に一旦解除。本来は40
 
@@ -137,10 +139,10 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     private void UpdateSelectedDeckText()
     {
         if (selectedPlayerDeckText != null)
-            selectedPlayerDeckText.text = decidedPlayerDeckId >= 0 ? decidedPlayerDeckId.ToString() : "未選択";
+            selectedPlayerDeckText.text = decidedPlayerDeckId >= 0 ? decidedPlayerDeckId.ToString() : "No deck selected";
 
         if (selectedEnemyDeckText != null)
-            selectedEnemyDeckText.text = decidedEnemyDeckId >= 0 ? decidedEnemyDeckId.ToString() : "未選択";
+            selectedEnemyDeckText.text = decidedEnemyDeckId >= 0 ? decidedEnemyDeckId.ToString() : "No deck selected";
     }
 
     private void UpdateStartBattleButton()
@@ -223,5 +225,12 @@ public class CpuBattleSelectionPanel : MonoBehaviour
             ModeConfigManager.Instance.ChangeMode(GameMode.CPU_BATTLE);
 
         SceneManager.LoadScene(battleScene);
+    }
+
+    // パネルを閉じるボタン
+    public void ClosePanel()
+    {
+        gameObject.SetActive(false);
+        Header.SetActive(false);
     }
 }

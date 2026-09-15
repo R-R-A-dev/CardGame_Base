@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,9 +11,19 @@ public class ModeSelectionUI : MonoBehaviour
     [SerializeField] private GameObject twoPickPanel;         // 2Pick選択パネル
     [SerializeField] private GameObject roguelikePanel;       // ローグライク選択パネル
 
+    [Header("ボタン押下演出")]
+    // 未設定の場合は演出を挟まず、従来通り即座にパネルを切り替える
+    [SerializeField] private ModeButtonPressEffect cpuBattleButtonEffect;
+    [SerializeField] private ModeButtonPressEffect lethalPuzzleButtonEffect;
+    [SerializeField] private ModeButtonPressEffect twoPickButtonEffect;
+    [SerializeField] private ModeButtonPressEffect roguelikeButtonEffect;
+
     [Header("シーン名設定")]
     [SerializeField] private string battleScene = "Battle";
     [SerializeField] private string titleScene = "Title";
+
+    // 押下演出の再生中は他のモードボタンを受け付けない
+    private bool isPlayingPressEffect;
 
     private void Start()
     {
@@ -75,6 +86,9 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void ShowModeSelectPanel()
     {
+        // 演出の途中でパネルが閉じられた場合に備え、モード選択へ戻った時点で入力を復帰させる
+        isPlayingPressEffect = false;
+
         modeSelectPanel.SetActive(true);
         cpuBattlePanel.SetActive(false);
         lethalPuzzlePanel.SetActive(false);
@@ -139,10 +153,13 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickCpuBattleMode()
     {
-        if (ModeConfigManager.Instance != null)
-            ModeConfigManager.Instance.ChangeMode(GameMode.CPU_BATTLE);
+        PlayPressEffectThen(cpuBattleButtonEffect, () =>
+        {
+            if (ModeConfigManager.Instance != null)
+                ModeConfigManager.Instance.ChangeMode(GameMode.CPU_BATTLE);
 
-        ShowCpuBattlePanel();
+            ShowCpuBattlePanel();
+        });
     }
 
     /// <summary>
@@ -150,7 +167,7 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickLethalPuzzleMode()
     {
-        ShowLethalPuzzlePanel();
+        PlayPressEffectThen(lethalPuzzleButtonEffect, ShowLethalPuzzlePanel);
     }
 
     /// <summary>
@@ -158,7 +175,7 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickTwoPickMode()
     {
-        ShowTwoPickPanel();
+        PlayPressEffectThen(twoPickButtonEffect, ShowTwoPickPanel);
     }
 
     /// <summary>
@@ -166,7 +183,29 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickRoguelikeMode()
     {
-        ShowRoguelikePanel();
+        PlayPressEffectThen(roguelikeButtonEffect, ShowRoguelikePanel);
+    }
+
+    /// <summary>
+    /// ボタン押下演出を再生し、完了後にパネル切り替えを行う
+    /// </summary>
+    private void PlayPressEffectThen(ModeButtonPressEffect effect, Action showPanel)
+    {
+        if (effect == null)
+        {
+            showPanel();
+            return;
+        }
+
+        if (isPlayingPressEffect)
+            return;
+
+        isPlayingPressEffect = true;
+        effect.Play(() =>
+        {
+            isPlayingPressEffect = false;
+            showPanel();
+        });
     }
 
     /// <summary>

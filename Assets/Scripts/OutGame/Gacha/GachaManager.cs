@@ -10,6 +10,16 @@ public class GachaManager : MonoBehaviour
     [SerializeField] private GachaOpenUI gachaOpenUI;
     [SerializeField] private GachaResultUI gachaResultUI;
 
+    
+    [SerializeField] private GameObject bg;
+    [SerializeField] private GameObject header;
+    [SerializeField] private GameObject gachaUIObj;
+    [SerializeField] private GameObject gachaOpenUIObj;
+    [SerializeField] private GameObject gachaResultUIObj;
+
+    // ガチャボタンの押下演出。未設定の場合は演出を挟まず即座に開く
+    [SerializeField] private ModeButtonPressEffect gachaButtonEffect;
+
     private void Awake()
     {
         Instance = this;
@@ -17,7 +27,31 @@ public class GachaManager : MonoBehaviour
 
     public void OpenGacha()
     {
+        if (gachaButtonEffect == null)
+        {
+            ShowGachaUI();
+            return;
+        }
+
+        gachaButtonEffect.Play(ShowGachaUI);
+    }
+
+    public void CloseGacha()
+    {
+        gachaUI.Hide();
+        bg.SetActive(false);
+        header.SetActive(false);
+
+        // モード選択パネルは非アクティブにならないため、押下演出を明示的に元へ戻す
+        if (gachaButtonEffect != null)
+            gachaButtonEffect.ResetState();
+    }
+
+    private void ShowGachaUI()
+    {
         gachaUI.Open(GetUnlockedPacks());
+        bg.SetActive(true);
+        header.SetActive(true);
     }
 
     public List<PackData> GetUnlockedPacks()

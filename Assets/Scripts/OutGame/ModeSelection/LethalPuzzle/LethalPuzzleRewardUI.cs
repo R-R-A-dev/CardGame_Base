@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // 詰みパズルをクリアした際に表示される報酬パネル
 public class LethalPuzzleRewardUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private Text goldText;
     [SerializeField] private Button closeButton;
     [SerializeField] private int rewardGold = 100;
 

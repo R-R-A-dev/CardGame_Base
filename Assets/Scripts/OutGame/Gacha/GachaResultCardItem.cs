@@ -13,8 +13,7 @@ public class GachaResultCardItem : MonoBehaviour
     {
         cardController.Init(id, false);
 
-        if (count > 1)
-            countText.text = $"×{count}";
+        countText.text = $"×{count}";
 
         cardButton.onClick.RemoveAllListeners();
         cardButton.onClick.AddListener(() => detailPanel.Open(cardController)); // cardControllerを渡す

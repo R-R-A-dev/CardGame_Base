@@ -12,7 +12,7 @@ public class DeckAndStageSelectUI : MonoBehaviour
     [SerializeField] private GameObject deckConfirmPanle;
     [SerializeField] private GameObject deckEdit;
     [SerializeField] private GameObject ModeSelectionPanel;
-    [SerializeField] private TextMeshProUGUI selectedDeck;
+    [SerializeField] private Text selectedDeck;
 
     [SerializeField] private DeckBuilderUI deckBuilderUI; // 追加：DeckBuilderUIへの参照
 

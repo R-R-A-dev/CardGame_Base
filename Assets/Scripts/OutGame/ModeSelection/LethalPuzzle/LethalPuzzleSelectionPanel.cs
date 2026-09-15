@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class LethalPuzzleSelectionPanel : MonoBehaviour
 {
-    [SerializeField] private GameObject buttonPrefab;
+    [SerializeField] private LethalPuzzleStageItem stageSelectItemPrefab;
     [SerializeField] private Transform parent;
 
     [SerializeField] GameObject ConfirmPanel;
@@ -45,9 +45,10 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
         for (int i = 0; i < ModeConfigManager.Instance.lethalPuzzleList.Count; i++)
         {
             int buttonNumber = i;
-            GameObject btn = Instantiate(buttonPrefab, parent);
+            LethalPuzzleData data = ModeConfigManager.Instance.lethalPuzzleList[buttonNumber];
 
-            btn.GetComponent<Button>().onClick.AddListener(() => OnClickButton(buttonNumber));
+            LethalPuzzleStageItem item = Instantiate(stageSelectItemPrefab, parent);
+            item.Setup(buttonNumber, data, OnClickButton);
         }
     }
 

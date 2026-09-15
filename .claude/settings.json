@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(node -e ' *)",
-      "Bash(awk '/static float SpellValue/,/^    \\\\}$/' Assets/Scripts/InGame/AI/AIEvaluator.cs)"
+      "Bash(awk '/static float SpellValue/,/^    \\\\}$/' Assets/Scripts/InGame/AI/AIEvaluator.cs)",
+      "Bash(grep -n \"^--- !u!1 &144075966$\\\\|^--- !u!1 &1847771285$\" \"Assets/Scenes/Field.unity\")",
+      "Bash(awk 'NR==38306,NR==38460' \"Assets/Scenes/Field.unity\")"
     ]
   }
 }
