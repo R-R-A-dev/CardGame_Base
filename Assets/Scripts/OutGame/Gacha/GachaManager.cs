@@ -17,8 +17,14 @@ public class GachaManager : MonoBehaviour
     [SerializeField] private GameObject gachaOpenUIObj;
     [SerializeField] private GameObject gachaResultUIObj;
 
-    // ガチャボタンの押下演出。未設定の場合は演出を挟まず即座に開く
+    // ガチャボタン（モード選択画面側）の押下演出。未設定の場合は演出を挟まず即座に開く
     [SerializeField] private ModeButtonPressEffect gachaButtonEffect;
+    // ガチャ画面の戻るボタンの押下演出。GachaPanelのフェードアウトを担当する
+    [SerializeField] private ModeButtonPressEffect returnButtonEffect;
+    // モード選択パネルの登場演出。ガチャを閉じた時に明示的に再生する
+    [SerializeField] private PanelEntranceAnimator modeSelectionEntrance;
+    // ガチャ画面の登場演出。GachaPanelは常時アクティブでOnEnableが走らないため明示的に再生する
+    [SerializeField] private PanelEntranceAnimator gachaEntrance;
 
     private void Awake()
     {
@@ -36,15 +42,27 @@ public class GachaManager : MonoBehaviour
         gachaButtonEffect.Play(ShowGachaUI);
     }
 
+    /// <summary>
+    /// ガチャを閉じてモード選択画面へ戻る。
+    /// 戻るボタンの押下演出（GachaPanelのフェードアウト）が完了した後に呼ばれる。
+    /// </summary>
     public void CloseGacha()
     {
         gachaUI.Hide();
         bg.SetActive(false);
         header.SetActive(false);
 
-        // モード選択パネルは非アクティブにならないため、押下演出を明示的に元へ戻す
+        // GachaPanelは常時アクティブなため、フェードアウトさせたalphaを明示的に戻す
+        if (returnButtonEffect != null)
+            returnButtonEffect.ResetState();
+
+        // モード選択パネルも非アクティブにならないため、ガチャボタンの拡大とフェードを元へ戻す
         if (gachaButtonEffect != null)
             gachaButtonEffect.ResetState();
+
+        // SetActiveを経由せず戻るので、登場演出はここから直接再生する
+        if (modeSelectionEntrance != null)
+            modeSelectionEntrance.Play();
     }
 
     private void ShowGachaUI()
@@ -52,6 +70,10 @@ public class GachaManager : MonoBehaviour
         gachaUI.Open(GetUnlockedPacks());
         bg.SetActive(true);
         header.SetActive(true);
+
+        // 中身を表示し終えてから、パネル全体の登場演出を再生する
+        if (gachaEntrance != null)
+            gachaEntrance.Play();
     }
 
     public List<PackData> GetUnlockedPacks()
