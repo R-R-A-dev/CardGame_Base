@@ -6,11 +6,11 @@ public class CardDetailUI : MonoBehaviour
 {
     [Header("UI参照")]
     [SerializeField] private Image cardImage;
-    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private Text nameText;
     [SerializeField] private TextMeshProUGUI hpText;
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI costText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
+    [SerializeField] private Text descriptionText;
 
     [SerializeField] private GameObject detailPanel;
 

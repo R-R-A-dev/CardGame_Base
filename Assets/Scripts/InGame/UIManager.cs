@@ -16,8 +16,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI timeCountText;
 
     [SerializeField] public GameObject descriptionObj;
-    [SerializeField] public TextMeshProUGUI descriptionText;
-    [SerializeField] public TextMeshProUGUI nameText;
+    [SerializeField] public Text descriptionText;
+    [SerializeField] public Text nameText;
     [SerializeField] public TextMeshProUGUI costText;
     [SerializeField] public TextMeshProUGUI attackText;
     [SerializeField] public TextMeshProUGUI hpText;

@@ -20,7 +20,7 @@ MonoBehaviour:
   effectDmg: 1
   effectHeal: 1
   price: 0
-  description: test
+  description: "\u30C6\u30B9\u30C8"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}

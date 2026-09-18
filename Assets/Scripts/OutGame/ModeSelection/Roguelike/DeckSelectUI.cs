@@ -14,6 +14,8 @@ public class DeckSelectUI : MonoBehaviour
         for (int i = 0; i < DeckButtons.Count; i++)
         {
             int index = i;
+            // OnEnableはパネルを開くたびに走るため、解除しないとリスナーが累積して多重発火する
+            DeckButtons[i].onClick.RemoveAllListeners();
             DeckButtons[i].onClick.AddListener(() => OnSelected(index));
         }
     }

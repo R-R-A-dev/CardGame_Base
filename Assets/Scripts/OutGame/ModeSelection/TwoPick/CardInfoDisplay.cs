@@ -9,10 +9,10 @@ public class CardInfoDisplay : MonoBehaviour, IPointerDownHandler
     [SerializeField] private CardController cardController;
     [SerializeField] private Button closeInfoButton;
 
-    [SerializeField] private TMPro.TextMeshProUGUI cardNameText;
+    [SerializeField] private Text cardNameText;
     [SerializeField] private TMPro.TextMeshProUGUI cardAttackText;
     [SerializeField] private TMPro.TextMeshProUGUI cardHealthText;
-    [SerializeField] private TMPro.TextMeshProUGUI cardDescriptionText;
+    [SerializeField] private Text cardDescriptionText;
 
 
 

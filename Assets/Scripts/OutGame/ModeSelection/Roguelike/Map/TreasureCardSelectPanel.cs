@@ -10,10 +10,10 @@ public class TreasureCardSelectPanel : MonoBehaviour, IPointerDownHandler
     [SerializeField] private CardController cardController;
     [SerializeField] private Button closeInfoPanelButton;
 
-    [SerializeField] private TextMeshProUGUI cardNameText;
+    [SerializeField] private Text cardNameText;
     [SerializeField] private TextMeshProUGUI cardAttackText;
     [SerializeField] private TextMeshProUGUI cardHealthText;
-    [SerializeField] private TextMeshProUGUI cardDescriptionText;
+    [SerializeField] private Text cardDescriptionText;
 
     public bool IsInfoPanelOpen => cardInfoPanel.activeSelf;
 

@@ -9,10 +9,10 @@ public class GachaCardDetailPanel : MonoBehaviour
     [SerializeField] private CardController cardController;
     [SerializeField] private Button closeInfoButton;
 
-    [SerializeField] private TextMeshProUGUI cardNameText;
+    [SerializeField] private Text cardNameText;
     [SerializeField] private TextMeshProUGUI cardAttackText;
     [SerializeField] private TextMeshProUGUI cardHealthText;
-    [SerializeField] private TextMeshProUGUI cardDescriptionText;
+    [SerializeField] private Text cardDescriptionText;
 
     private void Start()
     {

@@ -9,7 +9,15 @@
       "Bash(awk '/^--- !u!1 &396350927$/,0' Assets/Scenes/Field.unity)",
       "Bash(grep -n \"&396350925$\" -A 16 Assets/Scenes/Field.unity)",
       "Bash(grep -n \"&1884538235$\" -A 16 Assets/Scenes/Field.unity)",
-      "Bash(grep -n \"&219342963$\\\\|&1884538236$\" -A 12 Assets/Scenes/Field.unity)"
+      "Bash(grep -n \"&219342963$\\\\|&1884538236$\" -A 12 Assets/Scenes/Field.unity)",
+      "Bash(grep -n \"^--- !u!1 &57011\\\\$\" -A 3 Assets/Scenes/Field.unity)",
+      "Bash(grep -n \"&2080709841\\\\$\" -A 16 Assets/Scenes/Field.unity)",
+      "Bash(grep -n \"&2080709838\\\\$\" -A 18 Assets/Scenes/Field.unity)",
+      "Bash(grep -n \"^--- !u!1 &1003028656\\\\$\" -A 20 Assets/Scenes/Game.unity)",
+      "Bash(grep -n \"&1710037200\\\\$\" -A 22 Assets/Scenes/Game.unity)",
+      "Bash(grep -n \"^--- !u!224 &179550399\\\\$\" -A 20 Assets/Scenes/Game.unity)",
+      "Bash(grep -n \"^--- !u!1 &179550398\\\\$\" -A 16 Assets/Scenes/Game.unity)",
+      "Bash(grep -n \"^--- !u!1 &179550397\\\\$\" -A 18 Assets/Scenes/Game.unity)"
     ]
   }
 }

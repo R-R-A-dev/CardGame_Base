@@ -30,6 +30,11 @@ public class PanelEntranceAnimator : MonoBehaviour
     [Tooltip("子要素を個別にもフェードインさせる")]
     [SerializeField] private bool fadeChildrenIndividually = true;
 
+    [Header("入力の再開")]
+    [Tooltip("パネル表示から何秒後に入力を受け付けるか。スライドが終わり切るのを待たずに操作できるようにする。" +
+             "0以下にすると演出の完了と同時になる")]
+    [SerializeField] private float inputUnlockTime = 0.25f;
+
     [Header("対象")]
     [Tooltip("スライドさせる要素。未指定の場合は直下の子要素を自動的に対象にする")]
     [SerializeField] private List<RectTransform> slideTargets = new List<RectTransform>();
@@ -107,6 +112,10 @@ public class PanelEntranceAnimator : MonoBehaviour
             targetCanvasGroup.alpha = 0f;
             sequence.Insert(startTime, targetCanvasGroup.DOFade(1f, slideDuration));
         }
+
+        // 演出の完了を待たず、パネルが見えた時点で入力を受け付ける
+        if (inputUnlockTime > 0f && inputUnlockTime < sequence.Duration())
+            sequence.InsertCallback(inputUnlockTime, () => canvasGroup.blocksRaycasts = true);
 
         sequence.OnComplete(() =>
         {

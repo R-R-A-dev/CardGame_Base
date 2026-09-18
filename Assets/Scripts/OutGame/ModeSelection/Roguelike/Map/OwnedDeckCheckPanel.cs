@@ -15,10 +15,10 @@ public class OwnedDeckCheckPanel : MonoBehaviour, IPointerDownHandler
     [SerializeField] private GameObject cardListPanel;
     [SerializeField] private GameObject cardInfoPanel;
     [SerializeField] private CardController cardController;
-    [SerializeField] private TextMeshProUGUI cardNameText;
+    [SerializeField] private Text cardNameText;
     [SerializeField] private TextMeshProUGUI cardAttackText;
     [SerializeField] private TextMeshProUGUI cardHealthText;
-    [SerializeField] private TextMeshProUGUI cardDescriptionText;
+    [SerializeField] private Text cardDescriptionText;
     [SerializeField] private Button closeInfoPanelButton;
 
     private bool isOpen = false;

@@ -16,6 +16,8 @@ public class StageSelectUI : MonoBehaviour
         for (int i = 0; i < selectButtons.Count; i++)
         {
             int index = i;
+            // OnEnableはパネルを開くたびに走るため、解除しないとリスナーが累積して多重発火する
+            selectButtons[i].onClick.RemoveAllListeners();
             selectButtons[i].onClick.AddListener(() => OnSelected(index));
         }
     }

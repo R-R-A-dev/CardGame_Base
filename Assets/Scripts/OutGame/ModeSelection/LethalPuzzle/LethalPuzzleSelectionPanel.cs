@@ -42,6 +42,12 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
 
     void GeneratePuzzleButtons()
     {
+        // OnEnableはパネルを開くたびに走るため、クリアしないと前回生成分が残って増えていく
+        foreach (Transform child in parent)
+        {
+            Destroy(child.gameObject);
+        }
+
         for (int i = 0; i < ModeConfigManager.Instance.lethalPuzzleList.Count; i++)
         {
             int buttonNumber = i;

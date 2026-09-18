@@ -500,7 +500,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4074793410940164083
 RectTransform:
   m_ObjectHideFlags: 0
@@ -575,7 +575,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6018434031892389698
 RectTransform:
   m_ObjectHideFlags: 0
@@ -740,6 +740,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isDeck: 0
   dropSuccess: 0
+  isLeft: 0
+  leftMove: 0
 --- !u!114 &3654153967957143514
 MonoBehaviour:
   m_ObjectHideFlags: 0

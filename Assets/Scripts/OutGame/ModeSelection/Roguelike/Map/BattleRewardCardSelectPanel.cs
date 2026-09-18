@@ -10,10 +10,10 @@ public class BattleRewardCardSelectPanel : MonoBehaviour, IPointerDownHandler
     [SerializeField] private CardController cardController;
     [SerializeField] private Button cardGetButton;
 
-    [SerializeField] private TextMeshProUGUI cardNameText;
+    [SerializeField] private Text cardNameText;
     [SerializeField] private TextMeshProUGUI cardAttackText;
     [SerializeField] private TextMeshProUGUI cardHealthText;
-    [SerializeField] private TextMeshProUGUI cardDescriptionText;
+    [SerializeField] private Text cardDescriptionText;
     [SerializeField] private TextMeshProUGUI selectedCountText;
 
     // BattleRewardUIへの通知（相互依存を避けるためAction使用）

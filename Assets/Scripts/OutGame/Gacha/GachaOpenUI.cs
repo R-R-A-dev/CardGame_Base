@@ -11,13 +11,15 @@ public class GachaOpenUI : MonoBehaviour
 
     [Header("パック")]
     [SerializeField] private GameObject packObject;
-    [SerializeField] private Transform packTransform;
+    [SerializeField] private RectTransform packTransform;
     [SerializeField] private Button packButton;
     [SerializeField] private Transform packPosition;
+    // anchoredPosition基準の移動量。zは使用しない
     [SerializeField] private Vector3 packMoveDownOffset = new Vector3(0, -300f, 0);
 
     [Header("パック破れ演出")]
     [SerializeField] private GameObject packTopPart;
+    // anchoredPosition基準の移動量。zは使用しない
     [SerializeField] private Vector3 packTopMoveOffset = new Vector3(0, 200f, 0);
 
     [Header("アニメーション時間")]
@@ -44,13 +46,20 @@ public class GachaOpenUI : MonoBehaviour
     private int currentPackIndex = 0;
     private int revealedCount = 0;
 
-    private Vector3 packInitialPos;
-    private Vector3 packTopInitialPos;
-    private Vector3 packTopOriginalLocalPos;
-    private Vector3 packOriginalPos;
+    private RectTransform packTopRect;
+    private Vector2 packOriginalAnchoredPos;
+    private Vector2 packTopOriginalAnchoredPos;
 
-    private void Start()
+    // Canvasのスケール・サイズはCanvas更新時（Start以降）まで確定しないため、
+    // world座標ではなくシリアライズ済みのanchoredPositionを初期位置として保持する。
+    // 取得はAwakeで行い、Startより前にOpenされても正しい値が入るようにする。
+    private void Awake()
     {
+        packTopRect = (RectTransform)packTopPart.transform;
+
+        packOriginalAnchoredPos = packTransform.anchoredPosition;
+        packTopOriginalAnchoredPos = packTopRect.anchoredPosition;
+
         packButton.onClick.RemoveAllListeners();
         skipButton.onClick.RemoveAllListeners();
         nextButton.onClick.RemoveAllListeners();
@@ -58,10 +67,10 @@ public class GachaOpenUI : MonoBehaviour
         packButton.onClick.AddListener(OnPackClicked);
         skipButton.onClick.AddListener(OnSkipButtonClick);
         nextButton.onClick.AddListener(OnNextButtonClick);
+    }
 
-        packTopOriginalLocalPos = packTopPart.transform.localPosition;
-        packOriginalPos = packTransform.position;
-
+    private void Start()
+    {
         gameObject.SetActive(false);
     }
 
@@ -83,12 +92,10 @@ public class GachaOpenUI : MonoBehaviour
         packCountText.text = $"{currentPackIndex + 1} / {packResults.Count} パック目";
 
         packObject.SetActive(true);
-        packTransform.position = packOriginalPos;
-        packInitialPos = packTransform.position;
+        packTransform.anchoredPosition = packOriginalAnchoredPos;
 
         packTopPart.SetActive(true);
-        packTopPart.transform.localPosition = packTopOriginalLocalPos;
-        packTopInitialPos = packTopPart.transform.localPosition;
+        packTopRect.anchoredPosition = packTopOriginalAnchoredPos;
 
         packButton.interactable = true;
         skipButton.gameObject.SetActive(true);
@@ -100,8 +107,12 @@ public class GachaOpenUI : MonoBehaviour
         {
             bool isValid = i < drawnCards.Count;
 
+            // 抽選枚数を超える枠は前のパックの状態が残らないよう非表示にする
+            cardList[i].gameObject.SetActive(isValid);
+
             if (isValid)
             {
+                // packTransformをリセットした後に読むこと。Canvas更新後なのでworld座標で問題ない
                 cardList[i].transform.position = packPosition.position;
                 cardList[i].Setup(drawnCards[i].cardId, drawnCards[i].rarity, false, OnCardClicked);
             }
@@ -125,15 +136,15 @@ public class GachaOpenUI : MonoBehaviour
 
     private IEnumerator TearPackAnimation()
     {
-        Vector3 startPos = packTopInitialPos;
-        Vector3 endPos = packTopInitialPos + packTopMoveOffset;
+        Vector2 startPos = packTopOriginalAnchoredPos;
+        Vector2 endPos = packTopOriginalAnchoredPos + (Vector2)packTopMoveOffset;
 
         float elapsed = 0f;
         while (elapsed < tearDuration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / tearDuration);
-            packTopPart.transform.localPosition = Vector3.Lerp(startPos, endPos, t);
+            packTopRect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
             yield return null;
         }
 
@@ -142,15 +153,15 @@ public class GachaOpenUI : MonoBehaviour
 
     private IEnumerator MovePackDownAnimation()
     {
-        Vector3 startPos = packInitialPos;
-        Vector3 endPos = packInitialPos + packMoveDownOffset;
+        Vector2 startPos = packOriginalAnchoredPos;
+        Vector2 endPos = packOriginalAnchoredPos + (Vector2)packMoveDownOffset;
 
         float elapsed = 0f;
         while (elapsed < packMoveDuration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / packMoveDuration);
-            packTransform.position = Vector3.Lerp(startPos, endPos, t);
+            packTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
             yield return null;
         }
 

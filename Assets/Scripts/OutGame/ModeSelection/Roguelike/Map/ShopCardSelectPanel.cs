@@ -9,10 +9,10 @@ public class ShopCardSelectPanel : MonoBehaviour, IPointerDownHandler
     [Header("詳細パネル")]
     [SerializeField] private GameObject cardInfoPanel;
     [SerializeField] private CardController cardController;
-    [SerializeField] private TextMeshProUGUI cardNameText;
+    [SerializeField] private Text cardNameText;
     [SerializeField] private TextMeshProUGUI cardAttackText;
     [SerializeField] private TextMeshProUGUI cardHealthText;
-    [SerializeField] private TextMeshProUGUI cardDescriptionText;
+    [SerializeField] private Text cardDescriptionText;
     [SerializeField] private TextMeshProUGUI priceText;
 
     [Header("ボタン")]
