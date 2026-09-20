@@ -17,7 +17,17 @@
       "Bash(grep -n \"&1710037200\\\\$\" -A 22 Assets/Scenes/Game.unity)",
       "Bash(grep -n \"^--- !u!224 &179550399\\\\$\" -A 20 Assets/Scenes/Game.unity)",
       "Bash(grep -n \"^--- !u!1 &179550398\\\\$\" -A 16 Assets/Scenes/Game.unity)",
-      "Bash(grep -n \"^--- !u!1 &179550397\\\\$\" -A 18 Assets/Scenes/Game.unity)"
+      "Bash(grep -n \"^--- !u!1 &179550397\\\\$\" -A 18 Assets/Scenes/Game.unity)",
+      "Bash(powershell -NoProfile -Command 'Get-ChildItem -Directory Assets | ForEach-Object { $s = \\(Get-ChildItem $_.FullName -Recurse -File -Force | Where-Object { $_.Extension -ne '\\\\''.meta'\\\\'' } | Measure-Object -Property Length -Sum\\).Sum; [PSCustomObject]@{MB=[math]::Round\\($s/1MB,2\\); Name=$_.Name} } | Sort-Object MB -Descending | Format-Table -AutoSize')",
+      "Bash(powershell -NoProfile -Command 'Get-ChildItem -Directory Assets/ImportedAssets | ForEach-Object { $s = \\(Get-ChildItem $_.FullName -Recurse -File -Force | Where-Object { $_.Extension -ne '\\\\''.meta'\\\\'' } | Measure-Object -Property Length -Sum\\).Sum; [PSCustomObject]@{MB=[math]::Round\\($s/1MB,2\\); Name=$_.Name} } | Sort-Object MB -Descending | Format-Table -AutoSize')",
+      "Bash(powershell -NoProfile -Command 'Get-ChildItem -Directory Assets/ImportedAssets/Effects -Recurse -Depth 1 | ForEach-Object { $s = \\(Get-ChildItem $_.FullName -Recurse -File -Force | Where-Object { $_.Extension -ne '\\\\''.meta'\\\\'' } | Measure-Object -Property Length -Sum\\).Sum; [PSCustomObject]@{MB=[math]::Round\\($s/1MB,2\\); Path=$_.FullName.Replace\\('\\\\''D:\\\\Repository\\\\CardGame\\\\Assets\\\\ImportedAssets\\\\Effects\\\\'\\\\'','\\\\'''\\\\''\\) } } | Sort-Object MB -Descending | Select-Object -First 20 | Format-Table -AutoSize')",
+      "Bash(powershell -NoProfile -Command \"Get-ChildItem -Path 'D:\\\\Repository\\\\CardGame' -Recurse -Depth 3 -Filter 'Build*' -Directory -ErrorAction SilentlyContinue | Select-Object -First 10 FullName\")",
+      "Bash(powershell -NoProfile -Command \"\\(Get-ChildItem Assets -Recurse -File -Filter *.meta | Measure-Object\\).Count\")",
+      "Bash(python -c \"print\\('ok', 1+1\\)\")",
+      "Bash(node Temp/deps.js)",
+      "Bash(powershell -NoProfile -Command '$b=[IO.File]::ReadAllBytes\\('\\\\''Library\\\\EditorUserBuildSettings.asset'\\\\''\\); $s=[Text.Encoding]::ASCII.GetString\\($b\\); [regex]::Matches\\($s,'\\\\''[\\\\x20-\\\\x7E]{4,}'\\\\''\\) | Select-Object -Last 12 | ForEach-Object { $_.Value }')",
+      "Bash(sed -i 's|^// report$|// report\\\\nfs.writeFileSync\\(\"D:/Repository/CardGame/Temp/included.json\", JSON.stringify\\([...visited].filter\\(v=>sizeOf.has\\(v\\)\\)\\)\\);|' Temp/deps.js)",
+      "Bash(node Temp/tex.js)"
     ]
   }
 }
