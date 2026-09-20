@@ -337,6 +337,15 @@ public class CardController : MonoBehaviour
         view.Refresh(model);
     }
 
+    /// <summary>
+    /// 守護の表示を model.isFieldCard に合わせて更新する。
+    /// 場に出た／手札に戻った直後に呼ぶ。
+    /// </summary>
+    public void RefreshShieldPanel()
+    {
+        view.RefreshShieldPanel(model);
+    }
+
     public void SetCanAttack(bool canAttack)
     {
         model.canAttack = canAttack;
@@ -354,6 +363,7 @@ public class CardController : MonoBehaviour
         gameManager.ReduceManaCost(model.cost, model.isPlayerCard);
 
         model.isFieldCard = true;
+        RefreshShieldPanel();
         OnFiledAbilities();
     }
 

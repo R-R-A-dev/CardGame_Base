@@ -87,7 +87,9 @@ public class GameDataHolder : MonoBehaviour
 
     public void BeginDeckEdit(int deckNum, bool isRoguelike)
     {
-        int cardTypeCount = CardDatabase.LoadAllCards().Length;
+        // 添字方式のリスト長はカード枚数ではなく「カードNoの最大値」で取る。
+        // 枚数だとNoが歯抜けになった時に範囲外参照になる
+        int cardTypeCount = CardDatabase.MaxCardNo;
 
         List<DeckSaveData> decks = isRoguelike ? Data.roguelikeDecks : Data.cpuBattleDecks;
         while (decks.Count <= deckNum)
@@ -105,7 +107,7 @@ public class GameDataHolder : MonoBehaviour
     // デッキ一覧は空、所持カード一覧は指定されたcountsから開始する
     public void DebugBeginDeckEdit(List<int> ownedCounts)
     {
-        int cardTypeCount = CardDatabase.LoadAllCards().Length;
+        int cardTypeCount = CardDatabase.MaxCardNo;
         EditingDeckCounts = new List<int>(new int[cardTypeCount]);
 
         DebugOverrideDisplayPossessionCard(ownedCounts);
@@ -117,13 +119,18 @@ public class GameDataHolder : MonoBehaviour
     // Data.ownedCardCounts（セーブデータ本体）には触れないため、ファイル保存には一切影響しない
     public void DebugOverrideDisplayPossessionCard(List<int> counts)
     {
-        int cardTypeCount = CardDatabase.LoadAllCards().Length;
+        int cardTypeCount = CardDatabase.MaxCardNo;
         List<int> normalized = new List<int>(new int[cardTypeCount]);
 
         if (counts != null)
         {
             for (int i = 0; i < counts.Count && i < cardTypeCount; i++)
                 normalized[i] = counts[i];
+
+            // Inspectorのリストが短いままだと、その先のカードが所持0枚扱いで一覧に出ない
+            if (counts.Count < cardTypeCount)
+                Debug.LogWarning($"[DebugOverrideDisplayPossessionCard] 指定された所持枚数リストの要素数({counts.Count})が" +
+                    $"カードNoの最大値({cardTypeCount})より少ないため、No.{counts.Count + 1}以降は所持0枚として扱われます");
         }
 
         DisplayPossessionCard = normalized;

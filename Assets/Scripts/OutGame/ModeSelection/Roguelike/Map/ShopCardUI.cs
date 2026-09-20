@@ -23,6 +23,8 @@ public class ShopCardUI : MonoBehaviour
         cardAttackText.text = card.at.ToString();
         cardHPText.text = card.hp.ToString();
         cardIllust.sprite = card.icon;
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(card.spells, cardAttackText, cardHPText);
     }
 
     public int GetCardId() => cardId;

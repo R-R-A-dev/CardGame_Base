@@ -14,6 +14,7 @@ public class OutGameCardList : MonoBehaviour
     private int effectHeal;
     private int cost;
     private string description;
+    private SPELLS spells;
 
     public Image image;
     public TextMeshProUGUI cardNameText;
@@ -38,6 +39,7 @@ public class OutGameCardList : MonoBehaviour
     public int EffectHeal { get { return effectHeal; } set { effectHeal = value; } }
     public int Cost { get { return cost; } set { cost = value; } }
     public string Description { get { return description; } set { description = value; } }
+    public SPELLS Spells { get { return spells; } set { spells = value; } }
 
     /// <summary>
     /// 一覧表示時のデータセット
@@ -54,12 +56,15 @@ public class OutGameCardList : MonoBehaviour
         EffectHeal = entity.effectHeal;
         Cost = entity.cost;
         Description = entity.description;
+        Spells = entity.spells;
 
         image.sprite = entity.icon;
         cardNameText.text = entity.name;
         cardAttackText.text = entity.at.ToString();
         cardHpText.text = entity.hp.ToString();
         cardCostText.text = entity.cost.ToString();
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(Spells, cardAttackText, cardHpText);
     }
 
     /// <summary>
@@ -75,12 +80,14 @@ public class OutGameCardList : MonoBehaviour
         CardSprite = card.CardSprite;
         Cost = card.Cost;
         Description = card.Description;
+        Spells = card.Spells;
 
         image.sprite = card.image.sprite;
         cardNameText.text = card.cardNameText.text;
         cardAttackText.text = card.cardAttackText.text;
         cardHpText.text = card.cardHpText.text;
         cardCostText.text = card.cardCostText.text;
+        CardStatsDisplay.SetActiveStatsText(Spells, cardAttackText, cardHpText);
     }
 
     /// <summary>

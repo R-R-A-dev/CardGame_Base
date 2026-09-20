@@ -22,6 +22,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             dropped.movement.moveTween.Kill();
             dropped.view.SetActiveSelectablePanel(false);
             dropped.model.isFieldCard = false;
+            dropped.RefreshShieldPanel();
             dropped.movement.PlayerSelectMoveOff(dropped);
             CancelSelect();
         }
@@ -71,6 +72,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 {
                     droppedCard.view.SetActiveSelectablePanel(false);
                     droppedCard.model.isFieldCard = false;
+                    droppedCard.RefreshShieldPanel();
                     droppedCard.movement.PlayerSelectMoveOff(droppedCard);
                     CancelSelect();
                 }
@@ -89,6 +91,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             {
                 droppedCard.view.SetActiveSelectablePanel(false);
                 droppedCard.model.isFieldCard = false;
+                droppedCard.RefreshShieldPanel();
                 droppedCard.movement.PlayerSelectMoveOff(droppedCard);
                 CancelSelect();
             }
@@ -101,6 +104,7 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
         dropped = DropPlace.droppedCard;
         dropped.view.SetActiveSelectablePanel(false);
         dropped.model.isFieldCard = false;
+        dropped.RefreshShieldPanel();
         dropped.movement.PlayerSelectMoveOff(dropped);
         CancelSelect();
     }

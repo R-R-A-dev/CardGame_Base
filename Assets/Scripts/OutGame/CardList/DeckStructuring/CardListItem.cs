@@ -21,20 +21,22 @@ public class CardListItem : MonoBehaviour
             Destroy(child.gameObject);
 
         // 全カードデータと所持カードデータを比較して
-        CardEntity[] entitys = CardDatabase.LoadAllCards();
-
         List<int> displayPossessionCard = GameDataHolder.Instance.DisplayPossessionCard;
         GameObject[] cardObjects = new GameObject[displayPossessionCard.Count];
         for (int i = 0; i < displayPossessionCard.Count; i++)
         {
             if (displayPossessionCard[i] > 0)
             {
-                //カード番号：entitys[i].no
-                //カードの枚数：CardListData.PossessionCard[i]
+                //カード番号：添字＋1
+                //カードの枚数：displayPossessionCard[i]
+                //LoadAllCardsの配列順はカードNo順ではないため、必ずNo指定で取得する
+                CardEntity entity = CardDatabase.GetByNo(i + 1);
+                if (entity == null) continue;
+
                 //カードパネルを生成して、カード情報をセットしカードも生成する
                 GameObject obj = Instantiate(cardObject, cardListContent.transform);
                 OutGameCardList outGameCard = obj.GetComponent<OutGameCardList>();
-                outGameCard.SetData(entitys[i]);
+                outGameCard.SetData(entity);
                 cardObjects[i] = obj;
             }
         }
@@ -86,7 +88,9 @@ public class CardListItem : MonoBehaviour
             OutGameCardList card = child.GetComponent<OutGameCardList>();
             if (card == null) continue;
 
-            CardEntity entity = CardListData.Entities[card.No - 1];
+            CardEntity entity = CardDatabase.GetByNo(card.No);
+            if (entity == null) continue;
+
             child.gameObject.SetActive(filter.Matches(entity));
         }
     }

@@ -497,6 +497,7 @@ public class GameManager : MonoBehaviour
         {
             card.SetAbility(card);
             card.model.isFieldCard = true;
+            card.RefreshShieldPanel();
             if (card.CanUseAbilities())
             {
                 if (card.model.isPlayerCard)
@@ -562,6 +563,7 @@ public class GameManager : MonoBehaviour
             card.movement.isHand = false;
             card.Init(cardID, isPlayer);
             card.model.isFieldCard = true;
+            card.RefreshShieldPanel();
         }
     }
 

@@ -27,7 +27,9 @@ public class TwoPickProgress
 
     public List<int> GetSelectedCardsSortedById(List<int> addCards)
     {
-        int maxCardId = 120;
+        // 固定値(120)だと実際のカード数とずれ、集計側でカードNoを引けなくなるため
+        // 常に実データのカードNo最大値に合わせる
+        int maxCardId = CardDatabase.MaxCardNo;
         List<int> sortedCards = new List<int>(new int[maxCardId]);
         // addCardsのIDをカウント
         foreach (int cardId in addCards)

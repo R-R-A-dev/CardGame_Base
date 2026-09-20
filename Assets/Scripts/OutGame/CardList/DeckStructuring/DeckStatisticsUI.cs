@@ -24,20 +24,6 @@ public class DeckStatisticsUI : MonoBehaviour
         if (deck == null)
             deck = GameDataHolder.Instance.EditingDeckCounts;
 
-        // TwoPickのCaredEntityリストを用意が必要
-        // 所持カードリスト取得
-        //TwoPickDataが渡された場合はそちらを優先
-        if (CardListData.Entities.Count == 0)
-        {
-            CardEntity[] entitys = CardDatabase.LoadAllCards();
-            for (int i = 0; i < entitys.Length; i++)
-            {
-                CardListData.Entities.Add(entitys[i]);
-            }
-        }
-            List<CardEntity> allCards = CardListData.Entities;
-
-        int pickCount = 0;
         int totalCount = 0;
         int unitCount = 0;
         int spellCount = 0;
@@ -48,8 +34,12 @@ public class DeckStatisticsUI : MonoBehaviour
             int count = deck[i];
             if (count <= 0) continue;
 
+            // deckは添字方式（添字＋1＝カードNo）。LoadAllCardsの配列順はカードNo順では
+            // ないため、添字でCardEntity配列を引いてはいけない
+            CardEntity entity = CardDatabase.GetByNo(i + 1);
+            if (entity == null) continue;
+
             totalCount += count;
-            CardEntity entity = allCards[i];
 
             if (entity.spells == SPELLS.NONE)
                 unitCount += count;
@@ -59,9 +49,9 @@ public class DeckStatisticsUI : MonoBehaviour
             int cost = Mathf.Clamp(entity.cost, 1, 10);
             costCounts[cost - 1] += count;
         }
-        if (pickCountText != null)
-            //pickCountText.text = pickCount.ToString();
-
+        // pickCountTextは2Pick用で現状は集計していないため更新しない。
+        // 以前はコメントアウトされた行がif文の本体を奪い、pickCountTextが未設定だと
+        // 下のtotalCountText以降がまるごと実行されない状態になっていた
         totalCountText.text = totalCount.ToString();
         unitCountText.text = unitCount.ToString();
         spellCountText.text = spellCount.ToString();

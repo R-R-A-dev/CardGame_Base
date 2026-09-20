@@ -207,9 +207,10 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler,
             OutGameCardList card = GetComponent<OutGameCardList>();
             if (card == null) return;
 
-            DeckBuilderManager.Instance.cardDetailUI.ShowCardDetail(
-                CardListData.Entities[card.No - 1]
-            );
+            CardEntity entity = CardDatabase.GetByNo(card.No);
+            if (entity == null) return;
+
+            DeckBuilderManager.Instance.cardDetailUI.ShowCardDetail(entity);
         }
 
 

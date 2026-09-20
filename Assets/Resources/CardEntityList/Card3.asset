@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card3
   m_EditorClassIdentifier: 
   no: 3
-  name: test3
+  name: "\u6CE3\u304F\u7537"
   hp: 5
   at: 0
   cost: 0
   effectDmg: 1
   effectHeal: 1
   price: 0
-  description: "\u65E5\u672C\u8A9E\u78BA\u8A8D"
+  description: "\u30C6\u30B9\u30C8\u7528"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,7 +32,7 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -9084922355159997163, guid: 4921cc12c9930534fba2654c13e4da76, type: 3}
+  icon: {fileID: 6560158297854099428, guid: cf65da8531a58cb4989955315aaf0ef8, type: 3}
   attackType: 1
   rare: 2
   ability: 0

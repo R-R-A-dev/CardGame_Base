@@ -327,10 +327,10 @@ public class DeckBuilderUI : MonoBehaviour
 
             int insertIndex = deckCards.Length; // デフォルトは末尾
 
-            // コスト順に挿入位置を探す
+            // SortByCostと同じ基準（コスト順・同コストはカードNo順）で挿入位置を探す
             for (int i = 0; i < deckCards.Length; i++)
             {
-                if (newCardCost < deckCards[i].Cost)
+                if (CompareCardOrder(newCardCost, cardNo, deckCards[i].Cost, deckCards[i].No) < 0)
                 {
                     insertIndex = i;
                     break;
@@ -429,7 +429,18 @@ public class DeckBuilderUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 初期表示のカードをコスト順にソート
+    /// 表示順の比較基準：コスト昇順、同コストならカードNo昇順。
+    /// List.Sortは安定ソートではないため、コストだけで比較すると同コストのカードの
+    /// 並びが実行ごとに変わってしまう。必ずカードNoでタイブレークする
+    /// </summary>
+    private static int CompareCardOrder(int costA, int noA, int costB, int noB)
+    {
+        int byCost = costA.CompareTo(costB);
+        return byCost != 0 ? byCost : noA.CompareTo(noB);
+    }
+
+    /// <summary>
+    /// 初期表示のカードをコスト順（同コストはカードNo順）にソート
     /// </summary>
     /// <param name="parent"></param>
     void SortByCost(Transform parent)
@@ -437,8 +448,8 @@ public class DeckBuilderUI : MonoBehaviour
         // 子オブジェクトからOutGameCardListを全部取得
         List<OutGameCardList> cards = new List<OutGameCardList>(parent.GetComponentsInChildren<OutGameCardList>());
 
-        // Costで昇順ソート
-        cards.Sort((a, b) => a.Cost.CompareTo(b.Cost));
+        // コスト昇順、同コストならカードNo昇順
+        cards.Sort((a, b) => CompareCardOrder(a.Cost, a.No, b.Cost, b.No));
 
         // 並び替えた順にHierarchy上の位置を更新
         for (int i = 0; i < cards.Count; i++)
@@ -504,16 +515,16 @@ public class DeckBuilderUI : MonoBehaviour
         //0番目の位置 x:110 y:673.5
         //間の距離 220
 
-        //デッキ内にないカードならコスト順に挿入位置を探す
+        //デッキ内にないカードなら挿入位置を探す
         OutGameCardList[] deckCards = deckContent.GetComponentsInChildren<OutGameCardList>();
 
         int insertIndex = deckCards.Length; // デフォルトは末尾
         if (deckCards.Length != 0)
         {
-            // コスト順に挿入位置を探す
+            // 実際の挿入処理(AddDeckCard)と同じ基準で探さないと、移動先と実際の並び位置がずれる
             for (int i = 0; i < deckCards.Length; i++)
             {
-                if (cost < deckCards[i].Cost)
+                if (CompareCardOrder(cost, cardNo, deckCards[i].Cost, deckCards[i].No) < 0)
                 {
                     insertIndex = i;
                     return movePos = deckCards[i].transform.position;
@@ -521,7 +532,7 @@ public class DeckBuilderUI : MonoBehaviour
             }
         }
 
-        //デッキにカードが一枚もない場合、またはコストが一番高い場合は最後尾に追加
+        //デッキにカードが一枚もない場合、または並び順が一番後ろの場合は最後尾に追加
         if (movePos == Vector3.zero && deckCards.Length != 0)
         {
             movePos = deckCards[deckCards.Length - 1].transform.position;
@@ -620,29 +631,17 @@ public class DeckBuilderUI : MonoBehaviour
     {
         List<int> deck = new List<int>();
 
-        //インスペクター上のデッキ内カード一覧を取得
-        OutGameCardList[] cardLists = deckContent.GetComponentsInChildren<OutGameCardList>(true);
-
-        //リストの初期化 カードNo取得用
+        // 編集中のデッキ（添字＝カードNo-1、値＝枚数）からそのままデッキリストを作る。
+        // 以前は枚数配列（カードNo順）と表示側の子オブジェクト（コスト順にソート済み）を
+        // 同じ添字で突き合わせていたため、編成したものと別のカードが対戦に渡っていた
         List<int> editingDeckCounts = GameDataHolder.Instance.EditingDeckCounts;
-        int[] cardNum = new int[editingDeckCounts.Count];
 
-        // 例: デッキデータを代入
-        for (int i = 0; i < cardNum.Length; i++)
-            cardNum[i] = editingDeckCounts[i];
-
-        // 要素が 0 より大きいものだけを抽出して新しい配列に
-        int[] filtered = cardNum.Where(num => num > 0).ToArray();     
-
-        //カードNoと枚数情報からデッキリストを作成して返す
-        for (int i = 0; i < filtered.Length; i++)
+        for (int i = 0; i < editingDeckCounts.Count; i++)
         {
-            for (int j = 0; j < filtered[i]; j++)
-            {
-                deck.Add(cardLists[i].No);
-            }
+            int cardNo = i + 1;
+            for (int n = 0; n < editingDeckCounts[i]; n++)
+                deck.Add(cardNo);
         }
-        Debug.Log(filtered[0]);
 
         return deck;
     }

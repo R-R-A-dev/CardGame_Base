@@ -29,6 +29,8 @@ public class CardDetailUI : MonoBehaviour
         attackText.text = entity.at.ToString();
         costText.text = entity.cost.ToString();
         descriptionText.text = entity.description;
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(entity.spells, attackText, hpText);
 
         detailPanel.SetActive(true);
     }

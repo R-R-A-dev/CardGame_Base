@@ -141,6 +141,8 @@ public class ShopCardSelectPanel : MonoBehaviour, IPointerDownHandler
         cardAttackText.text = card.model.at.ToString();
         cardHealthText.text = card.model.hp.ToString();
         cardDescriptionText.text = card.model.description;
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(card.model.spells, cardAttackText, cardHealthText);
         priceText.text = $"G {selectedCardPrice}";
     }
 

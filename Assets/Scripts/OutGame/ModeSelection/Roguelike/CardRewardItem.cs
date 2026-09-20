@@ -40,6 +40,8 @@ public class CardRewardItem : MonoBehaviour
         cardAttackText.text = $"攻撃: {card.at}";
         cardHPText.text = $"HP: {card.hp}";
         cardIllust.sprite = card.icon;
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(card.spells, cardAttackText, cardHPText);
 
 
         selectedOverlay.SetActive(false);

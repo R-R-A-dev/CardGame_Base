@@ -18,19 +18,22 @@ public class DeckCardItem : MonoBehaviour
 
         //全カードデータと所持カードデータを比較して
         //デッキにあるカードとその枚数を取得する
-        CardEntity[] entitys = CardDatabase.LoadAllCards();
         List<int> editingDeckCounts = GameDataHolder.Instance.EditingDeckCounts;
         GameObject[] cardObjects = new GameObject[editingDeckCounts.Count];
         for (int i = 0; i < editingDeckCounts.Count; i++)
         {
             if (editingDeckCounts[i] > 0)
             {
-                //カード番号：entitys[i].no
-                //カードの枚数：CardListData.PossessionCard[i]
+                //カード番号：添字＋1
+                //カードの枚数：editingDeckCounts[i]
+                //LoadAllCardsの配列順はカードNo順ではないため、必ずNo指定で取得する
+                CardEntity entity = CardDatabase.GetByNo(i + 1);
+                if (entity == null) continue;
+
                 //カードパネルを生成して、カード情報をセットしカードも生成する
                 GameObject obj = Instantiate(cardObject, cardListContent.transform);
                 OutGameCardList outGameCard = obj.GetComponent<OutGameCardList>();
-                outGameCard.SetData(entitys[i]);
+                outGameCard.SetData(entity);
                 obj.GetComponent<CardDragHandler>().isDeck = true;
                 cardObjects[i] = obj;
             }
@@ -67,7 +70,9 @@ public class DeckCardItem : MonoBehaviour
             OutGameCardList card = child.GetComponent<OutGameCardList>();
             if (card == null) continue;
 
-            CardEntity entity = CardListData.Entities[card.No - 1];
+            CardEntity entity = CardDatabase.GetByNo(card.No);
+            if (entity == null) continue;
+
             child.gameObject.SetActive(filter.Matches(entity));
         }
     }

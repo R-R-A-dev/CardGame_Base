@@ -33,6 +33,8 @@ public class ShopCardDetailPanel : MonoBehaviour
         cardHPText.text = $"HP: {card.hp}";
         cardEffectText.text = card.description;
         cardIllust.sprite = card.icon;
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(card.spells, cardAttackText, cardHPText);
 
         gameObject.SetActive(true);
     }

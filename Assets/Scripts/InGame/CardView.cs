@@ -32,24 +32,9 @@ public class CardView : MonoBehaviour
         {
             //maskPanel.SetActive(true);
         }
-        if (cardModel.abilities.HasFlag(ABILITIES.SHIELD))
-        {
-            shieldPanel.SetActive(true);
-        }
-        else
-        {
-            shieldPanel.SetActive(false);
-        }
-        if (cardModel.spells != SPELLS.NONE)
-        {
-            hpText.gameObject.SetActive(false);
-            atText.gameObject.SetActive(false);
-        }
-        if (cardModel.spells == SPELLS.NONE)
-        {
-            hpText.gameObject.SetActive(true);
-            atText.gameObject.SetActive(true);
-        }
+        RefreshShieldPanel(cardModel);
+        // スペルは攻撃力・体力を持たないので非表示にする
+        CardStatsDisplay.SetActiveStatsText(cardModel.spells, atText, hpText);
     }
 
     public void Show()
@@ -67,6 +52,22 @@ public class CardView : MonoBehaviour
     public void SetActiveSelectablePanel(bool flag)
     {
         selectablePanel.SetActive(flag);
+    }
+
+    /// <summary>
+    /// 守護の表示更新。場に出ているカードのみオーラを表示する。
+    /// </summary>
+    public void RefreshShieldPanel(CardModel cardModel)
+    {
+        shieldPanel.SetActive(cardModel.isFieldCard && cardModel.abilities.HasFlag(ABILITIES.SHIELD));
+    }
+
+    /// <summary>
+    /// 場以外（2Pickの選択画面など）で守護表示を明示的に切り替えたい場合に使う。
+    /// </summary>
+    public void SetActiveShieldPanel(bool flag)
+    {
+        shieldPanel.SetActive(flag);
     }
 
     public void HideCard()

@@ -21,7 +21,6 @@ public class DeckBuilderManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        dataSet();
     }
     //TODO：ガチャの実装
 
@@ -79,15 +78,6 @@ public class DeckBuilderManager : MonoBehaviour
         deckBuilderUI.ReturnCardList(card, cardNo);
         DeckBuilderManager.Instance.deckStatisticsUI.
     RefreshStatistics(DeckBuilderManager.Instance.deckNum);
-    }
-
-    void dataSet()
-    {
-        CardEntity[] entitys = CardDatabase.LoadAllCards();
-        for (int i = 0; i < entitys.Length; i++)
-        {
-            CardListData.Entities.Add(entitys[i]);
-        }
     }
 
     public void OnDropZone()

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card5
   m_EditorClassIdentifier: 
   no: 5
-  name: SPELL
+  name: "\u306F\u3048\uFF5E"
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: spell
+  description: "\u30C6\u30B9\u30C8\u7528"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -37,6 +37,6 @@ MonoBehaviour:
   rare: 3
   ability: 0
   spell: 0
-  spells: 1048577
-  abilities: 0
+  spells: 0
+  abilities: 1
   targetCardID: 

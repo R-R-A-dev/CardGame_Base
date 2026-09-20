@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card2
   m_EditorClassIdentifier: 
   no: 2
-  name: test2
+  name: "\u30F4\u30A1\u30EB\u30AF\u30B7\u30AA\u30F3"
   hp: 5
   at: 0
   cost: 0
   effectDmg: 1
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8"
+  description: "\u30C6\u30B9\u30C8\u7528"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,11 +32,11 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -6383316570534409367, guid: adbffdb55ca4e6f4aabfb3502b45c034, type: 3}
-  attackType: 3
+  icon: {fileID: 1933478906972301040, guid: 1612f29ed46d77f439c61513f11a1130, type: 3}
+  attackType: 1
   rare: 1
   ability: 0
   spell: 0
   spells: 0
-  abilities: 1
+  abilities: 3
   targetCardID: 0100000001000000
