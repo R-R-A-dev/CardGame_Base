@@ -23,7 +23,7 @@ public class OutGameCardList : MonoBehaviour
     public TextMeshProUGUI cardCostText;
 
 
-    [SerializeField] private TextMeshProUGUI selectedText;
+    [SerializeField] private Text selectedText;
     [SerializeField] private GameObject selectedPanel;
     [SerializeField] private TextMeshProUGUI countText;
     [SerializeField] private GameObject countPanel;

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card11
   m_EditorClassIdentifier: 
   no: 11
-  name: "\u30A2\u30B6\u30A8\u30EB"
+  name: "\u30A2\u30B6\u30CA\u30A8\u30EB"
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
-  effectHeal: 1
+  effectHeal: 2
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u5C71\u672D\u304B\u3089\u30AB\u30FC\u30C9\u30922\u821E\u30C9\u30ED\u30FC\u3059\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -38,5 +38,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 1
+  abilities: 1024
   targetCardID: 

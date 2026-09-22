@@ -11,6 +11,7 @@ public class CardView : MonoBehaviour
     [SerializeField] TextMeshProUGUI costText;
     [SerializeField] Image iconImage;
     [SerializeField] GameObject selectablePanel;
+    [SerializeField] GameObject oneceNull;
     [SerializeField] GameObject shieldPanel;
     [SerializeField] public GameObject maskPanel;
     [SerializeField] CanvasGroup canvasGroup;
@@ -33,6 +34,7 @@ public class CardView : MonoBehaviour
             //maskPanel.SetActive(true);
         }
         RefreshShieldPanel(cardModel);
+        RefreshOneceNull(cardModel);
         // スペルは攻撃力・体力を持たないので非表示にする
         CardStatsDisplay.SetActiveStatsText(cardModel.spells, atText, hpText);
     }
@@ -47,6 +49,9 @@ public class CardView : MonoBehaviour
         hpText.text = cardModel.hp.ToString();
         atText.text = cardModel.at.ToString();
         costText.text = cardModel.cost.ToString();
+        // ダメージ無効はCardModel.Damage()内で被弾時に消費される。
+        // ダメージ適用後は必ずRefreshView()が呼ばれるので、ここで表示も落とす。
+        RefreshOneceNull(cardModel);
     }
 
     public void SetActiveSelectablePanel(bool flag)
@@ -60,6 +65,17 @@ public class CardView : MonoBehaviour
     public void RefreshShieldPanel(CardModel cardModel)
     {
         shieldPanel.SetActive(cardModel.isFieldCard && cardModel.abilities.HasFlag(ABILITIES.SHIELD));
+    }
+
+    /// <summary>
+    /// ダメージ無効（一度だけ）の表示更新。
+    /// 場に出ていて、かつまだ消費していないカードだけ表示する。
+    /// 2Pickの選択画面やカード一覧など、oneceNullを持たないCardViewもあるのでnullチェックする。
+    /// </summary>
+    public void RefreshOneceNull(CardModel cardModel)
+    {
+        if (oneceNull == null) return;
+        oneceNull.SetActive(cardModel.isFieldCard && cardModel.isDamageNullifyOnce);
     }
 
     /// <summary>

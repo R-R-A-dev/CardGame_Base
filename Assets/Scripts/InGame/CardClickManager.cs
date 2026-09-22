@@ -51,6 +51,17 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             droppedCard = DropPlace.droppedCard;
             clickedCard = eventData.pointerClick.GetComponent<CardController>();
 
+            // 敵フォロワー1体を選んでダメージを与えるスペルは、相手の場に守護がいるとき守護しか選べない。
+            // 選び直せるように、キャンセル（手札に戻す）はせず選択フェーズを続ける。
+            if (droppedCard.IsSpell &&
+                droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY) &&
+                droppedCard.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) &&
+                !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard &&
+                GameManager.instance.IsBlockedByShield(selectedCard))
+            {
+                return;
+            }
+
             if (!droppedCard.IsSpell)
             {
                 if (!droppedCard.CanUseAbilities())

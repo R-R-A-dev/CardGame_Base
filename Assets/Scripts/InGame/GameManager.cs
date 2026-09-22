@@ -378,7 +378,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SettingInitHand()
     {
         // カードをそれぞれに3まい配る
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
         {
             //GiveCardToHand(player.deck, playerHandTransform);
             //GiveCardToHand(enemy.deck, enemyHandTransform);
@@ -495,8 +495,10 @@ public class GameManager : MonoBehaviour
         card.summonEffect(card.model.summonEffect, card.transform);
         if (baseCard.model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
         {
-            card.SetAbility(card);
+            // SetAbility()がダメージ無効の表示更新まで行い、その判定にisFieldCardを使うため、
+            // 先に場のカードとして確定させてからアビリティを適用する
             card.model.isFieldCard = true;
+            card.SetAbility(card);
             card.RefreshShieldPanel();
             if (card.CanUseAbilities())
             {
@@ -678,6 +680,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // REDUCE_HAND_COST（手札のコストを下げる）のように、発動元のカード自身を対象に含めたくない効果用。
+    // 発動元がまだ手札のTransform配下にいるかどうかは経路によって異なる
+    // （プレイヤーはドラッグ開始時点で手札から外れている／AIは召喚演出中でまだ手札にいる）ため、
+    // 常に自身を除外した「自分以外の手札」を返すことで、どちらの経路でも枚数判定と対象が一致する。
+    public CardController[] GetFriendHandTransformExcept(bool isPlayer, CardController exclude)
+    {
+        CardController[] handCards = GetFriendHandTransform(isPlayer);
+        List<CardController> targets = new List<CardController>();
+        foreach (CardController handCard in handCards)
+        {
+            if (handCard == exclude) continue;
+            targets.Add(handCard);
+        }
+        return targets.ToArray();
+    }
+
     public CardController[] GetEnemyFieldCards(bool isPlayer)
     {
         if (isPlayer)
@@ -700,6 +718,33 @@ public class GameManager : MonoBehaviour
         {
             return enemyFieldTransform.GetComponentsInChildren<CardController>();
         }
+    }
+
+    /// <summary>
+    /// 守護（SHIELD）に守られていて対象に選べないカードかどうかを返す。
+    /// targetと同じ側の場に守護持ちがいて、target自身が守護でない場合にtrueになる。
+    /// </summary>
+    public bool IsBlockedByShield(CardController target)
+    {
+        if (target.model.abilities.HasFlag(ABILITIES.SHIELD)) return false;
+
+        CardController[] sameSideCards = GetFriendFieldCards(target.model.isPlayerCard);
+        return Array.Exists(sameSideCards, card => card.model.abilities.HasFlag(ABILITIES.SHIELD));
+    }
+
+    // HEAL_FRIEND_CARDS（自分のフォロワー全体回復）のように、
+    // 発動元のカード自身を対象に含めたくないアビリティ用。
+    // 発動時点で自分も場に出ている（=GetFriendFieldCards()に含まれる）ため、ここで除外する。
+    public CardController[] GetFriendFieldCardsExcept(bool isPlayer, CardController exclude)
+    {
+        CardController[] fieldCards = GetFriendFieldCards(isPlayer);
+        List<CardController> targets = new List<CardController>();
+        foreach (CardController fieldCard in fieldCards)
+        {
+            if (fieldCard == exclude) continue;
+            targets.Add(fieldCard);
+        }
+        return targets.ToArray();
     }
 
 
@@ -1240,6 +1285,30 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator GenDamageText(GameObject text, int damage, Vector3 position)
     {
+        yield return StartCoroutine(GenFloatingText(text, damage.ToString(), Color.red, position));
+    }
+
+    public IEnumerator GenHealText(GameObject text, int heal, Transform cardTransform)
+    {
+        if (cardTransform == null) yield break;
+        // GenDamageText(Transform)と同じ理由で、yieldする前に座標を確定させる
+        yield return StartCoroutine(GenHealText(text, heal, cardTransform.position));
+    }
+
+    public IEnumerator GenHealText(GameObject text, int heal, Vector3 position)
+    {
+        // 回復はダメージと同じ見た目だと区別がつかないため、色（緑）で区別する。
+        // 数字だけを出す（プラス記号は付けない）
+        yield return StartCoroutine(GenFloatingText(text, heal.ToString(), Color.green, position));
+    }
+
+    /// <summary>
+    /// ダメージ／回復の数字をターゲット上にポップさせる共通処理。
+    /// 表示位置・プール管理・DOTween演出はダメージも回復も同じなので、
+    /// 文字列と色だけを差し替えてここに集約している。
+    /// </summary>
+    IEnumerator GenFloatingText(GameObject text, string label, Color color, Vector3 position)
+    {
         // 1. 生成処理（Addressables化）
         if (text == null)
         {
@@ -1253,6 +1322,11 @@ public class GameManager : MonoBehaviour
             {
                 text = handle.Result;
             }
+            else if (damageText != null)
+            {
+                // Addressablesの読み込みに失敗しても、インスペクタ設定のプレハブで代替する
+                text = Instantiate(damageText.gameObject);
+            }
             else
             {
                 Debug.LogError("ダメージテキストの生成に失敗しました");
@@ -1265,8 +1339,8 @@ public class GameManager : MonoBehaviour
         text.transform.position = position;
 
         TextMeshProUGUI tmp = text.GetComponent<TextMeshProUGUI>();
-        tmp.text = damage.ToString();
-        tmp.color = Color.red;
+        tmp.text = label;
+        tmp.color = color;
         tmp.alpha = 1f;
 
         text.transform.localScale = Vector3.zero;
@@ -1286,23 +1360,6 @@ public class GameManager : MonoBehaviour
 
         // ※もし「生成したインスタンス」をその都度破棄したい場合は以下を有効化
         // Addressables.ReleaseInstance(text);
-    }
-
-    public IEnumerator GenHealText(GameObject text, int damage, Transform cardTransform)
-    {
-        if (text == null)
-        {
-            text = Instantiate(damageText.gameObject);
-        }
-        text.transform.SetParent(textPool.transform);
-        text.transform.position = cardTransform.position;
-        text.GetComponent<TextMeshProUGUI>().text = damage.ToString();
-        text.GetComponent<TextMeshProUGUI>().color = Color.green;
-        text.SetActive(true);
-        //0.5秒後に消えてtextPoolの子オブジェクトに戻る
-        yield return new WaitForSeconds(0.5f);
-        text.SetActive(false);
-
     }
 
 

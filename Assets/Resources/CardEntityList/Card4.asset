@@ -16,11 +16,11 @@ MonoBehaviour:
   name: "\u30AF\u30EC\u30B9\u30C8\u30ED\u30F3\u30FB\u30AA\u30FC\u30B7\u30E3\u30F3\u30ED\u30FC\u30C9"
   hp: 5
   at: 3
-  cost: 1
+  cost: 4
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u76F8\u624B\u306E\u5834\u306E\u3059\u3079\u3066\u30AB\u30FC\u30C9\u306B2\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -37,6 +37,6 @@ MonoBehaviour:
   rare: 3
   ability: 0
   spell: 0
-  spells: 1048577
-  abilities: 0
+  spells: 0
+  abilities: 8
   targetCardID: 

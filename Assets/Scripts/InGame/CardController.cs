@@ -22,6 +22,10 @@ public class CardController : MonoBehaviour
     [SerializeField] public AudioSource audioSource;
     GameManager gameManager;
 
+    // 破壊(Destroys)は同期でダメージを確定させるが、数字を出すのは攻撃エフェクトの着弾後になる。
+    // その時点では相手のダメージ無効が消費済みで判別できないため、確定時の結果をここに控えておく。
+    bool isLastDestroyNullified;
+
     public bool IsAbilities
     {
         get { return model.abilities != ABILITIES.NONE; }
@@ -195,17 +199,63 @@ public class CardController : MonoBehaviour
 
     public void Destroys(CardController enemyCard)
     {
+        isLastDestroyNullified = enemyCard != null && enemyCard.model.isDamageNullifyOnce;
         model.Destroy(enemyCard);
+    }
+
+    /// <summary>
+    /// 攻撃ヒット時に表示するダメージ量を返す。
+    /// ダメージ無効(DAMAGE_NULLIFY_ONCE)が残っている相手にはダメージが通らないので0を表示する。
+    /// CardModel.Damage()を通すとフラグが消費されて判別できなくなるため、
+    /// 必ずダメージを適用する前に呼ぶこと。
+    /// </summary>
+    int GetAttackDamageText(CardController target)
+    {
+        // 破壊者(isDestroyer)はDestroys()で既に無効化を消費しているので、その時点の結果を使う
+        if (model.isDestroyer)
+            return isLastDestroyNullified ? 0 : model.at;
+
+        if (target != null && target.model.isDamageNullifyOnce)
+            return 0;
+
+        return model.at;
     }
 
     public void EffectAttack(CardController enemyCard)
     {
+        if (enemyCard == null) return;
+
+        // ダメージ無効(DAMAGE_NULLIFY_ONCE)に吸収されたかどうかは、
+        // Damage()を通した後では区別できないため先に控えておく。
+        bool isNullified = enemyCard.model.isDamageNullifyOnce;
+
         model.EffectDmg(enemyCard);
+        enemyCard.RefreshView();
+
+        // 吸収された場合は「0」を出して、当たったがダメージが通っていないことを伝える。
+        // effectDmgが0の効果と違い、この0は必ず表示させたいのでforceShowで通す。
+        if (isNullified)
+            ShowEffectText(enemyCard.transform, 0, false, true);
+        else
+            ShowEffectText(enemyCard.transform, model.effectDmg, false);
     }
 
     public void Steal(CardController target)
     {
+        if (target == null) return;
+
         model.Steal(target);
+
+        // 親を付け替えただけでは奪った側の盤面のカードとして扱われない。
+        // defaultParentが元の盤面のままだとドラッグ操作で元の場所へ戻ってしまうため、
+        // 移動先のフィールドに合わせ直す。
+        target.movement.defaultParent = target.transform.parent;
+        target.movement.isHand = false;
+        // 奪ったターンは攻撃させない（召喚酔いと同じ扱い）。
+        // 攻撃可能表示も消す必要があるのでSetCanAttack()を通すこと。
+        target.SetCanAttack(false);
+        target.RefreshShieldPanel();
+        target.RefreshView();
     }
 
 
@@ -274,14 +324,46 @@ public class CardController : MonoBehaviour
 
     public void EffectHeal(CardController friendCard)
     {
+        if (friendCard == null) return;
+
         model.EffectHeal(friendCard);
         friendCard.RefreshView();
+        ShowEffectText(friendCard.transform, model.effectHeal, true);
+    }
+
+    /// <summary>
+    /// 効果ダメージ／回復の数字を対象の上にポップさせる。
+    /// アビリティ・スペル、単体／全体、ATTACKTYPEの違いに関係なく
+    /// 「実際に値を適用する場所」から呼ぶことで、表示漏れと二重表示を防いでいる。
+    /// </summary>
+    void ShowEffectText(Transform target, int amount, bool isHeal, bool forceShow = false)
+    {
+        if (target == null) return;
+        // 効果量0のアビリティ・スペルで数字が出ないようにする。
+        // ダメージ無効で0になったケースだけはforceShowで明示的に表示する。
+        if (amount == 0 && !forceShow) return;
+
+        // スペルカードはUseSpellTo()の最後に自分自身をDestroyするため、
+        // このカードでStartCoroutineすると数字が出る前にコルーチンが止まる。
+        // 必ずGameManager側で回すこと。
+        // 座標も同じ理由でここで確定させる（対象が破壊されるケース対策）。
+        Vector3 position = target.position;
+        GameObject textObj = GameManager.instance.GetTextPool();
+        if (isHeal)
+            GameManager.instance.StartCoroutine(GameManager.instance.GenHealText(textObj, amount, position));
+        else
+            GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, amount, position));
     }
 
     public void Heal(CardController friendCard)
     {
+        if (friendCard == null) return;
+
+        // HEAL_BY_DAMAGE（攻撃した分回復）はmodel.at分の回復になる。
+        // 他の回復と同じく「実際に値を適用する場所」で緑の数字を出す。
         model.Heal(friendCard);
         friendCard.RefreshView();
+        ShowEffectText(friendCard.transform, model.at, true);
     }
 
     public void Show()
@@ -321,11 +403,18 @@ public class CardController : MonoBehaviour
 
     public void AttackDebuff(CardController card, CardController target)
     {
+        // ATKは1未満にならないようclampするので、effectDmgではなく
+        // 実際に下がった分を数字として出す。
+        int before = target.model.at;
         target.model.at -= card.model.effectDmg;
         if (target.model.at < 1)
         {
             target.model.at = 1;
         }
+        int reduced = before - target.model.at;
+        // 既にATKが1で下がらなかった場合も、効果が当たったことが分かるように0を出す
+        // （ダメージ無効で0を出しているのと同じ扱い）。
+        card.ShowEffectText(target.transform, reduced, false, card.model.effectDmg > 0);
     }
     public void AttackBuff(CardController card, CardController target)
     {
@@ -344,6 +433,15 @@ public class CardController : MonoBehaviour
     public void RefreshShieldPanel()
     {
         view.RefreshShieldPanel(model);
+    }
+
+    /// <summary>
+    /// ダメージ無効（一度だけ）の表示を model の状態に合わせて更新する。
+    /// 場に出てフラグが立った直後に呼ぶ。消費時の非表示はRefreshView()経由で行われる。
+    /// </summary>
+    public void RefreshOneceNull()
+    {
+        view.RefreshOneceNull(model);
     }
 
     public void SetCanAttack(bool canAttack)
@@ -411,9 +509,12 @@ public class CardController : MonoBehaviour
             targets = gameManager.GetEnemyFieldCards(model.isPlayerCard);
 
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
-            targets = gameManager.GetFriendFieldCards(model.isPlayerCard);
+            targets = gameManager.GetFriendFieldCardsExcept(model.isPlayerCard, this);
 
-        if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+        // REDUCE_HAND_COSTは自分自身を対象に含めない（CanUseAbilities()の判定と揃える）
+        if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
+            targets = gameManager.GetFriendHandTransformExcept(model.isPlayerCard, this);
+        else if (model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
             targets = gameManager.GetFriendHandTransform(model.isPlayerCard);
 
         if (model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
@@ -577,7 +678,10 @@ public class CardController : MonoBehaviour
     public void SetAbility(CardController card)
     {
         if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
+        {
             card.model.isDamageNullifyOnce = true;
+            card.RefreshOneceNull();
+        }
 
         if (card.model.abilities.HasFlag(ABILITIES.DOUBLE_ACTION))
             card.model.isDoubleAction = true;
@@ -664,6 +768,18 @@ public class CardController : MonoBehaviour
             Destroys(target);
             StartCoroutine(target.CheckAlive());
         }
+        if (model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
+        {
+            if (target == null)
+            {
+                return;
+            }
+            if (target.model.isPlayerCard == model.isPlayerCard)
+            {
+                return;
+            }
+            Steal(target);
+        }
 
         if (model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
@@ -698,6 +814,7 @@ public class CardController : MonoBehaviour
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_NULLIFY_ONCE))
         {
             model.isDamageNullifyOnce = true;
+            RefreshOneceNull();
         }
         if (model.abilities.HasFlag(ABILITIES.DOUBLE_ACTION))
         {
@@ -772,7 +889,8 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
         {
-            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
+            // 自分自身は回復対象に含めないため、他に味方がいなければ発動できない
+            CardController[] friendCards = gameManager.GetFriendFieldCardsExcept(this.model.isPlayerCard, this);
             if (friendCards.Length > 0)
             {
                 canUse = true;
@@ -785,10 +903,18 @@ public class CardController : MonoBehaviour
         if (model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
-            CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
-            if (enemyCards.Length > 0 && friendCards.Length <= 4)
+            // アビリティ版は「このカード自身＋奪ったカード」で2体分の枠が要る。
+            // かつ、判定を呼ぶタイミングが経路によって違う
+            // （プレイヤーは効果対象選択前＝まだ場にいない／AIはOnFiled後＝既に場にいる）ため、
+            // 自分自身を必ず除外した数で数え、盤面上限5から2体分を引いた3以下を条件にする。
+            CardController[] friendCards = gameManager.GetFriendFieldCardsExcept(this.model.isPlayerCard, this);
+            if (enemyCards.Length > 0 && friendCards.Length <= 3)
             {
                 canUse = true;
+            }
+            else
+            {
+                return false;
             }
         }
         if (model.abilities.HasFlag(ABILITIES.SUMMON_SPECIFIC_UNIT))
@@ -801,8 +927,12 @@ public class CardController : MonoBehaviour
         }
         if (model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
         {
-            CardController[] handCards = gameManager.GetFriendHandTransform(this.model.isPlayerCard);
-            if (handCards.Length > 1)
+            // 自分自身はコスト減少の対象外なので、自身を除いた手札が1枚でもあれば発動できる。
+            // （以前はGetFriendHandTransform() をそのまま数えて > 1 としていたため、
+            //  自身が手札から外れているプレイヤーの経路では「他に2枚」必要になり、
+            //  手札が他に1枚のときに発動しなかった）
+            CardController[] handCards = gameManager.GetFriendHandTransformExcept(this.model.isPlayerCard, this);
+            if (handCards.Length > 0)
             {
                 canUse = true;
             }
@@ -1254,6 +1384,9 @@ public class CardController : MonoBehaviour
         // 破壊者(isDestroyer)はDestroys()が既に同期でダメージ無効を含めた結果を確定させている。
         // ここで通常ダメージを重ねて適用すると、ダメージ無効を1回消費した後の
         // 2発目が素通りしてしまう（無効化が意味をなさなくなる）ため、破壊者はスキップする。
+        // ダメージ無効で吸収される場合は0を表示する。Attack()を通すとフラグが消費されて
+        // 判別できなくなるため、必ず適用前に控えること。
+        int damageText = GetAttackDamageText(enemy);
         if (!model.isDestroyer)
         {
             model.Attack(enemy);
@@ -1261,7 +1394,7 @@ public class CardController : MonoBehaviour
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
         GameObject textObj = GameManager.instance.GetTextPool();
-        StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
+        StartCoroutine(GameManager.instance.GenDamageText(textObj, damageText, targetPos));
         if (model.hitAudio != null)
             audioSource.PlayOneShot(model.hitAudio);
     }
@@ -1274,6 +1407,8 @@ public class CardController : MonoBehaviour
                 hitEffect(endPos);
                 GameManager.instance.isAttacking = !isDefense;
                 CheckAttackParticle(effect);
+                // ダメージ無効の判定はAttack()より前に行う（SpawnEffect側のコメント参照）
+                int damageText = GetAttackDamageText(enemy);
                 // 破壊者はDestroys()が既に結果を確定させているため、重複適用をスキップする
                 // （SpawnEffect側のコメント参照）
                 if (!model.isDestroyer)
@@ -1283,7 +1418,7 @@ public class CardController : MonoBehaviour
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
                 GameObject textObj = GameManager.instance.GetTextPool();
-                StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, endPos));
+                StartCoroutine(GameManager.instance.GenDamageText(textObj, damageText, endPos));
                 if (model.hitAudio != null)
                     audioSource.PlayOneShot(model.hitAudio);
             });
@@ -1316,6 +1451,8 @@ public class CardController : MonoBehaviour
                     hitEffect(targetPos);
                     GameManager.instance.isAttacking = !isDefense;
                     CheckAttackParticle(target);
+                    // ダメージ無効の判定はAttack()より前に行う（SpawnEffect側のコメント参照）
+                    int damageText = GetAttackDamageText(enemyCC);
                     // 破壊者はDestroys()が既に結果を確定させているため、重複適用をスキップする
                     // （SpawnEffect側のコメント参照）
                     if (!model.isDestroyer)
@@ -1325,7 +1462,7 @@ public class CardController : MonoBehaviour
                     enemyCC.RefreshView();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
                     GameObject textObj = GameManager.instance.GetTextPool();
-                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.at, targetPos));
+                    StartCoroutine(GameManager.instance.GenDamageText(textObj, damageText, targetPos));
                 }
                 yield break;
             }
@@ -1380,14 +1517,10 @@ public class CardController : MonoBehaviour
         yield return new WaitForSeconds(attackTime);
         GameManager.instance.isAttacking = !isDefense;
         CheckAttackParticle(effect);
+        // ダメージ・回復の数字はEffectAttack()/EffectHeal()から出るので、ここでは出さない
         UseAbilitiesTo(enemy);
         enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-        if (model.effectDmg != 0 && ShowsDamageNumber())
-        {
-            GameObject textObj = GameManager.instance.GetTextPool();
-            StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
-        }
         if (model.hitAudio != null)
             audioSource.PlayOneShot(model.hitAudio);
 
@@ -1400,14 +1533,10 @@ public class CardController : MonoBehaviour
                 hitEffect(endPos);
                 GameManager.instance.isAttacking = !isDefense;
                 CheckAttackParticle(effect);
+                // ダメージ・回復の数字はEffectAttack()/EffectHeal()から出るので、ここでは出さない
                 UseAbilitiesTo(enemy);
                 enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-                if (model.effectDmg != 0 && ShowsDamageNumber())
-                {
-                    GameObject textObj = GameManager.instance.GetTextPool();
-                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
-                }
                 if (model.hitAudio != null)
                     audioSource.PlayOneShot(model.hitAudio);
             });
@@ -1425,7 +1554,6 @@ public class CardController : MonoBehaviour
     {
         float startTime = Time.timeSinceLevelLoad;
         float rate = 0f;
-        Transform targetPos = target;
         while (true)
         {
             if (rate >= 1.0f)
@@ -1437,14 +1565,10 @@ public class CardController : MonoBehaviour
                     hitEffect(enemyCC.transform);
                     GameManager.instance.isAttacking = !isDefense;
                     CheckAttackParticle(target);
+                    // ダメージ・回復の数字はEffectAttack()/EffectHeal()から出るので、ここでは出さない
                     UseAbilitiesTo(enemyCC);
                     enemyCC.RefreshView();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
-                    if (model.effectDmg != 0 && ShowsDamageNumber())
-                    {
-                        GameObject textObj = GameManager.instance.GetTextPool();
-                        StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
-                    }
                     if (model.hitAudio != null)
                         audioSource.PlayOneShot(model.hitAudio);
                 }
@@ -1619,6 +1743,50 @@ public class CardController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ヒーローへの効果（DAMAGE_ENEMY_HERO / HEAL_FRIEND_HERO）をHPに適用し、
+    /// 数字を出す対象ヒーロー・数値・回復かどうかを返す。
+    /// ATTACKTYPE（THROW/DIRECT/SPAWN）ごとに同じ処理を3か所へ書き写していた結果、
+    /// アビリティ版のフラグがTHROWでしか見られておらず、
+    /// DIRECT/SPAWNではHPが変わらないのに数字だけ出ていたためここへ集約した。
+    /// </summary>
+    void ApplyHeroEffect(out Transform targetHero, out int amount, out bool isHeal)
+    {
+        bool isDamage = model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) ||
+                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO);
+        isHeal = !isDamage && (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) ||
+                               model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO));
+        amount = model.effectDmg;
+        targetHero = null;
+
+        if (isDamage)
+        {
+            if (model.isPlayerCard)
+            {
+                gameManager.enemy.heroHp -= amount;
+                targetHero = gameManager.enemyHero;
+            }
+            else
+            {
+                gameManager.player.heroHp -= amount;
+                targetHero = gameManager.playerHero;
+            }
+        }
+        else if (isHeal)
+        {
+            if (model.isPlayerCard)
+            {
+                gameManager.player.heroHp += amount;
+                targetHero = gameManager.playerHero;
+            }
+            else
+            {
+                gameManager.enemy.heroHp += amount;
+                targetHero = gameManager.enemyHero;
+            }
+        }
+    }
+
     //スペルでのヒーローへの攻撃
     public void attackSpellEffectHero(Transform target, bool isDefense)
     {
@@ -1666,39 +1834,11 @@ public class CardController : MonoBehaviour
         hitEffect(targetPos);
         GameManager.instance.isAttacking = !isDefense;
         CheckAttackParticle(effect);
-        if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
-        {
-            if (model.isPlayerCard)
-            {
-                gameManager.enemy.heroHp -= model.effectDmg;
-            }
-            else
-            {
-                gameManager.player.heroHp -= model.effectDmg;
-            }
-        }
-        else if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
-        {
-            if (model.isPlayerCard)
-            {
-                gameManager.player.heroHp += model.effectDmg;
-            }
-            else
-            {
-                gameManager.enemy.heroHp += model.effectDmg;
-            }
-        }
-        Transform targetHero = null;
-        if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard ||
-                       model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard)
-            targetHero = gameManager.playerHero;
-        else
-            targetHero = gameManager.enemyHero;
+        ApplyHeroEffect(out Transform targetHero, out int amount, out bool isHeal);
 
         if (model.hitAudio != null)
             audioSource.PlayOneShot(model.hitAudio);
-        GameObject textObj = GameManager.instance.GetTextPool();
-        GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
+        ShowEffectText(targetHero, amount, isHeal);
 
         gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
         GameManager.instance.CheckHeroHP();
@@ -1718,50 +1858,22 @@ public class CardController : MonoBehaviour
                 hitEffect(endPos);
                 GameManager.instance.isAttacking = !isDefense;
                 CheckAttackParticle(effect);
-                if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO))
-                {
-                    if (model.isPlayerCard)
-                    {
-                        gameManager.enemy.heroHp -= model.effectDmg;
-                    }
-                    else
-                    {
-                        gameManager.player.heroHp -= model.effectDmg;
-                    }
-                }
-                else if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
-                {
-                    if (model.isPlayerCard)
-                    {
-                        gameManager.player.heroHp += model.effectDmg;
-                    }
-                    else
-                    {
-                        gameManager.enemy.heroHp += model.effectDmg;
-                    }
-                }
-                Transform targetHero = null;
-                if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard ||
-                    model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && !model.isPlayerCard)
-                    targetHero = gameManager.playerHero;
-                else if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && !model.isPlayerCard ||
-                    model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && model.isPlayerCard)
-                    targetHero = gameManager.enemyHero;
+                ApplyHeroEffect(out Transform targetHero, out int amount, out bool isHeal);
 
                 if (model.hitAudio != null)
                     audioSource.PlayOneShot(model.hitAudio);
-                GameObject textObj = GameManager.instance.GetTextPool();
-                GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
+                ShowEffectText(targetHero, amount, isHeal);
 
                 gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                 GameManager.instance.CheckHeroHP();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-                Destroy(this.gameObject);
-                if (model.abilities.HasFlag(ABILITIES.NONE))
+                // ここは無条件にDestroyしていたため、アビリティでヒーローを対象にした
+                // フォロワー（スペルではないカード）まで消えてしまっていた。
+                // 使い切りのスペルカードだけを破棄する
+                if (IsSpell)
                 {
-                    return;
+                    Destroy(this.gameObject);
                 }
-
             });
     }
     public void StartSpellThrowHero(Transform target, float height, Vector3 start, Vector3 end, float duration, bool isDefense, bool destroyOnComplete = true)
@@ -1789,42 +1901,11 @@ public class CardController : MonoBehaviour
                     hitEffect(targetPos);
                     GameManager.instance.isAttacking = !isDefense;
                     CheckAttackParticle(target);
-                    if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) ||
-                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO))
-                    {
-                        if (model.isPlayerCard)
-                        {
-                            gameManager.enemy.heroHp -= model.effectDmg;
-                        }
-                        else
-                        {
-                            gameManager.player.heroHp -= model.effectDmg;
-                        }
-                    }
-                    else if (model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) ||
-                        model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO))
-                    {
-                        if (model.isPlayerCard)
-                        {
-                            gameManager.player.heroHp += model.effectDmg;
-                        }
-                        else
-                        {
-                            gameManager.enemy.heroHp += model.effectDmg;
-                        }
-                    }
-                    Transform targetHero = null;
-                    if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && model.isPlayerCard ||
-                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && !model.isPlayerCard)
-                        targetHero = gameManager.playerHero;
-                    else if (model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) && !model.isPlayerCard || model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO) && !model.isPlayerCard ||
-                        model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) && model.isPlayerCard || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) && model.isPlayerCard)
-                        targetHero = gameManager.enemyHero;
+                    ApplyHeroEffect(out Transform targetHero, out int amount, out bool isHeal);
 
                     if (model.hitAudio != null)
                         audioSource.PlayOneShot(model.hitAudio);
-                    GameObject textObj = GameManager.instance.GetTextPool();
-                    StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetHero));
+                    ShowEffectText(targetHero, amount, isHeal);
 
                     gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                     GameManager.instance.CheckHeroHP();
@@ -1856,6 +1937,12 @@ public class CardController : MonoBehaviour
         }
         switch (model.attackType)
         {
+            // THROWのcaseが無く、attackTypeがTHROWのスペルカードは
+            // エフェクトを生成するだけで効果も数字も出ないまま終わっていたので追加した
+            case ATTACKTYPE.THROW:
+                StartThrowSpell(trans, 5, transform.position, target.transform.position, model.attackTime, target, isDefense);
+                break;
+
             case ATTACKTYPE.DIRECT:
                 DirectSpellAttack(trans, target.transform, target, isDefense, model.attackTime / 60);
                 break;
@@ -1870,37 +1957,53 @@ public class CardController : MonoBehaviour
         }
     }
 
-
-    // effectDmg が「ダメージ量」以外の意味（コスト増減量など）で使われている効果や、
-    // 破壊のように数値そのものが存在しない効果では、ダメージ数字を表示しない（4-F）。
-    // effectDmg != 0 の判定はここに含めない（「値が0だから出さない」と
-    // 「そもそもダメージではない」は別の理由のため、呼び出し側で別途チェックする）。
-    bool ShowsDamageNumber()
+    public void StartThrowSpell(Transform target, float height, Vector3 start, Vector3 end, float duration, CardController enemyCC, bool isDefense, bool destroyOnComplete = true)
     {
-        if (model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) ||
-            model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) ||
-            model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND) ||
-            model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND) ||
-            model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND) ||
-            model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST) ||
-            model.spells.HasFlag(SPELLS.REDUCE_HAND_COST))
-        {
-            return false;
-        }
+        // 中点を求める
+        Vector3 half = end - start * 0.50f + start;
+        half.y += Vector3.up.y + height;
 
-        if (model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) ||
-            model.abilities.HasFlag(ABILITIES.DISCARD_ENEMY_HAND) ||
-            model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND) ||
-            model.abilities.HasFlag(ABILITIES.DISCARD_FRIEND_HAND) ||
-            model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND) ||
-            model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) ||
-            model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
-        {
-            return false;
-        }
-
-        return true;
+        StartCoroutine(LerpThrowSpell(target, start, half, end, duration, destroyOnComplete, enemyCC, isDefense));
     }
+
+    IEnumerator LerpThrowSpell(Transform target, Vector3 start, Vector3 half, Vector3 end, float duration, bool destroyOnComplete, CardController enemyCC, bool isDefense)
+    {
+        float startTime = Time.timeSinceLevelLoad;
+        float rate = 0f;
+        while (true)
+        {
+            if (rate >= 1.0f)
+            {
+                target.position = end;
+
+                if (destroyOnComplete)
+                {
+                    hitEffect(enemyCC.transform);
+                    GameManager.instance.isAttacking = !isDefense;
+                    CheckAttackParticle(target);
+                    if (model.hitAudio != null)
+                        audioSource.PlayOneShot(model.hitAudio);
+                    target.SetParent(GameManager.instance.uiParticlesManager.transform);
+                    // ダメージ・回復の数字はEffectAttack()/EffectHeal()から出る。
+                    // UseSpellTo()は最後に自分自身をDestroyし、このコルーチンもそこで止まるため必ず最後に呼ぶ
+                    UseSpellTo(enemyCC);
+                    enemyCC.RefreshView();
+                }
+                yield break;
+            }
+            float diff = Time.timeSinceLevelLoad - startTime;
+            rate = diff / (duration / 60f);
+            target.position = CalcLerpPoint(start, half, end, rate);
+
+            yield return null;
+        }
+    }
+
+
+    // 破壊・手札破棄・コスト増減のように「ダメージでも回復でもない」効果で
+    // 数字が出てしまわないよう、効果の種類で表示可否を判定していた（ShowsDamageNumber）が、
+    // 数字の表示自体をEffectAttack()/EffectHeal()へ集約したため不要になった。
+    // ＝ HPを実際に増減させたときだけ数字が出る。
 
     public void DirectSpellAttack(Transform effect, Transform endPos, CardController enemy, bool isDefense, float attackTime)
     {
@@ -1914,19 +2017,13 @@ public class CardController : MonoBehaviour
                 GameManager.instance.isAttacking = !isDefense;
                 //model.Attack(enemy);
                 CheckAttackParticle(effect);
-                UseSpellTo(enemy);
-                enemy.RefreshView();
                 effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-                // DESTROY_ENEMY_CARD（破壊）やDISCARD/コスト変更系はダメージではないため
-                // 数字を出さない（4-D/4-F）。DAMAGE_NULLIFY_ONCEに吸収された場合も
-                // 数字だけ出て「効いたのに死なない」ように見えるため
-                if (model.effectDmg != 0 && ShowsDamageNumber())
-                {
-                    GameObject textObj = GameManager.instance.GetTextPool();
-                    GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, endPos));
-                }
                 if (model.hitAudio != null)
                     audioSource.PlayOneShot(model.hitAudio);
+                // ダメージ・回復の数字はEffectAttack()/EffectHeal()から出るので、ここでは出さない。
+                // UseSpellTo()は最後に自分自身をDestroyするので必ず最後に呼ぶ
+                UseSpellTo(enemy);
+                enemy.RefreshView();
             });
     }
 
@@ -1936,20 +2033,14 @@ public class CardController : MonoBehaviour
         yield return new WaitForSeconds(attackTime);
         GameManager.instance.isAttacking = !isDefense;
         //model.Attack(enemy);
-        UseSpellTo(enemy);
         CheckAttackParticle(effect);
-        // DESTROY_ENEMY_CARD（破壊）やDISCARD/コスト変更系はダメージではないため
-        // 数字を出さない（4-D/4-F）。
-        // あわせて表示値をmodel.atからmodel.effectDmgに統一（DirectSpellAttack側と食い違っていたバグ）
-        if (model.effectDmg != 0 && ShowsDamageNumber())
-        {
-            GameObject textObj = GameManager.instance.GetTextPool();
-            GameManager.instance.StartCoroutine(GameManager.instance.GenDamageText(textObj, model.effectDmg, targetPos));
-        }
         if (model.hitAudio != null)
             audioSource.PlayOneShot(model.hitAudio);
-        enemy.RefreshView();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
+        // ダメージ・回復の数字はEffectAttack()/EffectHeal()から出るので、ここでは出さない。
+        // UseSpellTo()は最後に自分自身をDestroyし、このコルーチンもそこで止まるため必ず最後に呼ぶ
+        UseSpellTo(enemy);
+        enemy.RefreshView();
     }
 
     public void hitEffect(Transform target)

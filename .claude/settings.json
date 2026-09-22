@@ -27,7 +27,9 @@
       "Bash(node Temp/deps.js)",
       "Bash(powershell -NoProfile -Command '$b=[IO.File]::ReadAllBytes\\('\\\\''Library\\\\EditorUserBuildSettings.asset'\\\\''\\); $s=[Text.Encoding]::ASCII.GetString\\($b\\); [regex]::Matches\\($s,'\\\\''[\\\\x20-\\\\x7E]{4,}'\\\\''\\) | Select-Object -Last 12 | ForEach-Object { $_.Value }')",
       "Bash(sed -i 's|^// report$|// report\\\\nfs.writeFileSync\\(\"D:/Repository/CardGame/Temp/included.json\", JSON.stringify\\([...visited].filter\\(v=>sizeOf.has\\(v\\)\\)\\)\\);|' Temp/deps.js)",
-      "Bash(node Temp/tex.js)"
+      "Bash(node Temp/tex.js)",
+      "Bash(awk '/^--- !u!/{p=0} /&961733478$|&961733479$|&961733480$/{p=1} p' Assets/Scenes/Game.unity)",
+      "Bash(grep -n \"m_Name: Card$\" Assets/Resources_moved/Prefabs/Card.prefab)"
     ]
   }
 }

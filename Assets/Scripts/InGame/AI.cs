@@ -208,7 +208,7 @@ public class AI : MonoBehaviour
             targets = gameManager.GetEnemyFieldCards(card.model.isPlayerCard);
 
         else if (card.model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_CARDS))
-            targets = gameManager.GetFriendFieldCards(card.model.isPlayerCard);
+            targets = gameManager.GetFriendFieldCardsExcept(card.model.isPlayerCard, card);
 
         else if (card.model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) || card.model.abilities.HasFlag(ABILITIES.HEAL_BY_DAMAGE))
         {
@@ -232,16 +232,15 @@ public class AI : MonoBehaviour
             yield break;
         }
 
-        if (card.model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST) || card.model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+        if (card.model.abilities.HasFlag(ABILITIES.REDUCE_HAND_COST))
         {
-            CardController[] hand = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
-            targets = new CardController[hand.Length];
-            int index = 0;
-            for (int i = 0; i < hand.Length; i++)
-            {
-                targets[index] = hand[i];
-                index++;
-            }
+            // AIの経路では召喚演出中でカード自身がまだ手札のTransform配下にいるため、
+            // 自身を除外した手札だけを対象にする（CanUseAbilities()の判定と揃える）
+            targets = gameManager.GetFriendHandTransformExcept(card.model.isPlayerCard, card);
+        }
+        else if (card.model.abilities.HasFlag(ABILITIES.DISCARD_ALL_FRIEND_HAND))
+        {
+            targets = gameManager.GetFriendHandTransform(card.model.isPlayerCard);
         }
         if (card.model.abilities.HasFlag(ABILITIES.INCREASE_ENEMY_COST) || card.model.abilities.HasFlag(ABILITIES.DISCARD_ALL_ENEMY_HAND))
             targets = gameManager.GetEnemyHandTransform(card.model.isPlayerCard);

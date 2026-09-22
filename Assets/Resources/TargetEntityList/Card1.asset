@@ -12,30 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
   m_Name: Card1
   m_EditorClassIdentifier: 
-  no: 0
-  name: target
+  no: 1
+  name: "\u30AE\u30E3\u30E9\u30AF\u30B7\u30FC\u30AC\u30FC\u30C7\u30A3\u30A2\u30F3"
   hp: 5
-  at: 1
-  cost: 5
+  at: 0
+  cost: 10
   effectDmg: 1
   effectHeal: 1
-  description: 
+  price: 0
+  description: "\u5834\u306B\u51FA\u305F\u30BF\u30FC\u30F3\u306B\u653B\u6483\u3067\u304D\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
-  hitAudio: {fileID: 0}
+  hitAudio: {fileID: 8300000, guid: 77c58426eee82cc4187d4ca13d55a21c, type: 3}
   destroyAudio: {fileID: 0}
-  summonEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
+  summonEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   summonAbilityEffect: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
   attackEffect: {fileID: 3817663088807389354, guid: 2a5a67e3328d02e4aac6388d0a624c7b, type: 3}
-  hitEffect: {fileID: 7226583673155636403, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
-  destroyEffect: {fileID: 7226583673155636403, guid: a2ab56839e1c9504ea9d141e95d0b16b, type: 3}
+  hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
+  destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -190086642, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  icon: {fileID: 3544656407700966163, guid: e9cf45d97e00cb24589af510d50248a9, type: 3}
   attackType: 1
-  rare: 0
+  rare: 1
   ability: 0
   spell: 0
   spells: 0
-  abilities: 0
-  targetCardID: 
+  abilities: 1
+  targetCardID: 0100000001000000

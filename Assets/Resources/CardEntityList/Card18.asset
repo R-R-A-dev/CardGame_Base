@@ -20,7 +20,7 @@ MonoBehaviour:
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u30C0\u30E1\u30FC\u30B8\u3092\uFF11\u5EA6\u3060\u3051\u7121\u52B9\u306B\u3059\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -38,5 +38,5 @@ MonoBehaviour:
   ability: 0
   spell: 0
   spells: 0
-  abilities: 1
+  abilities: 1048576
   targetCardID: 

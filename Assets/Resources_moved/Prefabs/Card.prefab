@@ -211,6 +211,110 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &1665288344944647209
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5321667847562095838}
+  - component: {fileID: 4012721837562575051}
+  - component: {fileID: 2700590060711124151}
+  - component: {fileID: 2580221112568620348}
+  m_Layer: 5
+  m_Name: OneceNull
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &5321667847562095838
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665288344944647209}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5733723200314794177}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &4012721837562575051
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665288344944647209}
+  m_CullTransparentMesh: 1
+--- !u!114 &2700590060711124151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665288344944647209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: 84dd961b990858841826cec5c2bc867a, type: 2}
+  m_Color: {r: 1, g: 0, b: 0.8163533, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: d547ad0c157c0a5429858ac4d911e25b, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2580221112568620348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665288344944647209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b9e2d4a7f18c3b4e85a09d21f6c7b38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  auraShader: {fileID: 4800000, guid: 3f7a1c9e5b2d4e84a9c61d0f8b3e7c52, type: 3}
+  auraColor: {r: 0.96727765, g: 0.34901965, b: 1, a: 1}
+  coreIntensity: 0.56
+  glowWidth: 0.05
+  glowIntensity: 7.58
+  glowFalloff: 1.8
+  rimWidth: 0.015
+  rimIntensity: 2.2
+  pulseSpeed: 2.2
+  pulseAmount: 0.3
+  noiseScale: 8
+  noiseAmount: 0.5
+  flowSpeed: {x: 0.05, y: -0.3}
+  distortion: 0.01
+  alpha: 1
+  additive: 1
 --- !u!1 &2230659008468129367
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,8 +560,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.05, y: 0.65004}
-  m_SizeDelta: {x: 160.1, y: 201.3}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 160, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7622750738986007611
 CanvasRenderer:
@@ -793,6 +897,7 @@ RectTransform:
   - {fileID: 4074793410940164083}
   - {fileID: 4333290018637359381}
   - {fileID: 6018434031892389698}
+  - {fileID: 5321667847562095838}
   - {fileID: 2892330555694246170}
   - {fileID: 8833565646985454078}
   - {fileID: 2407668046827093265}
@@ -848,6 +953,7 @@ MonoBehaviour:
   costText: {fileID: 5259589364532461155}
   iconImage: {fileID: 6021509550871728366}
   selectablePanel: {fileID: 5263026021843677536}
+  oneceNull: {fileID: 1665288344944647209}
   shieldPanel: {fileID: 3082528052981376236}
   maskPanel: {fileID: 6724691667608227162}
   canvasGroup: {fileID: 3250521729447992486}

@@ -16,11 +16,11 @@ MonoBehaviour:
   name: "\u30AE\u30E3\u30E9\u30AF\u30B7\u30FC\u30AC\u30FC\u30C7\u30A3\u30A2\u30F3"
   hp: 5
   at: 0
-  cost: 0
+  cost: 10
   effectDmg: 1
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u5834\u306B\u51FA\u305F\u30BF\u30FC\u30F3\u306B\u653B\u6483\u3067\u304D\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}

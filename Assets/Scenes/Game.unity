@@ -3893,8 +3893,8 @@ MonoBehaviour:
   enemyManaCostText: {fileID: 783756917}
   timeCountText: {fileID: 150810832}
   descriptionObj: {fileID: 1710037200}
-  descriptionText: {fileID: 0}
-  nameText: {fileID: 0}
+  descriptionText: {fileID: 843798925}
+  nameText: {fileID: 193248348}
   costText: {fileID: 2046324168}
   attackText: {fileID: 2015298529}
   hpText: {fileID: 1347794099}
