@@ -1843,11 +1843,13 @@ public class CardController : MonoBehaviour
         gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
         GameManager.instance.CheckHeroHP();
         effect.SetParent(GameManager.instance.uiParticlesManager.transform);
-        if (model.abilities.HasFlag(ABILITIES.NONE))
+        // ABILITIES.NONEは0なのでHasFlag()が常にtrueになり、Destroyに到達していなかった
+        // （ヒーロー対象のスペルが使用後も場に残っていた）。
+        // 使い切りのスペルカードだけを破棄する（DirectSpellAttackHero()と同じ扱い）
+        if (IsSpell)
         {
-            yield break;
+            Destroy(this.gameObject);
         }
-        Destroy(this.gameObject);
     }
 
     public void DirectSpellAttackHero(Transform effect, Transform endPos, bool isDefense, float attackTime)
@@ -1910,11 +1912,13 @@ public class CardController : MonoBehaviour
                     gameManager.uiManager.ShowHeroHP(gameManager.player.heroHp, gameManager.enemy.heroHp);
                     GameManager.instance.CheckHeroHP();
                     target.SetParent(GameManager.instance.uiParticlesManager.transform);
-                    if (model.abilities.HasFlag(ABILITIES.NONE))
+                    // ABILITIES.NONEは0なのでHasFlag()が常にtrueになり、Destroyに到達していなかった
+                    // （ヒーロー対象のスペルが使用後も場に残っていた）。
+                    // 使い切りのスペルカードだけを破棄する（DirectSpellAttackHero()と同じ扱い）
+                    if (IsSpell)
                     {
-                        yield break;
+                        Destroy(this.gameObject);
                     }
-                    Destroy(this.gameObject);
                 }
                 yield break;
             }

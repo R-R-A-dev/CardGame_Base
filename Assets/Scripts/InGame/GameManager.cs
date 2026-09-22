@@ -64,6 +64,18 @@ public class GameManager : MonoBehaviour
     // 時間管理
     public int timeCount;
 
+    // カウントダウンは「前のターンの分だけ」を止めたいので個別に保持する。
+    // StopAllCoroutines()で止めると実行中のダメージ数値表示(GenFloatingText)や
+    // 結果表示まで巻き込み、数字が消えないままテキストプールが枯れてしまう。
+    // この2つはtimeCountを共有しているため、同時に動くと時間が倍速で減る。
+    Coroutine countDownCoroutine;
+    Coroutine changeCardCountDownCoroutine;
+
+    // ターン変更の多重起動を防ぐフラグ。
+    // 演出待ちの間もターン終了ボタンは押せるため、連打やタイムアップとの競合で
+    // ChangeTurn()が二重に走り、ターンが2回切り替わってドローも2回起きていた。
+    bool isChangingTurn;
+
     [SerializeField] GameObject cardChangePanel;
     public bool isCardChange = false;
     public List<CardController> changedCardList = new List<CardController>();
@@ -141,7 +153,7 @@ public class GameManager : MonoBehaviour
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
             StartCoroutine(SettingInitHand());
-            StartCoroutine(CountDownChangeCard());
+            changeCardCountDownCoroutine = StartCoroutine(CountDownChangeCard());
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
         {
@@ -152,7 +164,7 @@ public class GameManager : MonoBehaviour
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
             StartCoroutine(SettingInitHand());
-            StartCoroutine(CountDownChangeCard());
+            changeCardCountDownCoroutine = StartCoroutine(CountDownChangeCard());
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.CPU_BATTLE)
         {
@@ -162,7 +174,7 @@ public class GameManager : MonoBehaviour
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
             StartCoroutine(SettingInitHand());
-            StartCoroutine(CountDownChangeCard());
+            changeCardCountDownCoroutine = StartCoroutine(CountDownChangeCard());
         }
         else
         {
@@ -181,7 +193,7 @@ public class GameManager : MonoBehaviour
             uiManager.ShowManaCost(player.manaCost, enemy.manaCost);
             TurnEndButtonText.text = "Decide";
             StartCoroutine(SettingInitHand());
-            StartCoroutine(CountDownChangeCard());
+            changeCardCountDownCoroutine = StartCoroutine(CountDownChangeCard());
         }
 
         StartCoroutine(WaitStartTurn());
@@ -570,10 +582,30 @@ public class GameManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// 進行中のカウントダウンを止める。timeCountを共有しているため、
+    /// 2つが同時に動くと残り時間が倍速で減ってしまう。
+    /// </summary>
+    void StopTurnTimers()
+    {
+        if (countDownCoroutine != null)
+        {
+            StopCoroutine(countDownCoroutine);
+            countDownCoroutine = null;
+        }
+        if (changeCardCountDownCoroutine != null)
+        {
+            StopCoroutine(changeCardCountDownCoroutine);
+            changeCardCountDownCoroutine = null;
+        }
+    }
+
     void TurnCalc()
     {
-        StopAllCoroutines();
-        StartCoroutine(CountDown());
+        // 以前はStopAllCoroutines()だったが、ダメージ数値表示や結果表示まで
+        // 巻き込んで止めてしまうため、止めたいカウントダウンだけを止める。
+        StopTurnTimers();
+        countDownCoroutine = StartCoroutine(CountDown());
         if (isPlayerTurn)
         {
             PlayerTurn();
@@ -752,11 +784,12 @@ public class GameManager : MonoBehaviour
     public void OnClickTurnEndButton()
     {
         if (isCardChange) return;
+        if (!isPlayerTurn) return;
 
-        if (isPlayerTurn)
-        {
-            StartCoroutine(WaitAndChangeTurn());
-        }
+        // 演出待ちの間もボタンは押せるため、押した時点で無効化して連打を防ぐ
+        // （プレイヤーターン開始時にChangeTurn()内で再度有効になる）
+        TurnEndButton.interactable = false;
+        StartCoroutine(WaitAndChangeTurn());
     }
 
     private IEnumerator WaitAndChangeTurn()
@@ -766,10 +799,10 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        if (!isSummoning && !isAttacking)
-        {
-            StartCoroutine(ChangeTurn());
-        }
+        // 待っている間にタイムアップ等で既にターンが変わっていたら何もしない
+        if (!isPlayerTurn) yield break;
+
+        StartCoroutine(ChangeTurn());
     }
     //ターン変更時の通常ドロー時もsummonningをtrueにする
     public IEnumerator ChangeTurn()
@@ -777,6 +810,11 @@ public class GameManager : MonoBehaviour
         //既に決着がついている場合はターン変更演出を出さない（負け演出とPlayerTurn演出が重複するのを防ぐ）
         if (player.heroHp <= 0 || enemy.heroHp <= 0)
             yield break;
+
+        // ターン終了ボタンの連打とタイムアップ(CountDown)が競合すると多重に呼ばれる。
+        // 二重に進むとターンが2回切り替わり、ドローも2回走ってしまう。
+        if (isChangingTurn) yield break;
+        isChangingTurn = true;
 
         if (DropPlace.droppedCard != null)
             DropPlace.droppedCard.gameObject.GetComponent<CardClickManager>().TimeUpSelect();
@@ -870,6 +908,7 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(1.3f);
         }
 
+        isChangingTurn = false;
         TurnCalc();
     }
 

@@ -42,6 +42,22 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         transform.SetParent(effectRoot, true);
     }
 
+    /// <summary>
+    /// OnBeginDrag()で落とした自分の場のカードのレイキャストを戻す。
+    /// DropPlace.OnDrop()でも戻しているが、フィールド以外（敵フィールド・ヒーロー・
+    /// 何もない場所・他の手札カードの上）にドロップするとそこを通らず、
+    /// 場のカードが攻撃ドラッグも説明表示もできないまま取り残されるため、
+    /// ドラッグ終了時に必ず戻す。
+    /// </summary>
+    void RestoreFieldCardsRaycast()
+    {
+        foreach (CardController fieldCard in GameManager.instance.GetFriendFieldCards(true))
+        {
+            CanvasGroup canvasGroup = fieldCard.GetComponent<CanvasGroup>();
+            if (canvasGroup != null) canvasGroup.blocksRaycasts = true;
+        }
+    }
+
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -157,6 +173,9 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             DropPlace.droppedCard = null;
         }
+        // ドロップ先に関係なく、場のカードのレイキャストもここで必ず戻す。
+        // ドロップの判定（OnDrop）は既に終わっているので、戻しても拾い先は変わらない。
+        RestoreFieldCardsRaycast();
 
         if (!GameManager.instance.isPlayerTurn) return;
         if (GameManager.instance.isSummoning)
@@ -186,38 +205,39 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
             BezierArrows.Instance.Hide();
             return;
         }
-        DropPlace dropPlace = eventData.pointerEnter?.GetComponent<DropPlace>();
-        if (eventData.pointerEnter != null && dropPlace != null)
+        // ドロップ先の判定は、DropPlace.OnDrop()と同じ「このフレームのレイキャスト結果」を使う。
+        // eventData.pointerEnterはProcessMove()で更新される＝1フレーム前の値であり、
+        // OnDrop側が使うcurrentOverGo（このフレームの値）とは、動かしながら離すとズレる。
+        // 親をたどるのは、OnDropがExecuteHierarchy()で親方向に探されるのに合わせるため。
+        GameObject dropTarget = eventData.pointerCurrentRaycast.gameObject;
+        DropPlace dropPlace = dropTarget != null ? dropTarget.GetComponentInParent<DropPlace>() : null;
+        CardController summonCard = GetComponent<CardController>();
+
+        // 場に出すのは、DropPlace.OnDrop()がこのカードを受け付けた場合に限る。
+        // 受け付けの証拠はOnFiled()が立てるisFieldCard。
+        // 以前はこことOnDropが別々にドロップ先を判定していたため、判定がズレると
+        // OnDrop（＝コストを払い、場に出た時の効果を発動する処理）を通らないまま
+        // この下のSummonMove()だけが走り、カードがコストなしで場に出ていた。
+        if (dropPlace != null && dropPlace.type == DropPlace.TYPE.FIELD && summonCard.model.isFieldCard)
         {
-            //ドロップ先がDropPlaceコンポーネントを持ち
-            //　そのタイプがHANDの場合HANDに戻す
-            if (dropPlace.type != DropPlace.TYPE.FIELD)
+            isDraggable = false;
+            isHand = false;
+            if (!summonCard.IsSpell && summonCard.model.summonEffect != null &&
+                !(summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY)))
             {
-                transform.SetParent(defaultParent, false);
-                transform.SetSiblingIndex(handSiblingIndex);
+                StartCoroutine(SummonMove(summonCard, dropPlace.transform));
             }
-            // ドロップ先がDropPlaceコンポーネントを持ち、タイプがFIELDの場合
-            // 場に出すカードの場合はエフェクトを再生する
-            CardController summonCard = GetComponent<CardController>();
-            if (!summonCard.IsSpell && summonCard.model.summonEffect != null && eventData.pointerEnter.GetComponent<DropPlace>() != null)
+            else
             {
-                if (dropPlace.type == DropPlace.TYPE.FIELD &&
-                    !(summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_FRIEND) || summonCard.model.abilities.HasFlag(ABILITIES.EFFECT_SELECTION_ENEMY)))
-                {
-                    isDraggable = false;
-                    isHand = false;
-                    StartCoroutine(SummonMove(summonCard, dropPlace.transform));
-                }
-            }
-            else if (summonCard.IsSpell)
-            {
+                // 召喚エフェクト未設定などで演出を出せない場合も、コストは払っている以上
+                // 場には置く（Canvas直下に浮いたままにしない）
+                defaultParent = dropPlace.transform;
                 transform.SetParent(defaultParent, false);
-                transform.SetSiblingIndex(handSiblingIndex);
             }
         }
-        // ドロップ先がDropPlaceコンポーネントを持たない場合手札に戻す
-        if ((eventData.pointerEnter != null || eventData.pointerEnter == null) && dropPlace == null)
+        else
         {
+            // 場に出せなかった（手札側・場以外・OnDropが受け付けなかった）ので手札へ戻す
             transform.SetParent(defaultParent, false);
             transform.SetSiblingIndex(handSiblingIndex);
         }

@@ -16,7 +16,12 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
     CardController clickedCard;
     private void Update()
     {
-        if (dropped == null) return;
+        // droppedはこのカードのドラッグ終了時の値を保持し続ける。
+        // 効果選択が成立した場合CancelSelect()はクリックされた側のインスタンスでしか走らないため、
+        // 召喚した側のdroppedは自分を指したまま残る。
+        // 現在選択待ちのカードと一致する時だけ処理し、過去の残留値で
+        // 無関係なカードが場から手札へ引き戻されるのを防ぐ。
+        if (dropped == null || DropPlace.droppedCard != dropped) return;
         if (GameManager.instance.isEffectSelectPhase && !GameManager.instance.isOnCard && Input.GetMouseButtonDown(0))
         {
             dropped.movement.moveTween.Kill();
@@ -66,6 +71,13 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
             {
                 if (!droppedCard.CanUseAbilities())
                 {
+                    // 選択中に盤面が変わって発動できなくなった場合。
+                    // 手札へ戻さないとカードが選択位置に浮いたまま取り残されるので、
+                    // 下のキャンセル分岐と同じ扱いにする。
+                    droppedCard.view.SetActiveSelectablePanel(false);
+                    droppedCard.model.isFieldCard = false;
+                    droppedCard.RefreshShieldPanel();
+                    droppedCard.movement.PlayerSelectMoveOff(droppedCard);
                     CancelSelect();
                     return;
                 }
@@ -75,9 +87,16 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 {
                     //droppedCard.movement.isHand = false;
                     //droppedCard.movement.isDraggable = false;
-                    StartCoroutine(SummonMove(droppedCard, selectedCard));
+                    // このコルーチンは対象カードではなく召喚する側のカードで回す。
+                    // クリックされた側（this）で回すと、効果で対象が破壊された時に
+                    // ホストごと消えてHideCard()のままShowCard()に到達せず、
+                    // 召喚したカードが透明のまま残るため。
+                    droppedCard.StartCoroutine(SummonMove(droppedCard, selectedCard));
                     DropPlace.droppedCard = null;
-                    CancelSelect();
+                    // 効果が成立した場合はコストを払い戻さない
+                    // （CancelSelect()を呼ぶと OnFiled() で払ったコストが戻り、
+                    //   対象選択を持つフォロワーが実質0コストになっていた）
+                    EndSelectPhase();
                 }
                 else
                 {
@@ -92,11 +111,12 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                     droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY) && !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard)
             {
                 //droppedCard.UseSpellTo(selectedCard);
-                StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
+                droppedCard.StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
                 GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
                 droppedCard.spellEffect(selectedCard, true);
                 BattleAudioManager.Instance.PlaySE("Summon_Effect1");
-                CancelSelect();
+                DropPlace.droppedCard = null;
+                EndSelectPhase();
             }
             else
             {
@@ -118,6 +138,9 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
         // 手札へ引き戻し（＋CancelSelect()でコストを払い戻し）てしまうため。
         if (!GameManager.instance.isEffectSelectPhase) return;
         dropped = DropPlace.droppedCard;
+        // CancelSelect()の払い戻しはdroppedCardを見るので、ここでも揃えておく
+        // （このインスタンスのdroppedCardが未設定だと払い戻しされない／例外になる）
+        droppedCard = dropped;
         dropped.view.SetActiveSelectablePanel(false);
         dropped.model.isFieldCard = false;
         dropped.RefreshShieldPanel();
@@ -127,8 +150,11 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     IEnumerator SummonMove(CardController droppedCard, CardController selectedCard)
     {
-        StartCoroutine(droppedCard.movement.SelectedSummon(droppedCard, GameManager.instance.playerFieldTransform));
+        // 召喚演出も召喚する側のカードで回す（対象が破壊されても止まらないように）
+        droppedCard.movement.StartCoroutine(droppedCard.movement.SelectedSummon(droppedCard, GameManager.instance.playerFieldTransform));
         yield return new WaitForSeconds(1f);
+        // 待っている間に対象が他の効果で破壊されている場合がある
+        if (selectedCard == null) yield break;
         Transform abilityEffect = droppedCard.effect.AbilityEffect(droppedCard.model.summonAbilityEffect, droppedCard.transform);
         droppedCard.effect.StartThrow(abilityEffect, 3f, droppedCard.transform.position, selectedCard.transform.position, 20f);
         DG.Tweening.Sequence seq = DOTween.Sequence();
@@ -151,16 +177,32 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
         );
         seq.Play();
         yield return new WaitForSeconds(0.3f);
+        if (selectedCard == null) yield break;
         droppedCard.UseAbilitiesTo(selectedCard);
         droppedCard.hitEffect(selectedCard.transform);
     }
 
+    /// <summary>
+    /// 効果の対象選択を「取りやめて」フェーズを終える。払った分のコストを戻す。
+    /// </summary>
     void CancelSelect()
     {
-        if (!droppedCard.IsSpell)
+        if (droppedCard != null && !droppedCard.IsSpell)
         {
             GameManager.instance.ReduceManaCost(-droppedCard.model.cost, droppedCard.model.isPlayerCard);
         }
+        EndSelectPhase();
+    }
+
+    /// <summary>
+    /// 効果の対象選択を「成立させて」フェーズを終える。コストは払い戻さない。
+    /// キャンセルと確定で同じCancelSelect()を呼んでいたため、成立時にもコストが
+    /// 戻ってしまい、対象選択を持つフォロワーが実質0コストになっていた。
+    /// </summary>
+    void EndSelectPhase()
+    {
+        // 選択が終わった以上、静的な参照も残さない
+        DropPlace.droppedCard = null;
         dropped = null;
         GameManager.instance.SelectingPanelOff();
         GameManager.instance.isEffectSelectPhase = false;
