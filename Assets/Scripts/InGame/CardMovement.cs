@@ -15,6 +15,33 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public CardController draggCard;
     int handSiblingIndex = 0;
 
+    // 演出中のカードの移動先。
+    // プレハブ上のアンカーは中央(0.5, 0.5)だが、手札のHorizontalLayoutGroupが
+    // 子のanchorMin/anchorMaxをVector2.up (0, 1)＝左上へ書き換える（Unityの仕様）。
+    // 手札を経由したカードは手札から外れた後も左上アンカーのままなので、
+    // ここの座標は「共通の親（1920x1080）の左上隅からのオフセット」になる。
+    // 中央アンカーだと勘違いして値を変えると画面外へ飛ぶので注意。
+    //
+    // 画面中心を原点に直すとGameManagerの光の位置と一致する（対で管理すること）
+    //   SummonCenterPos (960, -540) → 中心から ( 0,   0) ↔ SummonLightCenterOn() の (0, 0, 0)
+    //   SpellLeftPos    (160, -140) → 中心から (-800, 400) ↔ SummonLightLeftOn()  の (-800, 400, 0)
+    static readonly Vector2 SummonCenterPos = new Vector2(960, -540);
+    static readonly Vector2 SpellLeftPos = new Vector2(160, -140);
+
+    /// <summary>
+    /// 演出を始める前に、親を共通の親（フィールドの親＝画面中心が原点のオブジェクト）へ揃える。
+    /// 上の移動先座標はこの親を基準に書かれているため、親が違うと移動先がずれる。
+    /// プレイヤーはOnBeginDrag()で既に手札から外れているが、AIの経路では手札の下にいるままで、
+    /// 手札のLayoutGroupに位置を奪われて演出が破綻する。
+    /// </summary>
+    void MoveToEffectRoot()
+    {
+        Transform effectRoot = GameManager.instance.playerFieldTransform.parent;
+        if (effectRoot == null || transform.parent == effectRoot) return;
+        // 見た目の位置は変えずに親だけ付け替える
+        transform.SetParent(effectRoot, true);
+    }
+
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -62,10 +89,10 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         {
             return;
         }
-        if (DropPlace.droppedCard == null)
-        {
-            DropPlace.droppedCard = card;
-        }
+        // 効果対象の選択中はこのメソッド自体が冒頭でreturnしているため、
+        // ここに残っている値は前のドラッグの解放漏れ。必ず上書きして居座らせない
+        // （居座るとChangeTurn()のTimeUpSelect()が毎ターンそのカードを手札へ引き戻す）。
+        DropPlace.droppedCard = card;
 
         CardController[] cards = GameManager.instance.GetFriendFieldCards(true);
         if (cards.Length != 0)
@@ -121,8 +148,35 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     {
         if (eventData.button == PointerEventData.InputButton.Right) return;
 
+        // このカードのドラッグが終わる以上、効果対象の選択待ちに入った場合を除いて
+        // DropPlace.droppedCardはここで必ず解放する。
+        // 以降の早期returnを通ると末尾の解放処理まで到達できず、残った値を
+        // ChangeTurn()のTimeUpSelect()が拾って無関係なカードを手札へ引き戻してしまうため。
+        CardController endDragCard = GetComponent<CardController>();
+        if (!GameManager.instance.isEffectSelectPhase && DropPlace.droppedCard == endDragCard)
+        {
+            DropPlace.droppedCard = null;
+        }
+
         if (!GameManager.instance.isPlayerTurn) return;
-        if (GameManager.instance.isSummoning) return;
+        if (GameManager.instance.isSummoning)
+        {
+            // 他のカードの召喚演出中にドロップした場合、DropPlace.OnDrop()もSpellDropManager.OnDrop()も
+            // 同じ条件でreturnしており誰もこのカードを引き受けていない。
+            // ドラッグ開始時にShakeObject直下へ移してあるので、宙に浮いたままにならないよう手札へ戻す。
+            // 逆に引き受け済みのカードは触らない：
+            //   ・フォロワーの召喚      → OnFiled()でisFieldCardがtrueになっている
+            //   ・スペルの使用          → SpellDropManager.OnDrop()でisDraggableがfalseにされている
+            //     （MoveLeftSpell()が同期でisSummoningをtrueにするため、使用したスペル自身も
+            //       この分岐に入ってくる。ここで手札へ戻すと移動演出が壊れる）
+            if (isDraggable && !endDragCard.model.isFieldCard)
+            {
+                transform.SetParent(defaultParent, false);
+                transform.SetSiblingIndex(handSiblingIndex);
+                GetComponent<CanvasGroup>().blocksRaycasts = true;
+            }
+            return;
+        }
         if (GameManager.instance.isEffectSelectPhase) return;
         if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
         if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE
@@ -229,6 +283,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public IEnumerator SummonMove(CardController summonCard, Transform dropPlace)
     {
         GameManager.instance.isSummoning = true;
+        MoveToEffectRoot();
         //拡大しながら中央へ移動
         RectTransform rectTransform = GetComponent<RectTransform>();
         DG.Tweening.Sequence seq = DOTween.Sequence();
@@ -251,7 +306,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         );
         seq.Play();
         rectTransform.DOScale(2f, 0.3f);
-        yield return rectTransform.DOAnchorPos(new Vector2(960, -540), 0.3f).WaitForCompletion();
+        yield return rectTransform.DOAnchorPos(SummonCenterPos, 0.3f).WaitForCompletion();
         GameManager.instance.ScaleYSummonLightCenterOn();
 
         //光のエフェクトを表示しながら縮小　カードは非表示
@@ -290,7 +345,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public IEnumerator PlayerSelectMoveOn()
     {
         RectTransform rectTransform = GetComponent<RectTransform>();
-        moveTween = rectTransform.DOAnchorPos(new Vector2(160, -140), 0.2f);
+        moveTween = rectTransform.DOAnchorPos(SpellLeftPos, 0.2f);
         GameManager.instance.SelectingPanelOn();
         yield return null;
     }
@@ -334,6 +389,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
     public IEnumerator MoveLeftSpell(CardController summonCard)
     {
         GameManager.instance.isSummoning = true;
+        MoveToEffectRoot();
         RectTransform rectTransform = GetComponent<RectTransform>();
         DG.Tweening.Sequence seq = DOTween.Sequence();
 
@@ -355,7 +411,7 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         );
         seq.Play();
         //rectTransform.DOScale(2f, 0.3f);
-        yield return rectTransform.DOAnchorPos(new Vector2(160, -140), 0.3f).WaitForCompletion();
+        yield return rectTransform.DOAnchorPos(SpellLeftPos, 0.3f).WaitForCompletion();
         GameManager.instance.ScaleYSummonLightLeftOn();
 
         //光のエフェクトを表示しながら縮小　カードは非表示

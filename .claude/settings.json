@@ -29,7 +29,14 @@
       "Bash(sed -i 's|^// report$|// report\\\\nfs.writeFileSync\\(\"D:/Repository/CardGame/Temp/included.json\", JSON.stringify\\([...visited].filter\\(v=>sizeOf.has\\(v\\)\\)\\)\\);|' Temp/deps.js)",
       "Bash(node Temp/tex.js)",
       "Bash(awk '/^--- !u!/{p=0} /&961733478$|&961733479$|&961733480$/{p=1} p' Assets/Scenes/Game.unity)",
-      "Bash(grep -n \"m_Name: Card$\" Assets/Resources_moved/Prefabs/Card.prefab)"
+      "Bash(grep -n \"m_Name: Card$\" Assets/Resources_moved/Prefabs/Card.prefab)",
+      "Bash(awk '/^--- !u!224 &961733477$/,/^--- !u!/{print}' Assets/Scenes/Game.unity)",
+      "Bash(grep -n -A 24 '^--- !u!224 &961733477$' Assets/Scenes/Game.unity)",
+      "Bash(grep -n -A 22 '^--- !u!224 &179550399$' Assets/Scenes/Game.unity)",
+      "Bash(grep -n -B 2 -A 18 '^--- !u!1 &179550397$' Assets/Scenes/Game.unity)",
+      "Bash(grep -n -A 20 \"^--- !u!224 &7110737167040287920$\" Assets/Scenes/Game.unity)",
+      "Bash(grep -n -A 22 \"^--- !u!224 &895268303$\" Assets/Scenes/Game.unity)",
+      "Bash(grep -n -A 20 \"^--- !u!1 &1003028656$\" Assets/Scenes/Game.unity)"
     ]
   }
 }

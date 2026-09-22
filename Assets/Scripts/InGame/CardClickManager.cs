@@ -112,6 +112,11 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
     public void TimeUpSelect()
     {
         if (DropPlace.droppedCard == null) return;
+        // 効果対象の選択待ち中のカードを手札へ戻すための処理なので、選択フェーズ中に限定する。
+        // DropPlace.droppedCardはドラッグ終了時の早期returnで解放漏れすることがあり、
+        // 無条件に実行すると「場に出ているだけの無関係なカード」まで
+        // 手札へ引き戻し（＋CancelSelect()でコストを払い戻し）てしまうため。
+        if (!GameManager.instance.isEffectSelectPhase) return;
         dropped = DropPlace.droppedCard;
         dropped.view.SetActiveSelectablePanel(false);
         dropped.model.isFieldCard = false;
