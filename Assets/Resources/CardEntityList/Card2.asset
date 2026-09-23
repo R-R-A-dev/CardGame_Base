@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Card2
   m_EditorClassIdentifier: 
   no: 2
-  name: "\u30F4\u30A1\u30EB\u30AF\u30B7\u30AA\u30F3"
+  name: No.2
   hp: 5
-  at: 0
+  at: 1
   cost: 1
   effectDmg: 1
   effectHeal: 1
@@ -32,7 +32,7 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: 1933478906972301040, guid: 1612f29ed46d77f439c61513f11a1130, type: 3}
+  icon: {fileID: -1694112944, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 1
   ability: 0

@@ -99,5 +99,8 @@ InitTestScene*.unity*
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
 # 重いアセットのフォルダをまとめて無視
-Assets/ImportedAssets/
+# ただし fonts は日本語表示に必須（除外するとTMPの参照が切れて日本語が消える）ため追跡する
+Assets/ImportedAssets/*
+!Assets/ImportedAssets/fonts/
+!Assets/ImportedAssets/fonts.meta
 

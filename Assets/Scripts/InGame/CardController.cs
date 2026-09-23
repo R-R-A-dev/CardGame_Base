@@ -401,15 +401,36 @@ public class CardController : MonoBehaviour
         target.model.hp = swap;
     }
 
+    // CONDITIONAL_ENEMY_DEBUFF はATKを1未満に下げられないため、
+    // ATKが1以下のカードは下げようがなく、効果の対象にならない。
+    public static bool CanAttackDebuff(CardController target)
+    {
+        return target != null && target.model != null && target.model.at > 1;
+    }
+
+    // 下げられる（ATKが2以上の）カードが1枚でもあるか。
+    // 1枚もなければ CONDITIONAL_ENEMY_DEBUFF のカード自体を使わせない。
+    public static bool HasAttackDebuffTarget(CardController[] cards)
+    {
+        if (cards == null) return false;
+        foreach (CardController c in cards)
+        {
+            if (CanAttackDebuff(c)) return true;
+        }
+        return false;
+    }
+
     public void AttackDebuff(CardController card, CardController target)
     {
         // ATKは1未満にならないようclampするので、effectDmgではなく
         // 実際に下がった分を数字として出す。
+        // 元から1未満のカードを1に「上げて」しまわないよう、下限は min(1, 元のATK)。
         int before = target.model.at;
+        int floor = Mathf.Min(1, before);
         target.model.at -= card.model.effectDmg;
-        if (target.model.at < 1)
+        if (target.model.at < floor)
         {
-            target.model.at = 1;
+            target.model.at = floor;
         }
         int reduced = before - target.model.at;
         // 既にATKが1で下がらなかった場合も、効果が当たったことが分かるように0を出す
@@ -419,6 +440,9 @@ public class CardController : MonoBehaviour
     public void AttackBuff(CardController card, CardController target)
     {
         target.model.at += card.model.effectDmg;
+        // ATKアップも「実際に値を適用する場所」で数字を出す。
+        // プラスの効果なので回復と同じ緑（isHeal=true）で上昇量を表示する。
+        card.ShowEffectText(target.transform, card.model.effectDmg, true);
     }
 
     public void RefreshView()
@@ -858,7 +882,7 @@ public class CardController : MonoBehaviour
     {
         bool canUse = false;
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_CARDS) ||
-            model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
+            model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
@@ -870,6 +894,19 @@ public class CardController : MonoBehaviour
                 return false;
             }
 
+        }
+        if (model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
+        {
+            // ATKは1未満に下がらないため、相手の場がATK1以下のカードだけなら発動できない
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (HasAttackDebuffTarget(enemyCards))
+            {
+                canUse = true;
+            }
+            else
+            {
+                return false;
+            }
         }
         if (model.abilities.HasFlag(ABILITIES.DAMAGE_ENEMY_HERO) || model.abilities.HasFlag(ABILITIES.HEAL_FRIEND_HERO) || model.abilities.HasFlag(ABILITIES.DRAW_CARDS))
         {
@@ -1230,10 +1267,19 @@ public class CardController : MonoBehaviour
     {
         bool canUse = false;
         if (model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS)
-            || model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
+            || model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD))
         {
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (enemyCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
+        {
+            // ATKは1未満に下がらないため、相手の場がATK1以下のカードだけなら使用できない
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (HasAttackDebuffTarget(enemyCards))
             {
                 canUse = true;
             }
@@ -1276,11 +1322,21 @@ public class CardController : MonoBehaviour
                 canUse = true;
             }
         }
-        if (model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS) || model.spells.HasFlag(SPELLS.SWAP_HP_ATK))
+        if (model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
         {
             CardController[] friendCards = gameManager.GetFriendFieldCards(this.model.isPlayerCard);
             CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
             if (friendCards.Length > 0 || enemyCards.Length > 0)
+            {
+                canUse = true;
+            }
+        }
+        if (model.spells.HasFlag(SPELLS.SWAP_HP_ATK))
+        {
+            // 対象は敵フォロワー1体なので、相手の場が空なら使用できない
+            // （自陣にしかカードがない状態でも使えてしまっていた）
+            CardController[] enemyCards = gameManager.GetEnemyFieldCards(this.model.isPlayerCard);
+            if (enemyCards.Length > 0)
             {
                 canUse = true;
             }

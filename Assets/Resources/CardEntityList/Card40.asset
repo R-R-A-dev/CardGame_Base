@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card40
   m_EditorClassIdentifier: 
   no: 40
-  name: "\u685C\u5D50\u4EAC\u52A9"
+  name: No.40
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u76F8\u624B\u306E\u624B\u672D\u3059\u3079\u3066\u306E\u30AB\u30FC\u30C9\u30B3\u30B9\u30C8\u30922\u5897\u3084\u3059"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,11 +32,11 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -5169449360348758379, guid: aa2231ae691e5f744bf3ddb445b3b22a, type: 3}
+  icon: {fileID: 1898821887, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0
   spell: 0
-  spells: 0
-  abilities: 1
+  spells: 16384
+  abilities: 0
   targetCardID: 

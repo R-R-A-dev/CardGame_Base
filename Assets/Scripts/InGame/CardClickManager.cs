@@ -67,6 +67,18 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 return;
             }
 
+            // ATKダウン（CONDITIONAL_ENEMY_DEBUFF）はATKを1未満に下げられないため、
+            // ATKが1以下の相手フォロワーは対象に選べない。
+            // 選び直せるように、キャンセル（手札に戻す）はせず選択フェーズを続ける。
+            if ((droppedCard.IsSpell
+                    ? droppedCard.model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF)
+                    : droppedCard.model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF)) &&
+                !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard &&
+                !CardController.CanAttackDebuff(clickedCard))
+            {
+                return;
+            }
+
             if (!droppedCard.IsSpell)
             {
                 if (!droppedCard.CanUseAbilities())

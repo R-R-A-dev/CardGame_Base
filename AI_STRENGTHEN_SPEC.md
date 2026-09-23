@@ -257,7 +257,8 @@ if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp
 
 | 選択関数 | 対象フラグ | ルール |
 |---|---|---|
-| `SelectDamageTarget` | `DAMAGE_ENEMY_CARD` / `CONDITIONAL_ENEMY_DEBUFF` / `SWAP_HP_ATK` | `effectDmg` で倒せる相手の中で `Threat` 最大、いなければ全体で `Threat` 最大 |
+| `SelectDamageTarget` | `DAMAGE_ENEMY_CARD` / `SWAP_HP_ATK` | `effectDmg` で倒せる相手の中で `Threat` 最大、いなければ全体で `Threat` 最大 |
+| `SelectDebuffTarget` | `CONDITIONAL_ENEMY_DEBUFF` | **ATKが2以上**の相手のうち `Threat` 最大（ATK1以下は下げられないため候補外） |
 | `SelectDestroyTarget` | `DESTROY_ENEMY_CARD` / `STEAL_ENEMY_CARD` | `Threat` 最大 |
 | `SelectHealTarget` | `HEAL_FRIEND_CARD` | `hp` 最小の味方 |
 | `SelectBuffTarget` | `CONDITIONAL_FRIEND_BUFF` | **`SelfField()` 全体**のうち `hp` 最大 |
@@ -278,7 +279,8 @@ if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp
 
 | 必要な対象 | フラグ |
 |---|---|
-| `OppField()` に1体以上 | `DAMAGE_ENEMY_CARD` / `DAMAGE_ENEMY_CARDS` / `DESTROY_ENEMY_CARD` / `CONDITIONAL_ENEMY_DEBUFF` / `STEAL_ENEMY_CARD` / `RANDOM_ENEMY` / `SWAP_HP_ATK` |
+| `OppField()` に1体以上 | `DAMAGE_ENEMY_CARD` / `DAMAGE_ENEMY_CARDS` / `DESTROY_ENEMY_CARD` / `STEAL_ENEMY_CARD` / `RANDOM_ENEMY` / `SWAP_HP_ATK` |
+| `OppField()` に**ATK2以上**が1体以上 | `CONDITIONAL_ENEMY_DEBUFF`（`CardController.HasAttackDebuffTarget()`。プレイヤー側の `CanUseSpells()` / `CanUseAbilities()` と同じ判定） |
 | `SelfField()` に1体以上 | `HEAL_FRIEND_CARD` / `HEAL_FRIEND_CARDS` / `CONDITIONAL_FRIEND_BUFF` / `RANDOM_FRIEND` |
 | どちらかの盤面に1体以上 | `DESTROY_ALL_FIELD_CARDS` |
 | `OppHand()` が1枚以上 | `INCREASE_ENEMY_COST` / `DISCARD_ENEMY_HAND` / `DISCARD_ALL_ENEMY_HAND` |

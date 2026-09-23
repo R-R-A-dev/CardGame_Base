@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Card26
   m_EditorClassIdentifier: 
   no: 26
-  name: "\u30C8\u30E2\u30B3\u30EC\u30D1\u30BA\u30EB"
+  name: No.26
   hp: 5
   at: 3
   cost: 1
@@ -32,7 +32,7 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: 126428859179089320, guid: 9288a5bc4525f3743a54a25de770b0a1, type: 3}
+  icon: {fileID: 363146823, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0

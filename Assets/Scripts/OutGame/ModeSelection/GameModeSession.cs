@@ -1,25 +1,25 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class GameModeSession : MonoBehaviour
 {
     public static GameMode CurrentGameMode { get; set; } = GameMode.NONE;
 
-    // ‘I‘ğ‚³‚ê‚½ƒf[ƒ^
+    // é¸æŠã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿
     public static LethalPuzzleData SelectedPuzzle { get; set; }
     public static TwoPickData SelectedTwoPick { get; set; }
     public static RoguelikeStageData SelectedRoguelike { get; set; }
 
-    // 2Pick/ƒ[ƒOƒ‰ƒCƒN‚Å\’z‚³‚ê‚½ƒfƒbƒL
+    // 2Pick/ãƒ­ãƒ¼ã‚°ãƒ©ã‚¤ã‚¯ã§æ§‹ç¯‰ã•ã‚ŒãŸãƒ‡ãƒƒã‚­
     public static List<int> PlayerDeck { get; set; } = new List<int>();
     public static List<int> EnemyDeck { get; set; } = new List<int>();
 
-    // ƒ[ƒOƒ‰ƒCƒN—p‚Ìisó‘Ô
+    // ãƒ­ãƒ¼ã‚°ãƒ©ã‚¤ã‚¯ç”¨ã®é€²è¡ŒçŠ¶æ…‹
     public static int CurrentStage { get; set; } = 1;
     public static int PlayerHP { get; set; } = 20;
 
     /// <summary>
-    /// ƒZƒbƒVƒ‡ƒ“‚ğƒŠƒZƒbƒg
+    /// ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚’ãƒªã‚»ãƒƒãƒˆ
     /// </summary>
     public static void Reset()
     {

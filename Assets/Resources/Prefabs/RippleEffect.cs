@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -16,14 +16,14 @@ public class RippleEffect : MonoBehaviour
 
     private IEnumerator PlayRipple()
     {
-        while (true) // –³ŒÀƒ‹[ƒv
+        while (true) // ç„¡é™ãƒ«ãƒ¼ãƒ—
         {
             float time = 0f;
             while (time < duration)
             {
                 float t = time / duration;
                 float scale = Mathf.Lerp(startScale, endScale, t);
-                float alpha = Mathf.Lerp(1f, 0f, t); // “§–¾“x‚ğ‚¾‚ñ‚¾‚ñ‰º‚°‚é
+                float alpha = Mathf.Lerp(1f, 0f, t); // é€æ˜åº¦ã‚’ã ã‚“ã ã‚“ä¸‹ã’ã‚‹
 
                 rippleImage.transform.localScale = new Vector3(scale, scale, 1);
                 Color color = rippleImage.color;
@@ -34,10 +34,10 @@ public class RippleEffect : MonoBehaviour
                 yield return null;
             }
 
-            // ƒŠƒZƒbƒg
-            rippleImage.transform.localScale = Vector3.one; // ƒTƒCƒY‚ğŒ³‚É–ß‚·
+            // ãƒªã‚»ãƒƒãƒˆ
+            rippleImage.transform.localScale = Vector3.one; // ã‚µã‚¤ã‚ºã‚’å…ƒã«æˆ»ã™
             Color resetColor = rippleImage.color;
-            resetColor.a = 1f; // “§–¾“x‚ğŒ³‚É–ß‚·
+            resetColor.a = 1f; // é€æ˜åº¦ã‚’å…ƒã«æˆ»ã™
             rippleImage.color = resetColor;
         }
     }

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class RoguelikeSelectionPanel : MonoBehaviour
 {
@@ -16,7 +16,7 @@ public class RoguelikeSelectionPanel : MonoBehaviour
     public void StartRoguelike()
     {
         ModeConfigManager.Instance.currentGameMode = GameMode.ROGUELIKE;
-        //ƒV[ƒ“•ÏX
+        //ã‚·ãƒ¼ãƒ³å¤‰æ›´
         //UnityEngine.SceneManagement.SceneManager.LoadScene("Battle");
 
     }

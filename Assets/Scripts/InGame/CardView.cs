@@ -9,7 +9,12 @@ public class CardView : MonoBehaviour
     [SerializeField] TextMeshProUGUI hpText;
     [SerializeField] TextMeshProUGUI atText;
     [SerializeField] TextMeshProUGUI costText;
+    [SerializeField] TextMeshProUGUI descriptionText;
     [SerializeField] Image iconImage;
+    // レアリティごとのフレーム。対応する一枚だけを活性にする
+    [SerializeField] GameObject frameN;
+    [SerializeField] GameObject frameR;
+    [SerializeField] GameObject frameSR;
     [SerializeField] GameObject selectablePanel;
     [SerializeField] GameObject oneceNull;
     [SerializeField] GameObject shieldPanel;
@@ -22,7 +27,9 @@ public class CardView : MonoBehaviour
         hpText.text = cardModel.hp.ToString();
         atText.text = cardModel.at.ToString();
         costText.text = cardModel.cost.ToString();
+        SetDescription(cardModel);
         iconImage.sprite = cardModel.icon;
+        RefreshFrame(cardModel);
         //maskPanel.SetActive(!cardModel.isPlayerCard);
 
         if (cardModel.isPlayerCard)
@@ -37,6 +44,28 @@ public class CardView : MonoBehaviour
         RefreshOneceNull(cardModel);
         // スペルは攻撃力・体力を持たないので非表示にする
         CardStatsDisplay.SetActiveStatsText(cardModel.spells, atText, hpText);
+    }
+
+    /// <summary>
+    /// カード効果テキスト（description）の表示更新。
+    /// 効果を持たないカードは枠だけ残らないようオブジェクトごと隠す。
+    /// descriptionTextを持たないCardView（旧プレハブ等）もあるのでnullチェックする。
+    /// </summary>
+    void SetDescription(CardModel cardModel)
+    {
+        if (descriptionText == null) return;
+
+        bool hasDescription = !string.IsNullOrEmpty(cardModel.description);
+        descriptionText.gameObject.SetActive(hasDescription);
+        descriptionText.text = hasDescription ? cardModel.description : string.Empty;
+    }
+
+    /// <summary>
+    /// フレーム（枠）の表示更新。CardModelのレアリティに対応する一枚だけを活性にする。
+    /// </summary>
+    public void RefreshFrame(CardModel cardModel)
+    {
+        CardFrameDisplay.Apply(cardModel.rare, frameN, frameR, frameSR);
     }
 
     public void Show()

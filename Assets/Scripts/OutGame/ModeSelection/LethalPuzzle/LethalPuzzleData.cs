@@ -1,29 +1,29 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "LethalPuzzleData", menuName = "GameMode/LethalPuzzleData")]
 public class LethalPuzzleData : ScriptableObject
 {
-    [Header("ƒpƒYƒ‹Šî–{İ’è")]
+    [Header("ãƒ‘ã‚ºãƒ«åŸºæœ¬è¨­å®š")]
     public string puzzleName;
     public int puzzleId;
     [TextArea(3, 5)]
     public string description;
 
-    [Header("HP/ƒ}ƒiİ’è")]
+    [Header("HP/ãƒãƒŠè¨­å®š")]
     public int playerInitialHP = 20;
     public int enemyInitialHP = 10;
     public int playerInitialMana = 10;
     public int turnLimit = 1;
 
-    [Header("‰ŠúèD")]
+    [Header("åˆæœŸæ‰‹æœ­")]
     public List<int> playerInitialHand = new List<int>();
 
-    [Header("‰ŠúƒtƒB[ƒ‹ƒh")]
+    [Header("åˆæœŸãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰")]
     public List<int> playerInitialField = new List<int>();
     public List<int> enemyInitialField = new List<int>();
 
-    [Header("ƒfƒbƒLiƒhƒ[—pj")]
+    [Header("ãƒ‡ãƒƒã‚­ï¼ˆãƒ‰ãƒ­ãƒ¼ç”¨ï¼‰")]
     public List<int> playerDeck = new List<int>();
     public List<int> enemyDeck = new List<int>();
 }

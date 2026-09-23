@@ -15,12 +15,18 @@ public class OutGameCardList : MonoBehaviour
     private int cost;
     private string description;
     private SPELLS spells;
+    private RARE rare;
 
     public Image image;
+    // レアリティごとのフレーム。対応する一枚だけを活性にする
+    public GameObject frameN;
+    public GameObject frameR;
+    public GameObject frameSR;
     public TextMeshProUGUI cardNameText;
     public TextMeshProUGUI cardAttackText;
     public TextMeshProUGUI cardHpText;
     public TextMeshProUGUI cardCostText;
+    public TextMeshProUGUI cardDescriptionText;
 
 
     [SerializeField] private Text selectedText;
@@ -40,6 +46,7 @@ public class OutGameCardList : MonoBehaviour
     public int Cost { get { return cost; } set { cost = value; } }
     public string Description { get { return description; } set { description = value; } }
     public SPELLS Spells { get { return spells; } set { spells = value; } }
+    public RARE Rare { get { return rare; } set { rare = value; } }
 
     /// <summary>
     /// 一覧表示時のデータセット
@@ -57,14 +64,39 @@ public class OutGameCardList : MonoBehaviour
         Cost = entity.cost;
         Description = entity.description;
         Spells = entity.spells;
+        Rare = entity.rare;
 
         image.sprite = entity.icon;
+        RefreshFrame();
         cardNameText.text = entity.name;
         cardAttackText.text = entity.at.ToString();
         cardHpText.text = entity.hp.ToString();
         cardCostText.text = entity.cost.ToString();
+        SetDescription(entity.description);
         // スペルは攻撃力・体力を持たないので非表示にする
         CardStatsDisplay.SetActiveStatsText(Spells, cardAttackText, cardHpText);
+    }
+
+    /// <summary>
+    /// カード効果テキスト（description）の表示更新。
+    /// 効果を持たないカードは枠だけ残らないようオブジェクトごと隠す。
+    /// cardDescriptionTextを割り当てていないプレハブもあるのでnullチェックする。
+    /// </summary>
+    void SetDescription(string text)
+    {
+        if (cardDescriptionText == null) return;
+
+        bool hasDescription = !string.IsNullOrEmpty(text);
+        cardDescriptionText.gameObject.SetActive(hasDescription);
+        cardDescriptionText.text = hasDescription ? text : string.Empty;
+    }
+
+    /// <summary>
+    /// フレーム（枠）の表示更新。レアリティに対応する一枚だけを活性にする。
+    /// </summary>
+    public void RefreshFrame()
+    {
+        CardFrameDisplay.Apply(Rare, frameN, frameR, frameSR);
     }
 
     /// <summary>
@@ -81,12 +113,15 @@ public class OutGameCardList : MonoBehaviour
         Cost = card.Cost;
         Description = card.Description;
         Spells = card.Spells;
+        Rare = card.Rare;
 
         image.sprite = card.image.sprite;
+        RefreshFrame();
         cardNameText.text = card.cardNameText.text;
         cardAttackText.text = card.cardAttackText.text;
         cardHpText.text = card.cardHpText.text;
         cardCostText.text = card.cardCostText.text;
+        SetDescription(card.Description);
         CardStatsDisplay.SetActiveStatsText(Spells, cardAttackText, cardHpText);
     }
 

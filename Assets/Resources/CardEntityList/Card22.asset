@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Card22
   m_EditorClassIdentifier: 
   no: 22
-  name: "\u30B5\u30A4\u30E2\u30F3\u30B7\u30E5\u30FC\u30BA\u5F8C\u85E4"
+  name: No.22
   hp: 5
   at: 3
   cost: 1
@@ -32,7 +32,7 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -3087429585983604619, guid: d86c0000a9043aa41ae8f564c9fcdd92, type: 3}
+  icon: {fileID: -1796945640, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0

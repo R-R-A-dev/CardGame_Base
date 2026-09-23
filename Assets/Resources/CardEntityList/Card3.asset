@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Card3
   m_EditorClassIdentifier: 
   no: 3
-  name: "\u6CE3\u304F\u7537"
+  name: No.3
   hp: 5
   at: 0
   cost: 1
@@ -32,7 +32,7 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: 6560158297854099428, guid: cf65da8531a58cb4989955315aaf0ef8, type: 3}
+  icon: {fileID: 1968902660, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 2
   ability: 0

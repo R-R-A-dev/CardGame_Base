@@ -123,11 +123,19 @@ public static class AIEvaluator
         SPELLS spells = card.model.spells;
 
         if (spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARD) || spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) ||
-            spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF) ||
+            spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) ||
             spells.HasFlag(SPELLS.STEAL_ENEMY_CARD) || spells.HasFlag(SPELLS.RANDOM_ENEMY) ||
             spells.HasFlag(SPELLS.SWAP_HP_ATK))
         {
             if (OppField().Length == 0) return false;
+        }
+
+        // CONDITIONAL_ENEMY_DEBUFF（AttackDebuff）はATKを1未満に下げられないため、
+        // 相手の場がATK1以下のカードだけなら効果がなく、撃たない（プレイヤー側の
+        // CardController.CanUseSpells() / CanUseAbilities() の判定と揃える）。
+        if (spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
+        {
+            if (!CardController.HasAttackDebuffTarget(OppField())) return false;
         }
 
         // CONDITIONAL_FRIEND_BUFF（AttackBuff）は target.model.at += effectDmg という
@@ -541,7 +549,7 @@ public static class AIEvaluator
     // ---- スペル/アビリティの効果対象選択（段階4） ----
     // 対象が0件のときは必ず null を返す。呼び出し側（AI.cs）は null を効果不発として扱う。
 
-    // ダメージ系（DAMAGE_ENEMY_CARD / CONDITIONAL_ENEMY_DEBUFF）の対象を選ぶ。
+    // ダメージ系（DAMAGE_ENEMY_CARD / SWAP_HP_ATK）の対象を選ぶ。
     // card.model.effectDmg で倒せる相手がいればその中でThreat最大、いなければ全体でThreat最大。
     public static CardController SelectDamageTarget(CardController card)
     {
@@ -565,6 +573,26 @@ public static class AIEvaluator
         // 倒せる相手がいなければThreat最大
         foreach (CardController c in candidates)
         {
+            float t = Threat(c);
+            if (t > bestThreat)
+            {
+                bestThreat = t;
+                best = c;
+            }
+        }
+        return best;
+    }
+
+    // ATKダウン系（CONDITIONAL_ENEMY_DEBUFF）の対象を選ぶ。
+    // AttackDebuff()はATKを1未満に下げられないため、ATKが2以上の相手だけを候補にし、
+    // その中でThreat最大を返す。候補が0体なら null（効果不発）。
+    public static CardController SelectDebuffTarget(CardController card)
+    {
+        CardController best = null;
+        float bestThreat = float.NegativeInfinity;
+        foreach (CardController c in OppField())
+        {
+            if (!CardController.CanAttackDebuff(c)) continue;
             float t = Threat(c);
             if (t > bestThreat)
             {

@@ -198,6 +198,9 @@ public class AI : MonoBehaviour
         {
             if (card.model.abilities.HasFlag(ABILITIES.DESTROY_ENEMY_CARD) || card.model.abilities.HasFlag(ABILITIES.STEAL_ENEMY_CARD))
                 target = AIEvaluator.SelectDestroyTarget(card);
+            else if (card.model.abilities.HasFlag(ABILITIES.CONDITIONAL_ENEMY_DEBUFF))
+                // ATKを1未満には下げられないため、ATK2以上の相手だけを対象にする（0体ならnull＝不発）
+                target = AIEvaluator.SelectDebuffTarget(card);
             else
                 target = AIEvaluator.SelectDamageTarget(card);
         }
@@ -330,6 +333,9 @@ public class AI : MonoBehaviour
         {
             if (card.model.spells.HasFlag(SPELLS.DESTROY_ENEMY_CARD) || card.model.spells.HasFlag(SPELLS.STEAL_ENEMY_CARD))
                 target = AIEvaluator.SelectDestroyTarget(card);
+            else if (card.model.spells.HasFlag(SPELLS.CONDITIONAL_ENEMY_DEBUFF))
+                // ATKを1未満には下げられないため、ATK2以上の相手だけを対象にする（0体ならnull＝不発）
+                target = AIEvaluator.SelectDebuffTarget(card);
             else
                 target = AIEvaluator.SelectDamageTarget(card);
         }

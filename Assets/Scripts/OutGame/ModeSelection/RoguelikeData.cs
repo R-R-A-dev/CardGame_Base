@@ -1,48 +1,48 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "RoguelikeData", menuName = "GameMode/RoguelikeData")]
 public class RoguelikeData : ScriptableObject
 {
-    [Header("ŠƒXƒe[ƒWİ’è")]
+    [Header("æ‰€æŒã‚¹ãƒ†ãƒ¼ã‚¸è¨­å®š")]
     public List<StageRow> stageMap = new List<StageRow>();
 
-    [Header("ƒ[ƒOƒ‰ƒCƒNŠî–{İ’è")]
+    [Header("ãƒ­ãƒ¼ã‚°ãƒ©ã‚¤ã‚¯åŸºæœ¬è¨­å®š")]
     public string runName = "Adventure Run";
     [TextArea(3, 5)]
     public string description;
 
-    [Header("ƒQ[ƒ€İ’è")]
+    [Header("ã‚²ãƒ¼ãƒ è¨­å®š")]
     public int playerInitialHP = 20;
     public int startingDeckSize = 40;
 
-    [Header("‰ŠúƒfƒbƒL")]
+    [Header("åˆæœŸãƒ‡ãƒƒã‚­")]
     public List<int> startingDeck = new List<int>();
 
-    [Header("ƒXƒe[ƒWİ’è")]
+    [Header("ã‚¹ãƒ†ãƒ¼ã‚¸è¨­å®š")]
     public int totalStages = 10;
-    public List<int> bossStages = new List<int> { 3, 6, 10 }; // ƒ{ƒXí‚ÌƒXƒe[ƒW”Ô†
+    public List<int> bossStages = new List<int> { 3, 6, 10 }; // ãƒœã‚¹æˆ¦ã®ã‚¹ãƒ†ãƒ¼ã‚¸ç•ªå·
 
-    [Header("•ñVİ’è")]
-    public int cardsPerReward = 5; // •ñV‚Å‘I‚×‚éƒJ[ƒh”
-    public List<int> rewardCardPool = new List<int>(); // •ñVƒJ[ƒhƒv[ƒ‹
+    [Header("å ±é…¬è¨­å®š")]
+    public int cardsPerReward = 5; // å ±é…¬ã§é¸ã¹ã‚‹ã‚«ãƒ¼ãƒ‰æ•°
+    public List<int> rewardCardPool = new List<int>(); // å ±é…¬ã‚«ãƒ¼ãƒ‰ãƒ—ãƒ¼ãƒ«
 
-    [Header("“Gİ’è")]
-    public List<int> normalEnemyDecks = new List<int>(); // ’Êí“G‚ÌƒfƒbƒLƒŠƒXƒg
-    public List<int> bossEnemyDecks = new List<int>(); // ƒ{ƒX‚ÌƒfƒbƒLƒŠƒXƒg
+    [Header("æ•µè¨­å®š")]
+    public List<int> normalEnemyDecks = new List<int>(); // é€šå¸¸æ•µã®ãƒ‡ãƒƒã‚­ãƒªã‚¹ãƒˆ
+    public List<int> bossEnemyDecks = new List<int>(); // ãƒœã‚¹ã®ãƒ‡ãƒƒã‚­ãƒªã‚¹ãƒˆ
 
 }
 
 [System.Serializable]
 public class StageRow
 {
-    [Tooltip("‚±‚Ìs‚ÌƒXƒe[ƒWˆê—— (—ñ•ûŒü)")]
+    [Tooltip("ã“ã®è¡Œã®ã‚¹ãƒ†ãƒ¼ã‚¸ä¸€è¦§ (åˆ—æ–¹å‘)")]
     public List<StageData> stages = new List<StageData>();
 }
-/*ƒ[ƒOƒ‰ƒCƒNƒ‚[ƒh‚Å•K—v‚Èƒf[ƒ^‚â‰æ–ÊA‘¼‚à
- * ŠJnƒ{ƒ^ƒ“‚ğ‰Ÿ‚·‚ÆƒfƒbƒLƒfƒbƒL‘I‘ğƒEƒBƒ“ƒhƒEŠJ‚­
- * ‰æ–ÊŠO‚©~ƒ{ƒ^ƒ“‚Å–ß‚é
- * ŠJn‚ğ‰Ÿ‚·‚Æ‘JˆÚ
+/*ãƒ­ãƒ¼ã‚°ãƒ©ã‚¤ã‚¯ãƒ¢ãƒ¼ãƒ‰ã§å¿…è¦ãªãƒ‡ãƒ¼ã‚¿ã‚„ç”»é¢ã€ä»–ã‚‚
+ * é–‹å§‹ãƒœã‚¿ãƒ³ã‚’æŠ¼ã™ã¨ãƒ‡ãƒƒã‚­ãƒ‡ãƒƒã‚­é¸æŠã‚¦ã‚£ãƒ³ãƒ‰ã‚¦é–‹ã
+ * ç”»é¢å¤–ã‹Ã—ãƒœã‚¿ãƒ³ã§æˆ»ã‚‹
+ * é–‹å§‹ã‚’æŠ¼ã™ã¨é·ç§»
  * 
  * 
  * 

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card45
   m_EditorClassIdentifier: 
   no: 45
-  name: "\u8001\u725B"
+  name: No.45
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u76F8\u624B\u306E\u624B\u672D\u3092\u30E9\u30F3\u30C0\u30E0\u3067\uFF11\u679A\u7834\u58CA\u3059\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,11 +32,11 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: 2769985130219872622, guid: a0197ba3d9d7a6a43965cb40d9bdb1bd, type: 3}
+  icon: {fileID: -1108357025, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0
   spell: 0
-  spells: 0
-  abilities: 1
+  spells: 8388608
+  abilities: 0
   targetCardID: 

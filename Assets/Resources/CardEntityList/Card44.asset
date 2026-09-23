@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card44
   m_EditorClassIdentifier: 
   no: 44
-  name: "\u771F\u4E38\u661F\u52F2"
+  name: No.44
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u76F8\u624B\u306E\u5834\u306E\u30AB\u30FC\u30C9\u3092\uFF11\u4F53\u9078\u629E\u3057\u3066\u30A2\u30BF\u30C3\u30AF\u5024\u3068HP\u3092\u5165\u308C\u66FF\u3048\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,11 +32,11 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -7006334787274422983, guid: 7af4f24ac5792ed40806550981715edc, type: 3}
+  icon: {fileID: -2127414233, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0
   spell: 0
-  spells: 0
-  abilities: 1
+  spells: 4198400
+  abilities: 0
   targetCardID: 

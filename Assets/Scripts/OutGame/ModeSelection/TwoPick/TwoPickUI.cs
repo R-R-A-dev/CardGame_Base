@@ -161,8 +161,13 @@ public class TwoPickUI : MonoBehaviour
 
             if (selectedCards[i] > 0)
             {
+                // 表示枠より多くの種類を引いた場合はそこで打ち切る
+                if (setCount >= cardControllers.Length) break;
+
                 cardControllers[setCount].gameObject.SetActive(true);
-                cardsNum[setCount].text = selectedCards[i].ToString();
+                // 枚数表示は枠ごとに用意されているが、未設定でも一覧自体は表示できるようにする
+                if (setCount < cardsNum.Length && cardsNum[setCount] != null)
+                    cardsNum[setCount].text = selectedCards[i].ToString();
                 //カードデータセット
                 cardControllers[setCount].Init(i + 1, false);
                 setCount++;

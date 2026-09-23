@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card37
   m_EditorClassIdentifier: 
   no: 37
-  name: "\u5FD7\u72E9\u4F50\u66AE\u72FC"
+  name: No.37
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u76F8\u624B\u306E\u5834\u306E\u30AB\u30FC\u30C9\u3092\uFF11\u4F53\u9078\u629E\u3057\u3066\u81EA\u5206\u306E\u5834\u306E\u30AB\u30FC\u30C9\u3068\u3057\u3066\u6271\u3046"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,11 +32,11 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -385555167483148285, guid: daccb41d9c8fa854c98f8e5b05fa927b, type: 3}
+  icon: {fileID: -130223781, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0
   spell: 0
-  spells: 0
-  abilities: 1
+  spells: 4224
+  abilities: 0
   targetCardID: 

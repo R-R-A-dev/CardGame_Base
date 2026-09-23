@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card36
   m_EditorClassIdentifier: 
   no: 36
-  name: "\u5BAE\u57CE\u725B\u592A\u90CE"
+  name: No.36
   hp: 5
   at: 3
   cost: 1
   effectDmg: 2
   effectHeal: 1
   price: 0
-  description: "\u30C6\u30B9\u30C8\u7528"
+  description: "\u76F8\u624B\u306E\u5834\u306E\u30AB\u30FC\u30C9\u3092\uFF11\u4F53\u9078\u629E\u3057\u3066\u7834\u58CA\u3059\u308B"
   summonAudio: {fileID: 0}
   summonAbilityAudio: {fileID: 0}
   attackAudio: {fileID: 0}
@@ -32,11 +32,11 @@ MonoBehaviour:
   hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
   destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
   attackTime: 30
-  icon: {fileID: -3822701817198879153, guid: 2770f16b1aed6044e848372fc2e64c2b, type: 3}
+  icon: {fileID: -1227359091, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
   attackType: 1
   rare: 3
   ability: 0
   spell: 0
-  spells: 0
-  abilities: 1
+  spells: 4160
+  abilities: 0
   targetCardID: 
