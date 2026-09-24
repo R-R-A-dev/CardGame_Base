@@ -139,7 +139,8 @@ public class DeckAndStageSelectUI : MonoBehaviour
     public void DecideDeck()
     {
         deckConfirmPanle.SetActive(false);
-        selectedDeck.text = selectedDeckId.ToString();
+        // deckIdは0始まりのため+1して「Deck 01」～「Deck 08」の形式で表示する
+        selectedDeck.text = $"Deck {selectedDeckId + 1:D2}";
 
         decidedDeckId = selectedDeckId;
         stageSelectUI.SetSelectButtonsInteractable(true);

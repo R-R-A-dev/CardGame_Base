@@ -131,7 +131,15 @@
       "Bash(awk -v i=\"1170874107\" '/^--- !u!/{p=0} $0 ~ \\(\"^--- !u!1 &\" i \"$\"\\){p=1} p' Assets/Scenes/Field.unity)",
       "Bash(cp /tmp/Field.v7.unity Assets/Scenes/Field.unity)",
       "Bash(bash /tmp/gen7.sh)",
-      "Bash(awk -v G=6ae74f9180ae02c4b81046b5712dcf64 ' *)"
+      "Bash(awk -v G=6ae74f9180ae02c4b81046b5712dcf64 ' *)",
+      "Bash(sed -i \"s/readFileSync\\(file,'utf8'\\)/readFileSync\\(file,'utf8'\\).replace\\(\\\\/\\\\\\\\\\\\\\\\r\\\\/g,''\\)/\" /tmp/inv/tree.js)",
+      "Read(//tmp/inv/**)",
+      "Bash(node /tmp/inv/tree.js Assets/Scenes/Field.unity 492075818)",
+      "Bash(sed -i \"3s/.*/const txt=fs.readFileSync\\(file,'utf8'\\).split\\(String.fromCharCode\\(13\\)\\).join\\(''\\);/\" /tmp/inv/tree.js)",
+      "Bash(cat /tmp/inv/tree.js | head -12)",
+      "Bash(sed -i \"9s/.*/const get=\\(b,k\\)=>{const line=b.split\\(String.fromCharCode\\(10\\)\\).find\\(l=>l.trim\\(\\).startsWith\\(k+':'\\)\\);return line?line.slice\\(line.indexOf\\(':'\\)+1\\).trim\\(\\):null};/\" /tmp/inv/tree.js)",
+      "Bash(awk -v i=\"1881461845\" '/^--- !u!/{p=0} $0 ~ \\(\"^--- !u!114 &\" i \"$\"\\){p=1} p' Assets/Scenes/Field.unity)",
+      "Bash(awk 'NR>=611380 && NR<=611520 && /--- !u!|m_Text:|m_Script:/ {print NR\": \"$0}' Assets/Scenes/Field.unity)"
     ],
     "additionalDirectories": [
       "C:\\Users\\lenov",
