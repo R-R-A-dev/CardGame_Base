@@ -139,11 +139,36 @@
       "Bash(cat /tmp/inv/tree.js | head -12)",
       "Bash(sed -i \"9s/.*/const get=\\(b,k\\)=>{const line=b.split\\(String.fromCharCode\\(10\\)\\).find\\(l=>l.trim\\(\\).startsWith\\(k+':'\\)\\);return line?line.slice\\(line.indexOf\\(':'\\)+1\\).trim\\(\\):null};/\" /tmp/inv/tree.js)",
       "Bash(awk -v i=\"1881461845\" '/^--- !u!/{p=0} $0 ~ \\(\"^--- !u!114 &\" i \"$\"\\){p=1} p' Assets/Scenes/Field.unity)",
-      "Bash(awk 'NR>=611380 && NR<=611520 && /--- !u!|m_Text:|m_Script:/ {print NR\": \"$0}' Assets/Scenes/Field.unity)"
+      "Bash(awk 'NR>=611380 && NR<=611520 && /--- !u!|m_Text:|m_Script:/ {print NR\": \"$0}' Assets/Scenes/Field.unity)",
+      "Bash(grep -a -v \"^.*m_Enabled: 1$\")",
+      "Bash(reg query *)",
+      "Bash(awk '/^--- !u!114 &113337260$/{f=1;print;next} f&&/^--- /{exit} f' Field.unity)",
+      "Bash(grep -n \"&677481570$\\\\|&677481569$\\\\|&677481568$\" Assets/Scenes/Field.unity)",
+      "Bash(awk '/^--- !u!/{hdr=$0} /m_GameObject: \\\\{fileID: 677481569\\\\}/{print NR\": \"hdr}' Assets/Scenes/Field.unity)",
+      "Bash(grep -n -A3 \"&677481569$\" Assets/Scenes/Field.unity)",
+      "Bash(grep -n -A12 \"&28937313$\" Assets/Scenes/Field.unity)",
+      "Bash(sed -i 's/^  blinkMinAlpha: 0\\\\.2$/  blinkMinAlpha: 0/; s/^  blinkDuration: 0\\\\.6$/  blinkDuration: 0.4/' Assets/Scenes/Field.unity)",
+      "Bash(grep -c \"blinkMinAlpha: 0$\" Assets/Scenes/Field.unity)",
+      "Bash(grep -c \"blinkDuration: 0.4$\" Assets/Scenes/Field.unity)",
+      "Bash(sed -i \"s#require\\('/tmp/cg/parse.js'\\)#require\\('./parse.js'\\)#\" q1.js)",
+      "Bash(node q1.js \"D:/Repository/CardGame/Assets/Scenes/Field.unity\")",
+      "Bash(node q2.js \"D:/Repository/CardGame/Assets/Scenes/Field.unity\" 62657261 1119863189 1359036200 2095259730 2110515135)",
+      "Bash(cd /tmp/cg && wc -l Field.unity.bak \"D:/Repository/CardGame/Assets/Scenes/Field.unity\")",
+      "Bash(sed -i \"s/const s=fs.readFileSync\\(f,'utf8'\\)/const s=fs.readFileSync\\(f,'utf8'\\).replace\\(\\\\/\\\\\\\\\\\\\\\\r\\\\/g,''\\)/\" /tmp/scan.js)",
+      "Bash(sed -i 's/t=JSON.parse\\(t.replace\\(\\\\/\\\\\\\\n\\\\\\\\s\\\\*\\\\/g,'\"'\"' '\"'\"'\\)\\)/t=JSON.parse\\(t.replace\\(\\\\/\\\\\\\\n\\\\\\\\s*\\\\/g,\" \"\\).replace\\(\\\\/\\\\\\\\\\\\\\\\x\\([0-9A-Fa-f]{2}\\)\\\\/g,\"\\\\\\\\\\\\\\\\u00$1\"\\)\\)/' /tmp/scan.js)",
+      "Bash(node /tmp/scan.js)",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/scan.js\" Assets/Scenes Assets/Resources_moved Assets/Prefabs Assets/Scripts Assets/Resources)",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/scan2.js\" Assets/Scenes Assets/Resources_moved Assets/Prefabs Assets/Scripts Assets/Resources)",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/legacyfont_scan.js\" Assets/Scenes Assets/Resources_moved Assets/Prefabs Assets/Scripts Assets/Resources)",
+      "Read(//c/Users/lenov/AppData/Local/Temp/**)",
+      "Bash(sed -i 's/const m = d.match\\(\\\\/\\\\\\\\n  m_Text: \\(\\\\[\\\\\\\\s\\\\\\\\S\\\\]\\\\*?\\)\\\\\\\\n\\(?=  \\\\\\\\w|\\\\$\\)\\\\/\\);/const m = \\(d + \"\\\\\\\\n\"\\).match\\(\\\\/\\\\\\\\n  m_Text: \\([\\\\\\\\s\\\\\\\\S]*?\\)\\\\\\\\n\\(?=  \\\\\\\\w|$\\)\\\\/\\);/' legacyfont_scan.js)",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/legacyfont_refs.js\" Assets/Scenes/Field.unity)",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/legacyfont_refs.js\" Assets/Scenes/Game.unity)"
     ],
     "additionalDirectories": [
       "C:\\Users\\lenov",
-      "\\tmp"
+      "\\tmp",
+      "C:\\Users\\lenov\\AppData\\Local\\Temp"
     ]
   }
 }
