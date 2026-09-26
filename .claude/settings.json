@@ -163,12 +163,37 @@
       "Read(//c/Users/lenov/AppData/Local/Temp/**)",
       "Bash(sed -i 's/const m = d.match\\(\\\\/\\\\\\\\n  m_Text: \\(\\\\[\\\\\\\\s\\\\\\\\S\\\\]\\\\*?\\)\\\\\\\\n\\(?=  \\\\\\\\w|\\\\$\\)\\\\/\\);/const m = \\(d + \"\\\\\\\\n\"\\).match\\(\\\\/\\\\\\\\n  m_Text: \\([\\\\\\\\s\\\\\\\\S]*?\\)\\\\\\\\n\\(?=  \\\\\\\\w|$\\)\\\\/\\);/' legacyfont_scan.js)",
       "Bash(node \"C:/Users/lenov/AppData/Local/Temp/legacyfont_refs.js\" Assets/Scenes/Field.unity)",
-      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/legacyfont_refs.js\" Assets/Scenes/Game.unity)"
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/legacyfont_refs.js\" Assets/Scenes/Game.unity)",
+      "Bash(grep -n \"m_Name: RogulikePanle\\\\|m_Name: DeckCheckPannelBG\\\\|m_Name: 2PickCard$\\\\|m_Name: CardNumPannel\\\\|m_Name: CardNum$\" Assets/Scenes/Field.unity)",
+      "Bash(awk -F: '{print $3 $4}')",
+      "Bash(python -c \"import sys;print\\(sys.version\\)\")",
+      "Bash(py -c \"import sys;print\\(sys.version\\)\")",
+      "Bash(cd /tmp/u && cat explore.js | head -3)",
+      "Bash(node explore.js)",
+      "Read(//c/Users/lenov/AppData/Local/Temp/u/**)",
+      "Bash(node find.js)",
+      "Bash(grep -A12 \"m_Name: CardNum$\" \"D:/Repository/CardGame/Assets/Scenes/Field.unity\")",
+      "Bash(node map.js)",
+      "Bash(cd \"D:/Repository/CardGame\" && sed -n '51627p;92030p;227139p;227274p' Assets/Scenes/Field.unity && sed -i '51627d;92030d;227139,227274d' Assets/Scenes/Field.unity && grep -c \"71713190\" Assets/Scenes/Field.unity; git diff --stat Assets/Scenes/Field.unity)",
+      "Bash(git show *)",
+      "Bash(grep -n -A14 \"guid: 3269532e9e3dbaf4997c96aa2a298caa\" /tmp/field_head.unity | head -20; awk '/^--- !u!224 &1302483175$/{p=1} p&&/m_Children/{c=1;next} p&&c&&/^  - /{print} p&&/m_Father/{exit}' /tmp/field_head.unity)",
+      "Bash(awk '/^--- !u!224 &1302483175$/{p=1} p&&/m_Children/{c=1;next} p&&c&&/^  - /{print} p&&/m_Father/{exit}' Field.unity)",
+      "Bash(awk '/m_Name: 2PickCard$/{f=1} f&&/^--- !u!224/{p=1} p&&/m_Anchor|m_SizeDelta|m_Father/{print} p&&/m_Pivot/{exit}' Resources_moved/Prefabs/2PickCard.prefab)",
+      "Bash(awk '/^--- !u!1 &1758883808$/{p=1} p&&/component:/{print} p&&/m_Name/{print;exit}' Field.unity)",
+      "Bash(python /tmp/resolve.py)",
+      "Bash(sed -i 's|const go = field\\(objs\\\\[cc\\\\].body, .m_GameObject.\\); goName = nameOf\\(go\\);|if \\(!objs[cc]\\) { console.log\\(\"NOOBJ\", cc\\); out.push\\(\"0\"\\); continue; } const go = field\\(objs[cc].body, \"m_GameObject\"\\); if \\(!objs[go]\\) { console.log\\(\"NOGO\", cc, go, objs[cc].type\\); out.push\\(\"0\"\\); continue; } goName = nameOf\\(go\\);|' /tmp/resolve.js)",
+      "Bash(node /tmp/resolve.js)",
+      "Bash(grep -n \"const field\" /tmp/resolve.js)",
+      "Bash(rm /tmp/resolve.js)",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/resolve.js\")",
+      "Bash(node \"C:/Users/lenov/AppData/Local/Temp/attach.js\")",
+      "Bash(grep -n -B2 -A3 \"985142610}$\" Field.unity)"
     ],
     "additionalDirectories": [
       "C:\\Users\\lenov",
       "\\tmp",
-      "C:\\Users\\lenov\\AppData\\Local\\Temp"
+      "C:\\Users\\lenov\\AppData\\Local\\Temp",
+      "C:\\Users\\lenov\\AppData\\Local\\Temp\\u"
     ]
   }
 }

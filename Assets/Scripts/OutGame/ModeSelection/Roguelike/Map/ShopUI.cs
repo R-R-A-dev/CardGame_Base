@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+using TMPro;
 
 public class ShopUI : MonoBehaviour
 {
     [SerializeField] private List<CardController> cardList;
-    [SerializeField] private TextMeshProUGUI goldText;
+    // cardListと同じ並びで、各カードのCardPricePannel/CardPriceをアタッチする
+    [SerializeField] private List<TextMeshProUGUI> cardPriceTextList;
     [SerializeField] private Button closeButton;
     [SerializeField] private ShopCardSelectPanel selectPanel;
     [SerializeField] private OwnedDeckCheckPanel ownedDeckCheckPanel;
@@ -36,8 +37,6 @@ public class ShopUI : MonoBehaviour
         purchasedCardIds.Clear();
         cardPriceMap.Clear();
 
-        goldText.text = $"G: {gameState.Gold}";
-
         foreach (var card in cardList)
             card.gameObject.SetActive(false);
 
@@ -53,6 +52,8 @@ public class ShopUI : MonoBehaviour
             cardList[i].Init(cards[i], false);
             int price = cardList[i].model.price;
             cardPriceMap[cardList[i]] = price;
+            if (i < cardPriceTextList.Count && cardPriceTextList[i] != null)
+                cardPriceTextList[i].text = $"{price}G";
         }
 
         // 所持金も渡す
@@ -78,9 +79,6 @@ public class ShopUI : MonoBehaviour
             gameState.CurrentDeck.Add(card.model.no);
             card.gameObject.SetActive(false);
         }
-
-        // 所持金表示更新
-        goldText.text = $"G: {gameState.Gold}";
 
         // ShopCardSelectPanelへ通知
         selectPanel.UpdateGold(gameState.Gold);
