@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GachaPackItem : MonoBehaviour
 {
-    [SerializeField] private Image packImage;
+    [SerializeField] private GameObject packVisual; // パックの見た目（子オブジェクトの画像群）
+    [SerializeField] private TextMeshProUGUI packNameText;
+    [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private Button packButton; // パック全体がボタン
 
     private PackData packData;
@@ -14,7 +17,11 @@ public class GachaPackItem : MonoBehaviour
         packData = data;
         onSelected = onSelectedCallback;
 
-        packImage.sprite = data.packImage;
+        if (packVisual != null)
+            packVisual.SetActive(true);
+
+        packNameText.text = data.packName;
+        priceText.text = $"G {data.price}";
 
         packButton.onClick.RemoveAllListeners();
         packButton.onClick.AddListener(OnPackClicked);

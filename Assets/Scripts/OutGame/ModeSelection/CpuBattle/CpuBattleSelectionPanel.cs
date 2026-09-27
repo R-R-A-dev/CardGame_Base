@@ -24,6 +24,7 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     [Header("対戦開始")]
     [SerializeField] private Button startBattleButton;
     [SerializeField] private string battleScene = "Game";
+    [SerializeField, Range(0f, 1f)] private float startBattleButtonDisabledBrightness = 0.6f;
 
     [Header("勝利報酬パネル")]
     [SerializeField] private CpuBattleRewardUI cpuBattleRewardUI;
@@ -41,8 +42,14 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     private int decidedPlayerDeckId = -1;
     private int decidedEnemyDeckId = -1;
 
+    // 対戦開始ボタン配下のGraphicと元の色（無効時に暗くし、有効時に戻すため）
+    private Graphic[] startBattleButtonGraphics;
+    private Color[] startBattleButtonOriginalColors;
+
     private void Start()
     {
+        CacheStartBattleButtonColors();
+
         // シーン上のデッキボタン数に対して保存データの枠が不足している場合、空デッキで埋めておく
         // （古いセーブデータや初期セーブデータの枠数がボタン数より少ない場合の保険）
         EnsureDeckSlotsExist();
@@ -139,17 +146,47 @@ public class CpuBattleSelectionPanel : MonoBehaviour
     private void UpdateSelectedDeckText()
     {
         if (selectedPlayerDeckText != null)
-            selectedPlayerDeckText.text = decidedPlayerDeckId >= 0 ? decidedPlayerDeckId.ToString() : "No deck selected";
+            selectedPlayerDeckText.text = GetSelectedDeckLabel(decidedPlayerDeckId);
 
         if (selectedEnemyDeckText != null)
-            selectedEnemyDeckText.text = decidedEnemyDeckId >= 0 ? decidedEnemyDeckId.ToString() : "No deck selected";
+            selectedEnemyDeckText.text = GetSelectedDeckLabel(decidedEnemyDeckId);
+    }
+
+    // デッキIDは0始まりなので、表示は「Deck 01」～「Deck 08」にする
+    private string GetSelectedDeckLabel(int deckId)
+    {
+        return deckId >= 0 ? $"Deck {deckId + 1:00}" : "No deck selected";
     }
 
     private void UpdateStartBattleButton()
     {
-        startBattleButton.interactable =
+        bool canStart =
             decidedPlayerDeckId >= 0 && GetDeckSize(decidedPlayerDeckId) >= MIN_DECK_SIZE &&
             decidedEnemyDeckId >= 0 && GetDeckSize(decidedEnemyDeckId) >= MIN_DECK_SIZE;
+
+        startBattleButton.interactable = canStart;
+        ApplyStartBattleButtonBrightness(canStart);
+    }
+
+    private void CacheStartBattleButtonColors()
+    {
+        startBattleButtonGraphics = startBattleButton.GetComponentsInChildren<Graphic>(true);
+        startBattleButtonOriginalColors = new Color[startBattleButtonGraphics.Length];
+        for (int i = 0; i < startBattleButtonGraphics.Length; i++)
+            startBattleButtonOriginalColors[i] = startBattleButtonGraphics[i].color;
+    }
+
+    // ボタンのTransitionがSprite Swapで無効時の見た目が変わらないため、配下のGraphicの色を直接暗くする
+    private void ApplyStartBattleButtonBrightness(bool interactable)
+    {
+        float brightness = interactable ? 1f : startBattleButtonDisabledBrightness;
+
+        for (int i = 0; i < startBattleButtonGraphics.Length; i++)
+        {
+            Color original = startBattleButtonOriginalColors[i];
+            startBattleButtonGraphics[i].color = new Color(
+                original.r * brightness, original.g * brightness, original.b * brightness, original.a);
+        }
     }
 
     // モーダル：「決定」ボタン

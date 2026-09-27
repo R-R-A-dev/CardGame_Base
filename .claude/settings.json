@@ -187,13 +187,21 @@
       "Bash(rm /tmp/resolve.js)",
       "Bash(node \"C:/Users/lenov/AppData/Local/Temp/resolve.js\")",
       "Bash(node \"C:/Users/lenov/AppData/Local/Temp/attach.js\")",
-      "Bash(grep -n -B2 -A3 \"985142610}$\" Field.unity)"
+      "Bash(grep -n -B2 -A3 \"985142610}$\" Field.unity)",
+      "Bash(sed -i 's/^  packImage: {fileID: 21300000, guid: b786fce0d30f5464ebdec072bdafec35, type: 3}$/  packImage: {fileID: 0}/' Scripts/OutGame/Gacha/PackDataSO/PackData.asset && grep -n \"packImage\" Scripts/OutGame/Gacha/PackDataSO/PackData.asset)",
+      "Bash(bash /tmp/show.sh Field.unity 1400709828)",
+      "Bash(bash /tmp/show.sh Field.unity 846581845)",
+      "Bash(grep -o \"^--- .*&74200[123][12][1-4]$\" Field.unity)",
+      "Bash(grep -c \"^--- .*&74200[123][12][1-4]$\" Field.unity)",
+      "Bash(sed -i -e '553156,553291d' -e '673059d' -e '673150d' Assets/Scenes/Field.unity)",
+      "Bash(echo \"exit=$?\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\lenov",
       "\\tmp",
       "C:\\Users\\lenov\\AppData\\Local\\Temp",
-      "C:\\Users\\lenov\\AppData\\Local\\Temp\\u"
+      "C:\\Users\\lenov\\AppData\\Local\\Temp\\u",
+      "D:\\Repository\\CardGame\\Assets\\Scripts\\OutGame\\Gacha\\PackDataSO"
     ]
   }
 }

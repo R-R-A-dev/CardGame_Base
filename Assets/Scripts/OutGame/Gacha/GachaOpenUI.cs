@@ -38,7 +38,6 @@ public class GachaOpenUI : MonoBehaviour
     [Header("ボタン")]
     [SerializeField] private Button skipButton;
     [SerializeField] private Button nextButton;
-    [SerializeField] private TextMeshProUGUI nextButtonText;
 
     private PackData currentPack;
     private List<List<GachaCardEntry>> packResults = new List<List<GachaCardEntry>>();
@@ -243,9 +242,6 @@ public class GachaOpenUI : MonoBehaviour
     {
         skipButton.gameObject.SetActive(false);
         nextButton.gameObject.SetActive(true);
-
-        bool isLastPack = currentPackIndex >= packResults.Count - 1;
-        nextButtonText.text = isLastPack ? "結果を見る" : "次のパックへ";
     }
 
     private void OnNextButtonClick()
