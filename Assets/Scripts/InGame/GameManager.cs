@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     public Transform enemyHero;
 
     [SerializeField] Button TurnEndButton;
-    [SerializeField] TextMeshProUGUI TurnEndButtonText;
+    [SerializeField] Text TurnEndButtonText;
 
     public RectTransform summonLight;
     [SerializeField] UIParticle UIParticleObj;
@@ -196,6 +196,7 @@ public class GameManager : MonoBehaviour
             changeCardCountDownCoroutine = StartCoroutine(CountDownChangeCard());
         }
 
+        UpdateDeckNum();
         StartCoroutine(WaitStartTurn());
     }
 
@@ -410,6 +411,7 @@ public class GameManager : MonoBehaviour
         }
         int cardID = deck[0];
         deck.RemoveAt(0);
+        UpdateDeckNum();
         CreateCard(cardID, hand);
     }
 
@@ -421,6 +423,7 @@ public class GameManager : MonoBehaviour
         }
         int cardID = deck[0];
         deck.RemoveAt(0);
+        UpdateDeckNum();
         CreateCardEffect(cardID, hand);
     }
 
@@ -432,7 +435,14 @@ public class GameManager : MonoBehaviour
         }
         int cardID = deck[0];
         deck.RemoveAt(0);
+        UpdateDeckNum();
         CreateCardEffect(cardID, hand);
+    }
+
+    // 山札の残り枚数を表示する（手札に配ったカードは山札から除かれているので含まれない）
+    void UpdateDeckNum()
+    {
+        uiManager.ShowDeckNum(player.deck.Count, enemy.deck.Count);
     }
 
     public void DrawCard(bool isPlayer)

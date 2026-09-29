@@ -15,6 +15,10 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI timeCountText;
 
+    // 山札の残り枚数（手札は含まない）
+    [SerializeField] TextMeshProUGUI playerDeckNumText;
+    [SerializeField] TextMeshProUGUI enemyDeckNumText;
+
     [SerializeField] public GameObject descriptionObj;
     [SerializeField] public Text descriptionText;
     [SerializeField] public Text nameText;
@@ -72,6 +76,14 @@ public class UIManager : MonoBehaviour
     public void UpdateTime(int timeCount)
     {
         timeCountText.text = timeCount.ToString();
+    }
+
+    public void ShowDeckNum(int playerDeckNum, int enemyDeckNum)
+    {
+        if (playerDeckNumText != null)
+            playerDeckNumText.text = "× " + playerDeckNum;
+        if (enemyDeckNumText != null)
+            enemyDeckNumText.text = "× " + enemyDeckNum;
     }
 
     public void ShowHeroHP(int playerHeroHp, int enemyHeroHp)
