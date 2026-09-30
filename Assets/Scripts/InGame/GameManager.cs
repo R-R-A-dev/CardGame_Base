@@ -345,7 +345,7 @@ public class GameManager : MonoBehaviour
 
     public void MoveDeckEdit()
     {
-        SceneManager.LoadScene(0);
+        SceneTransition.Load(0);
     }
 
     public void DisableButtonCards()
@@ -1078,13 +1078,13 @@ public class GameManager : MonoBehaviour
     {
         if (player.heroHp <= 0)
         {
-            SceneManager.LoadScene("Field");
+            SceneTransition.Load("Field");
         }
         else if (enemy.heroHp <= 0)
         {
             RoguelikeSession.IsBattleWin = true;
             DeckSetCards();
-            SceneManager.LoadScene("Field");
+            SceneTransition.Load("Field");
         }
     }
 
@@ -1133,7 +1133,7 @@ public class GameManager : MonoBehaviour
         {
             GameSession.LethalPuzzleFinished = true;
             GameSession.LethalPuzzleWon = enemy.heroHp <= 0;
-            SceneManager.LoadScene("Field");
+            SceneTransition.Load("Field");
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.TWO_PICK)
         {
@@ -1147,7 +1147,7 @@ public class GameManager : MonoBehaviour
             {
                 // 敗北：元のモード選択画面に戻る
                 GameSession.TwoPickFinished = true;
-                SceneManager.LoadScene("Field");
+                SceneTransition.Load("Field");
             }
         }
         else if (ModeConfigManager.Instance != null && ModeConfigManager.Instance.currentGameMode == GameMode.ROGUELIKE)
@@ -1157,12 +1157,12 @@ public class GameManager : MonoBehaviour
         {
             GameSession.CpuBattleFinished = true;
             GameSession.CpuBattleWon = enemy.heroHp <= 0;
-            SceneManager.LoadScene("Field");
+            SceneTransition.Load("Field");
         }
         else if (GameSession.DebugReturnToDeckEdit)
         {
             // GameModeが未設定のデバッグ対戦。フラグはField側（ModeSelectionUI）で消費される
-            SceneManager.LoadScene("Field");
+            SceneTransition.Load("Field");
         }
     }
 
@@ -1172,7 +1172,7 @@ public class GameManager : MonoBehaviour
     public void OnTwoPickNextBattle()
     {
         uiManager.HideTwoPickResultPanel();
-        SceneManager.LoadScene("Game");
+        SceneTransition.Load("Game");
     }
 
     /// <summary>
@@ -1187,7 +1187,7 @@ public class GameManager : MonoBehaviour
         int moneyPerWin = GameSession.TwoPickData != null ? GameSession.TwoPickData.moneyPerWin : 0;
         GameSession.TwoPickReward = GameSession.TwoPickBattleIndex * moneyPerWin;
 
-        SceneManager.LoadScene("Field");
+        SceneTransition.Load("Field");
     }
 
 
@@ -1332,9 +1332,13 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(GenDamageText(text, damage, cardTransform.position));
     }
 
+    // 暗い赤・緑だと黒い縁取りとの差が出ず読みにくいため、明るめの色にしている
+    static readonly Color DamageTextColor = new Color32(0xFF, 0x4D, 0x5E, 0xFF); // #FF4D5E
+    static readonly Color HealTextColor = new Color32(0x5B, 0xE3, 0x7D, 0xFF);   // #5BE37D
+
     public IEnumerator GenDamageText(GameObject text, int damage, Vector3 position)
     {
-        yield return StartCoroutine(GenFloatingText(text, damage.ToString(), Color.red, position));
+        yield return StartCoroutine(GenFloatingText(text, damage.ToString(), DamageTextColor, position));
     }
 
     public IEnumerator GenHealText(GameObject text, int heal, Transform cardTransform)
@@ -1348,7 +1352,7 @@ public class GameManager : MonoBehaviour
     {
         // 回復はダメージと同じ見た目だと区別がつかないため、色（緑）で区別する。
         // 数字だけを出す（プラス記号は付けない）
-        yield return StartCoroutine(GenFloatingText(text, heal.ToString(), Color.green, position));
+        yield return StartCoroutine(GenFloatingText(text, heal.ToString(), HealTextColor, position));
     }
 
     /// <summary>
@@ -1399,13 +1403,20 @@ public class GameManager : MonoBehaviour
         DG.Tweening.Sequence seq = DOTween.Sequence();
         seq.Append(text.transform.DOScale(1.5f, 0.2f).SetEase(Ease.OutBack));
         seq.Append(text.transform.DOScale(1.0f, 0.1f));
-        seq.AppendInterval(0.3f);
+        // 表示中は上へ30px移動しながらフェードアウトさせる。
+        // 移動量はCanvas上のpxで指定したいので、親(textPool)基準のローカル座標で動かす
+        Vector3 startLocalPos = text.transform.localPosition;
+        seq.Append(text.transform.DOLocalMoveY(startLocalPos.y + 30f, 0.3f));
+        seq.Join(DOTween.To(() => tmp.alpha, a => tmp.alpha = a, 0f, 0.3f));
 
         // シーケンス終了まで待機
         yield return seq.WaitForCompletion();
 
         // 4. 後処理
         text.SetActive(false);
+        // プールから再利用されたときに移動・フェード後の状態が残らないよう戻しておく
+        text.transform.localPosition = startLocalPos;
+        tmp.alpha = 1f;
 
         // ※もし「生成したインスタンス」をその都度破棄したい場合は以下を有効化
         // Addressables.ReleaseInstance(text);

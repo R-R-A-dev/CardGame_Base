@@ -75,6 +75,6 @@ public class LethalPuzzleSelectionPanel : MonoBehaviour
     {
 
         ModeConfigManager.Instance.ChangeMode(GameMode.LETHAL_PUZZLE);
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        SceneTransition.Load("Game");
     }
 }

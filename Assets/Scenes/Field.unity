@@ -9010,11 +9010,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 649847359}
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -2.5305, y: 287.91608}
+  m_AnchoredPosition: {x: 1.4695001, y: 287.91608}
   m_SizeDelta: {x: 719.6536, y: 69.472}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &30461166
@@ -21471,6 +21471,7 @@ GameObject:
   - component: {fileID: 67449191}
   - component: {fileID: 67449193}
   - component: {fileID: 67449192}
+  - component: {fileID: 67449194}
   m_Layer: 5
   m_Name: DeckConfirmPanelBG
   m_TagString: Untagged
@@ -21536,6 +21537,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 67449190}
   m_CullTransparentMesh: 1
+--- !u!114 &67449194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67449190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 2085897700}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &67521491
 GameObject:
   m_ObjectHideFlags: 0
@@ -41367,11 +41384,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1895549004}
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 130, y: -237.82}
+  m_AnchoredPosition: {x: 134, y: -237.82}
   m_SizeDelta: {x: 210, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &122449439
@@ -52592,6 +52609,7 @@ GameObject:
   - component: {fileID: 158125460}
   - component: {fileID: 158125459}
   - component: {fileID: 158125461}
+  - component: {fileID: 158125462}
   m_Layer: 5
   m_Name: ShopMapPanel
   m_TagString: Untagged
@@ -52754,6 +52772,22 @@ MonoBehaviour:
   closeButton: {fileID: 1491614445}
   selectPanel: {fileID: 1333048932}
   ownedDeckCheckPanel: {fileID: 1333048934}
+--- !u!114 &158125462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 158125456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 296668764}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &158216438
 GameObject:
   m_ObjectHideFlags: 0
@@ -69260,6 +69294,7 @@ GameObject:
   - component: {fileID: 213476907}
   - component: {fileID: 213476909}
   - component: {fileID: 213476908}
+  - component: {fileID: 213476910}
   m_Layer: 5
   m_Name: TreasureCardSelectPanel
   m_TagString: Untagged
@@ -69325,6 +69360,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 213476906}
   m_CullTransparentMesh: 1
+--- !u!114 &213476910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 213476906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1119863189}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &214446950
 GameObject:
   m_ObjectHideFlags: 0
@@ -73319,6 +73370,7 @@ GameObject:
   - component: {fileID: 228569926}
   - component: {fileID: 228569925}
   - component: {fileID: 228569927}
+  - component: {fileID: 228569928}
   m_Layer: 5
   m_Name: GachaResultUI
   m_TagString: Untagged
@@ -73439,6 +73491,22 @@ MonoBehaviour:
   - {fileID: 343098775}
   - {fileID: 1855084198}
   closeButton: {fileID: 650055813}
+--- !u!114 &228569928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228569923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 768481014}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &229626561
 GameObject:
   m_ObjectHideFlags: 0
@@ -113777,6 +113845,7 @@ GameObject:
   - component: {fileID: 365652572}
   - component: {fileID: 365652574}
   - component: {fileID: 365652573}
+  - component: {fileID: 365652575}
   m_Layer: 5
   m_Name: DeckCheckPannelBG
   m_TagString: Untagged
@@ -113842,6 +113911,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 365652571}
   m_CullTransparentMesh: 1
+--- !u!114 &365652575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365652571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 758281249}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &365819415
 GameObject:
   m_ObjectHideFlags: 0
@@ -156065,6 +156150,7 @@ GameObject:
   - component: {fileID: 503033958}
   - component: {fileID: 503033960}
   - component: {fileID: 503033959}
+  - component: {fileID: 503033961}
   m_Layer: 5
   m_Name: RewardCardSelectPanel
   m_TagString: Untagged
@@ -156130,6 +156216,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 503033957}
   m_CullTransparentMesh: 1
+--- !u!114 &503033961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503033957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 62657261}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &503053200
 GameObject:
   m_ObjectHideFlags: 0
@@ -171820,6 +171922,7 @@ GameObject:
   - component: {fileID: 552851959}
   - component: {fileID: 552851958}
   - component: {fileID: 552851960}
+  - component: {fileID: 552851961}
   m_Layer: 5
   m_Name: RewardMapPanelBack
   m_TagString: Untagged
@@ -171942,6 +172045,22 @@ MonoBehaviour:
   goldText: {fileID: 1854941260}
   closeButton: {fileID: 2022685241}
   selectPanel: {fileID: 1333048933}
+--- !u!114 &552851961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552851956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1936916865}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &552934108
 GameObject:
   m_ObjectHideFlags: 0
@@ -186968,6 +187087,7 @@ GameObject:
   - component: {fileID: 591755163}
   - component: {fileID: 591755165}
   - component: {fileID: 591755164}
+  - component: {fileID: 591755166}
   m_Layer: 5
   m_Name: StageConfirmPanelBG
   m_TagString: Untagged
@@ -187033,6 +187153,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 591755162}
   m_CullTransparentMesh: 1
+--- !u!114 &591755166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591755162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1438238350}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &591965760
 GameObject:
   m_ObjectHideFlags: 0
@@ -198826,6 +198962,7 @@ GameObject:
   - component: {fileID: 631959483}
   - component: {fileID: 631959485}
   - component: {fileID: 631959484}
+  - component: {fileID: 631959486}
   m_Layer: 5
   m_Name: DeckPanelBG
   m_TagString: Untagged
@@ -198891,6 +199028,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 631959482}
   m_CullTransparentMesh: 1
+--- !u!114 &631959486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 631959482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 800877162}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &632482448
 GameObject:
   m_ObjectHideFlags: 0
@@ -254214,6 +254367,7 @@ GameObject:
   - component: {fileID: 805380734}
   - component: {fileID: 805380736}
   - component: {fileID: 805380735}
+  - component: {fileID: 805380737}
   m_Layer: 5
   m_Name: ShopCardInfoPanel
   m_TagString: Untagged
@@ -254279,6 +254433,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 805380733}
   m_CullTransparentMesh: 1
+--- !u!114 &805380737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 805380733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1359036200}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &806062787
 GameObject:
   m_ObjectHideFlags: 0
@@ -265183,6 +265353,7 @@ GameObject:
   - component: {fileID: 841886377}
   - component: {fileID: 841886379}
   - component: {fileID: 841886378}
+  - component: {fileID: 841886380}
   m_Layer: 5
   m_Name: CardInfoPannel
   m_TagString: Untagged
@@ -265253,6 +265424,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 841886376}
   m_CullTransparentMesh: 1
+--- !u!114 &841886380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 841886376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 0}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &842650381
 GameObject:
   m_ObjectHideFlags: 0
@@ -266543,11 +266730,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1872249014}
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -99, y: -42.820007}
+  m_AnchoredPosition: {x: -95, y: -42.820007}
   m_SizeDelta: {x: 60, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &846422670
@@ -271540,6 +271727,7 @@ GameObject:
   - component: {fileID: 861951197}
   - component: {fileID: 861951196}
   - component: {fileID: 861951195}
+  - component: {fileID: 861951198}
   m_Layer: 5
   m_Name: ConfirmPanelBG
   m_TagString: Untagged
@@ -271560,14 +271748,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1471739062}
-  - {fileID: 862608277}
-  - {fileID: 1336541854}
-  - {fileID: 1973100146}
-  - {fileID: 846422669}
-  - {fileID: 1441716686}
-  - {fileID: 2033173068}
-  - {fileID: 122449438}
-  - {fileID: 30461165}
   m_Father: {fileID: 37756122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -271634,6 +271814,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 861951193}
   m_CullTransparentMesh: 1
+--- !u!114 &861951198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 861951193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1471739062}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &861959489
 GameObject:
   m_ObjectHideFlags: 0
@@ -271814,11 +272010,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 26, y: 165.18}
+  m_AnchoredPosition: {x: 30, y: 165.18}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &862608278
@@ -284506,7 +284702,8 @@ MonoBehaviour:
   fadeChildrenIndividually: 1
   inputUnlockTime: 0.4
   slideTargets: []
-  excludeFromSlide: []
+  excludeFromSlide:
+  - {fileID: 1739715725}
 --- !u!1 &903553386
 GameObject:
   m_ObjectHideFlags: 0
@@ -322731,6 +322928,7 @@ GameObject:
   - component: {fileID: 1025916094}
   - component: {fileID: 1025916096}
   - component: {fileID: 1025916095}
+  - component: {fileID: 1025916097}
   m_Layer: 5
   m_Name: DeckConfirmPanelBG
   m_TagString: Untagged
@@ -322796,6 +322994,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1025916093}
   m_CullTransparentMesh: 1
+--- !u!114 &1025916097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025916093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 471811474}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1026264678
 GameObject:
   m_ObjectHideFlags: 0
@@ -347453,6 +347667,7 @@ GameObject:
   - component: {fileID: 1097271216}
   - component: {fileID: 1097271218}
   - component: {fileID: 1097271217}
+  - component: {fileID: 1097271219}
   m_Layer: 5
   m_Name: DeckCheckPannelBG
   m_TagString: Untagged
@@ -347522,6 +347737,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1097271215}
   m_CullTransparentMesh: 1
+--- !u!114 &1097271219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1097271215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 634368047}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1097958133
 GameObject:
   m_ObjectHideFlags: 0
@@ -392195,6 +392426,7 @@ MonoBehaviour:
   slideTargets: []
   excludeFromSlide:
   - {fileID: 938496830}
+  - {fileID: 228569924}
 --- !u!1 &1248937651
 GameObject:
   m_ObjectHideFlags: 0
@@ -424521,7 +424753,11 @@ MonoBehaviour:
   fadeChildrenIndividually: 1
   inputUnlockTime: 0.4
   slideTargets: []
-  excludeFromSlide: []
+  excludeFromSlide:
+  - {fileID: 631959483}
+  - {fileID: 1025916094}
+  - {fileID: 591755163}
+  - {fileID: 365652572}
 --- !u!1 &1333432058
 GameObject:
   m_ObjectHideFlags: 0
@@ -425872,11 +426108,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 3, y: -42.820007}
+  m_AnchoredPosition: {x: 7, y: -42.820007}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1336541855
@@ -455183,6 +455419,7 @@ GameObject:
   - component: {fileID: 1429487813}
   - component: {fileID: 1429487812}
   - component: {fileID: 1429487814}
+  - component: {fileID: 1429487815}
   m_Layer: 5
   m_Name: TreasureMapPanelBack
   m_TagString: Untagged
@@ -455306,6 +455543,22 @@ MonoBehaviour:
   closeButton: {fileID: 1535095428}
   selectPanel: {fileID: 1333048931}
   ownedDeckCheckPanel: {fileID: 1333048934}
+--- !u!114 &1429487815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429487810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1232287569}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1429964962
 GameObject:
   m_ObjectHideFlags: 0
@@ -459640,11 +459893,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1346051940}
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 99, y: -42.820007}
+  m_AnchoredPosition: {x: 103, y: -42.820007}
   m_SizeDelta: {x: 60, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1441716687
@@ -469332,7 +469585,15 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 862608277}
+  - {fileID: 1336541854}
+  - {fileID: 1973100146}
+  - {fileID: 846422669}
+  - {fileID: 1441716686}
+  - {fileID: 2033173068}
+  - {fileID: 122449438}
+  - {fileID: 30461165}
   m_Father: {fileID: 861951194}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -499214,6 +499475,7 @@ GameObject:
   - component: {fileID: 1567373257}
   - component: {fileID: 1567373259}
   - component: {fileID: 1567373258}
+  - component: {fileID: 1567373260}
   m_Layer: 5
   m_Name: DeckPanelBG
   m_TagString: Untagged
@@ -499279,6 +499541,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1567373256}
   m_CullTransparentMesh: 1
+--- !u!114 &1567373260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567373256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 771617090}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1567509392
 GameObject:
   m_ObjectHideFlags: 0
@@ -510668,6 +510946,7 @@ GameObject:
   - component: {fileID: 1610719469}
   - component: {fileID: 1610719468}
   - component: {fileID: 1610719467}
+  - component: {fileID: 1610719470}
   m_Layer: 5
   m_Name: FilterBG
   m_TagString: Untagged
@@ -510799,6 +511078,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1610719465}
   m_CullTransparentMesh: 1
+--- !u!114 &1610719470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610719465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1347317089}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1610778322
 GameObject:
   m_ObjectHideFlags: 0
@@ -548765,6 +549060,7 @@ GameObject:
   - component: {fileID: 1739715725}
   - component: {fileID: 1739715724}
   - component: {fileID: 1739715723}
+  - component: {fileID: 1739715726}
   m_Layer: 5
   m_Name: ConfirmPanelBG
   m_TagString: Untagged
@@ -548830,6 +549126,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1739715726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739715722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 436545491}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1739745229
 GameObject:
   m_ObjectHideFlags: 0
@@ -577131,6 +577443,7 @@ GameObject:
   - component: {fileID: 1838009652}
   - component: {fileID: 1838009654}
   - component: {fileID: 1838009653}
+  - component: {fileID: 1838009655}
   m_Layer: 5
   m_Name: CardInfoPannelBG
   m_TagString: Untagged
@@ -577196,6 +577509,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1838009651}
   m_CullTransparentMesh: 1
+--- !u!114 &1838009655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1838009651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 242104904}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &1838132166
 GameObject:
   m_ObjectHideFlags: 0
@@ -579205,7 +579534,8 @@ MonoBehaviour:
   fadeChildrenIndividually: 1
   inputUnlockTime: 0.4
   slideTargets: []
-  excludeFromSlide: []
+  excludeFromSlide:
+  - {fileID: 1567373257}
 --- !u!1 &1844306954
 GameObject:
   m_ObjectHideFlags: 0
@@ -622445,11 +622775,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 16, y: 51.179993}
+  m_AnchoredPosition: {x: 20, y: 51.179993}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1973100147
@@ -642914,11 +643244,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2124400345}
-  m_Father: {fileID: 861951194}
+  m_Father: {fileID: 1471739062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -139.65, y: -237.82}
+  m_AnchoredPosition: {x: -135.65, y: -237.82}
   m_SizeDelta: {x: 210, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2033173069
@@ -644157,7 +644487,8 @@ MonoBehaviour:
   fadeChildrenIndividually: 1
   inputUnlockTime: 0.4
   slideTargets: []
-  excludeFromSlide: []
+  excludeFromSlide:
+  - {fileID: 2141902578}
 --- !u!1 &2036104372
 GameObject:
   m_ObjectHideFlags: 0
@@ -652875,6 +653206,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2058736988}
   m_CullTransparentMesh: 1
+--- !u!1 &2059512090
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2059512092}
+  - component: {fileID: 2059512091}
+  m_Layer: 0
+  m_Name: SceneTransition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2059512091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059512090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23825c8c441b19f41a902d21de78432c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeOutDuration: 0.3
+  fadeInDuration: 0.3
+  fadeColor: {r: 0, g: 0, b: 0, a: 1}
+  sortingOrder: 32767
+--- !u!4 &2059512092
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059512090}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2059803620
 GameObject:
   m_ObjectHideFlags: 0
@@ -663917,6 +664296,7 @@ GameObject:
   - component: {fileID: 2095259730}
   - component: {fileID: 2095259732}
   - component: {fileID: 2095259731}
+  - component: {fileID: 2095259733}
   m_Layer: 5
   m_Name: CardInfoPannel
   m_TagString: Untagged
@@ -663987,6 +664367,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2095259729}
   m_CullTransparentMesh: 1
+--- !u!114 &2095259733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095259729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 0}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &2095352896
 GameObject:
   m_ObjectHideFlags: 0
@@ -680144,6 +680540,7 @@ GameObject:
   - component: {fileID: 2141902578}
   - component: {fileID: 2141902580}
   - component: {fileID: 2141902579}
+  - component: {fileID: 2141902581}
   m_Layer: 5
   m_Name: ConfirmPanelBG
   m_TagString: Untagged
@@ -680209,6 +680606,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2141902577}
   m_CullTransparentMesh: 1
+--- !u!114 &2141902581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141902577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75aa80af89e89e45a8b406b56a538ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 4421834}
+  fadeDuration: 0.2
+  startScale: 0.9
+  scaleDuration: 0.2
 --- !u!1 &2142018400
 GameObject:
   m_ObjectHideFlags: 0
@@ -697050,3 +697463,4 @@ SceneRoots:
   - {fileID: 1387948538}
   - {fileID: 55676327}
   - {fileID: 2013376011}
+  - {fileID: 2059512092}

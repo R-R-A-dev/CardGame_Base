@@ -116,7 +116,7 @@ public class RoguelikeManager : MonoBehaviour
                 RoguelikeSession.BattleModifiers = nodeData.modifiers;
                 ModeConfigManager.Instance.currentGameMode = GameMode.ROGUELIKE;
                 //RoguelikeSession.GameState.CurrentDeck
-                SceneManager.LoadScene("Game");
+                SceneTransition.Load("Game");
                 break;
 
             case StageType.REST:

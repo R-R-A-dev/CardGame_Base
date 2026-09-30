@@ -151,7 +151,7 @@ public class DeckBuilderUI : MonoBehaviour
         GameSession.DebugReturnToDeckEdit = true;
         GameSession.DebugReturnDeckNum = deckIndex;
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        SceneTransition.Load("Game");
     }
 
     /// <summary>

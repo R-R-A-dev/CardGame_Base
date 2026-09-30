@@ -213,7 +213,7 @@ public class ModeSelectionUI : MonoBehaviour
     /// </summary>
     public void OnClickBackToTitle()
     {
-        SceneManager.LoadScene(titleScene);
+        SceneTransition.Load(titleScene);
     }
 
     // ========================================

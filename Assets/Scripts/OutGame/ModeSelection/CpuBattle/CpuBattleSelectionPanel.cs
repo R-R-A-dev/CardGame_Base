@@ -261,7 +261,7 @@ public class CpuBattleSelectionPanel : MonoBehaviour
         if (ModeConfigManager.Instance != null)
             ModeConfigManager.Instance.ChangeMode(GameMode.CPU_BATTLE);
 
-        SceneManager.LoadScene(battleScene);
+        SceneTransition.Load(battleScene);
     }
 
     // パネルを閉じるボタン

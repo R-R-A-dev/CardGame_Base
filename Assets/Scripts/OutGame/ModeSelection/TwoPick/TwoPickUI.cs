@@ -140,7 +140,7 @@ public class TwoPickUI : MonoBehaviour
             rightButton.SetActive(false);
             ModeConfigManager.Instance.ChangeMode(GameMode.TWO_PICK);
             GameSession.SelectedDeck = TwoPickModeManager.Instance.pickProgress.SelectedCards;
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+            SceneTransition.Load("Game");
         }
     }
 

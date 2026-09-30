@@ -127,7 +127,7 @@ public class TwoPickModeManager : MonoBehaviour
 
     public void StartGame()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        SceneTransition.Load("Game");
     }
 
 }
