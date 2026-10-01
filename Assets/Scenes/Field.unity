@@ -263393,6 +263393,7 @@ GameObject:
   - component: {fileID: 834723520}
   - component: {fileID: 834723519}
   - component: {fileID: 834723521}
+  - component: {fileID: 834723524}
   m_Layer: 5
   m_Name: StageButton
   m_TagString: Untagged
@@ -263474,6 +263475,23 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &834723524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 834723518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f33f6a360c44cd7372cda4d1c0ea6f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxScale: 1.06
+  halfDuration: 0.8
+  ease: 4
+  interactableSource: {fileID: 834723519}
+  coverObject: {fileID: 0}
 --- !u!114 &834723521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580457,6 +580475,7 @@ GameObject:
   - component: {fileID: 1847771287}
   - component: {fileID: 1847771289}
   - component: {fileID: 1847771290}
+  - component: {fileID: 1847771291}
   m_Layer: 5
   m_Name: Button (Legacy) (2)
   m_TagString: Untagged
@@ -580581,6 +580600,23 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1847771291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847771285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f33f6a360c44cd7372cda4d1c0ea6f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxScale: 1.06
+  halfDuration: 0.8
+  ease: 4
+  interactableSource: {fileID: 1847771289}
+  coverObject: {fileID: 1881461840}
 --- !u!114 &1847771290
 MonoBehaviour:
   m_ObjectHideFlags: 0
