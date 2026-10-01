@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,11 +14,18 @@ public class DeckStatisticsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI[] costCountTexts;
     [SerializeField] private RectTransform[] costBars;
 
+    [Header("演出")]
+    [Tooltip("animate指定時にコストの棒が伸びきるまでの時間")]
+    [SerializeField] private float costBarAnimationDuration = 0.35f;
+
+    public float CostBarAnimationDuration => costBarAnimationDuration;
+
     /// <summary>
     /// UI上の集計・統計情報を表示
     /// </summary>
     /// <param name="deckNum"></param>
-    public void RefreshStatistics(int deckNum, List<int> deck = null, List<CardEntity> twoPickData = null)
+    /// <param name="animate">trueならコストの棒を即座に切り替えず、伸び縮みさせる</param>
+    public void RefreshStatistics(int deckNum, List<int> deck = null, List<CardEntity> twoPickData = null, bool animate = false)
     {
         // デッキ情報が渡されなかった場合、指定されたデッキ番号から取得(デッキの所持状況)
         //TwoPickのデッキが渡された場合はそちらを優先
@@ -69,12 +77,24 @@ public class DeckStatisticsUI : MonoBehaviour
             // yスケールを0.1ずつ増加（1枚 = +0.1）
             float newY = 0.1f * cardCount;
 
+            // 前回の伸び途中のトゥイーンが残っていると今回の値を上書きされるため止めておく
+            costBars[i].DOKill();
+
             // RectTransformのscaleを変更
-            costBars[i].localScale = new Vector3(
-                costBars[i].localScale.x,
-                newY,
-                costBars[i].localScale.z
-            );
+            if (animate)
+            {
+                costBars[i].DOScaleY(newY, costBarAnimationDuration)
+                    .SetEase(Ease.OutCubic)
+                    .SetLink(costBars[i].gameObject);
+            }
+            else
+            {
+                costBars[i].localScale = new Vector3(
+                    costBars[i].localScale.x,
+                    newY,
+                    costBars[i].localScale.z
+                );
+            }
 
             // 数字も表示（0でも表示）
             if (costCountTexts != null && i < costCountTexts.Length)

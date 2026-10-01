@@ -594183,6 +594183,7 @@ MonoBehaviour:
   cardParent: {fileID: 496650702}
   leftButton: {fileID: 1859347434}
   rightButton: {fileID: 1111083232}
+  pickedCardDestination: {fileID: 2016741836}
 --- !u!114 &1881461846
 MonoBehaviour:
   m_ObjectHideFlags: 0

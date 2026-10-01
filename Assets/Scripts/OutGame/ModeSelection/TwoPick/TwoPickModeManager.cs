@@ -52,25 +52,24 @@ public class TwoPickModeManager : MonoBehaviour
         twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
     }
 
-    public void OnLeftButtonClick(List<int> leftCards)
+    /// <summary>
+    /// 次の4枚を表示する。ピック演出の途中で呼ぶため、統計の更新とは分けている
+    /// </summary>
+    public void ShowNextCards()
     {
         if (pickCount < 20)
             twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
-
-        //選択したカードの合計を渡す
-        //TwoPickModeManager.Instance.pickProgress.SelectedCards
-        deckStatisticsUI.RefreshStatistics(0, leftCards);
     }
 
-    public void OnRightButtonClick(List<int> rightCards)
+    /// <summary>
+    /// 選択したカードの合計を渡し、コストの棒を伸ばしながら統計を更新する
+    /// </summary>
+    public void RefreshStatistics(List<int> selectedCards)
     {
-        if (pickCount < 20)
-            twoPickUI.CreateCard(twoPickData.twoPickCards, pickCount);
-
-        //選択したカードの合計を渡す
-        //TwoPickModeManager.Instance.pickProgress.SelectedCards
-        deckStatisticsUI.RefreshStatistics(0, rightCards);
+        deckStatisticsUI.RefreshStatistics(0, selectedCards, animate: true);
     }
+
+    public float StatisticsAnimationDuration => deckStatisticsUI.CostBarAnimationDuration;
 
     public void PickCountUp()
     {
