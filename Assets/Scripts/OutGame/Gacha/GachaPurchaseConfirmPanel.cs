@@ -26,7 +26,9 @@ public class GachaPurchaseConfirmPanel : MonoBehaviour
     private int currentGold = 0; // 所持金を保持
     private System.Action<PackData, int> onConfirmed;
 
-    private void Start()
+    // シーン上で非アクティブ配置のため、初回Open()のSetActive(true)で初めて初期化が走る。
+    // Startで非表示にすると初回Open直後に閉じてしまうので、Awakeでリスナー登録のみ行う。
+    private void Awake()
     {
         minusButton.onClick.RemoveAllListeners();
         plusButton.onClick.RemoveAllListeners();
@@ -37,8 +39,6 @@ public class GachaPurchaseConfirmPanel : MonoBehaviour
         plusButton.onClick.AddListener(OnPlusClicked);
         yesButton.onClick.AddListener(OnYesClicked);
         noButton.onClick.AddListener(OnNoClicked);
-
-        gameObject.SetActive(false);
     }
 
     public void Open(PackData pack, System.Action<PackData, int> onConfirmedCallback)

@@ -187,6 +187,14 @@ public class RoguelikeManager : MonoBehaviour
     }
 
     // ========================================
+    // 回復演出（RestUIから呼ばれる）
+    // ========================================
+    public void PlayHealEffect(int healAmount)
+    {
+        mapUI.PlayHealEffect(healAmount, gameState);
+    }
+
+    // ========================================
     // 各イベントクリア後にマップへ戻る
     // ========================================
     public void ReturnToMap()

@@ -36,7 +36,11 @@ public class RestUI : MonoBehaviour
             ? Mathf.FloorToInt(gameState.MaxHP * restData.healPercentage / 100f)
             : restData.healAmount;
 
+        int beforeHP = gameState.CurrentHP;
         gameState.CurrentHP = Mathf.Min(gameState.MaxHP, gameState.CurrentHP + heal);
+
+        // 最大HPで切り捨てた後の、実際に回復した量を表示する
+        RoguelikeManager.Instance.PlayHealEffect(gameState.CurrentHP - beforeHP);
         //Close();
     }
 

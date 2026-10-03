@@ -125,5 +125,10 @@ public class MapManager : MonoBehaviour
         RoguelikeManager.Instance.OnNodeSelected(nodeData);
     }
 
+    public void PlayHealEffect(int healAmount, RoguelikeGameState state)
+    {
+        statusUI.PlayHealEffect(healAmount, state);
+    }
+
 
 }

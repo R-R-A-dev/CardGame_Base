@@ -6,6 +6,8 @@ public class RoguelikeStageUI : MonoBehaviour
     [SerializeField] private RoguelikeStageData stageData; // 対応するSO
     [SerializeField] private List<MapManager> mapManagers; // このステージのマップ群
 
+    private MapManager currentMapManager;
+
     public RoguelikeStageData StageData => stageData;
 
     public void Initialize(MapData mapData, RoguelikeGameState state)
@@ -15,16 +17,22 @@ public class RoguelikeStageUI : MonoBehaviour
             manager.gameObject.SetActive(false);
 
         // mapDataに対応するManagerを探してアクティブ化
-        MapManager target = mapManagers.Find(m => m.MapData == mapData);
+        currentMapManager = mapManagers.Find(m => m.MapData == mapData);
 
-        if (target == null)
+        if (currentMapManager == null)
         {
             Debug.LogError($"対応するMapManagerが見つかりません: {mapData.mapName}");
             return;
         }
 
-        target.gameObject.SetActive(true);
-        target.Initialize(state);
+        currentMapManager.gameObject.SetActive(true);
+        currentMapManager.Initialize(state);
+    }
+
+    public void PlayHealEffect(int healAmount, RoguelikeGameState state)
+    {
+        if (currentMapManager != null)
+            currentMapManager.PlayHealEffect(healAmount, state);
     }
 
     public void Hide()
