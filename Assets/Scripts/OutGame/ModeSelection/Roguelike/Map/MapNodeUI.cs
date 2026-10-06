@@ -15,6 +15,9 @@ public class MapNodeUI : MonoBehaviour
     private System.Action<NodeData> onNodeClicked;
 
     private bool isSelectable;
+    private bool isSelected;                                    // 選択中は点滅を止めて明るい状態で固定
+    private bool isButtonColorsInitialized;
+    private ColorBlock defaultButtonColors;
     private bool isBlinkInitialized;
     private float blinkBaseAlpha = 1f;
     private Tween blinkTween;
@@ -41,7 +44,7 @@ public class MapNodeUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (isSelectable) StartBlink();
+        if (isSelectable && !isSelected) StartBlink();
     }
 
     private void OnDisable()
@@ -63,9 +66,44 @@ public class MapNodeUI : MonoBehaviour
     public void SetSelectable(bool isSelectable)
     {
         this.isSelectable = isSelectable;
-        nodeButton.interactable = isSelectable;
+        isSelected = false;
+        ApplyButtonColors();
 
-        if (isSelectable && isActiveAndEnabled) StartBlink();
+        RefreshBlink();
+    }
+
+    // 選べないノードもクリックで情報を見られるよう interactable は常に有効にし、
+    // 見た目だけインスペクターの Disabled Color に差し替えて従来どおり暗く表示する
+    private void ApplyButtonColors()
+    {
+        if (!isButtonColorsInitialized)
+        {
+            isButtonColorsInitialized = true;
+            defaultButtonColors = nodeButton.colors;
+        }
+
+        nodeButton.interactable = true;
+
+        ColorBlock colors = defaultButtonColors;
+        if (!isSelectable)
+        {
+            colors.normalColor = colors.disabledColor;
+            colors.highlightedColor = colors.disabledColor;
+            colors.pressedColor = colors.disabledColor;
+            colors.selectedColor = colors.disabledColor;
+        }
+        nodeButton.colors = colors;
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        this.isSelected = isSelected;
+        RefreshBlink();
+    }
+
+    private void RefreshBlink()
+    {
+        if (isSelectable && !isSelected && isActiveAndEnabled) StartBlink();
         else StopBlink();
     }
 
