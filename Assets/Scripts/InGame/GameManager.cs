@@ -58,6 +58,16 @@ public class GameManager : MonoBehaviour
 
     public bool isSummoning = false;
     public bool isAttacking;
+    // カード同士の戦闘（CardsBattle）の最中か。
+    // isAttackingは反撃がヒットした時点でfalseに戻るが、その後も倒れたカードを消す
+    // （CheckAlive）までの待ちがあり、その間に次の攻撃を許すと消える直前のカードを狙えてしまうため、
+    // 戦闘が終わるまではこちらで塞ぐ。
+    public bool isCardsBattling;
+    // プレイヤーが使用中のスペルカード。
+    // スペルは移動演出(isSummoning)が終わってから効果(isAttacking)が始まるまでの間や、
+    // 複数対象の効果で最初の1発がヒットした後など、どちらのフラグも立っていない時間がある。
+    // スペルは効果の最後に自分自身をDestroyするので、破棄されればUnityのnull判定でnullになり自動で解除される。
+    public CardController castingSpell;
     public bool isOnCard;
     public bool showDescriptionClicked;
 
@@ -86,6 +96,13 @@ public class GameManager : MonoBehaviour
 
 
     [SerializeField] BattleAudioManager globalAudioManager;
+
+    /// <summary>
+    /// 攻撃・召喚・スペルの演出中や効果対象の選択中で、
+    /// プレイヤーに新しい操作（召喚・スペル・攻撃）をさせてはいけない状態か。
+    /// </summary>
+    public bool IsPlayerActionLocked =>
+        isSummoning || isAttacking || isCardsBattling || isEffectSelectPhase || castingSpell != null;
 
     public static GameManager instance;
     private void Awake()
@@ -852,6 +869,9 @@ public class GameManager : MonoBehaviour
             StartCoroutine(TurnChangeAnimateText("Enemy Turn"));
         }
         IsDraggFlgOff();
+        // 演出が例外などで途中終了した場合に、次のターンも操作できないまま固まらないための保険
+        isCardsBattling = false;
+        castingSpell = null;
         BattleAudioManager.Instance.PlaySE("TurnChange");
         yield return new WaitForSeconds(1.2f);
         effectBack.SetActive(false);
@@ -941,6 +961,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator CardsBattle(CardController attacker, CardController defender)
     {
         GameManager.instance.isAttacking = true;
+        isCardsBattling = true;
         /*        Debug.Log("CardsBattle");
                 Debug.Log("attacker HP:" + attacker.model.hp);
                 Debug.Log("defender HP:" + defender.model.hp);*/
@@ -952,6 +973,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.8f + (defender.model.attackTime / 60));
         StartCoroutine(attacker.CheckAlive());
         StartCoroutine(defender.CheckAlive());
+        isCardsBattling = false;
     }
 
 

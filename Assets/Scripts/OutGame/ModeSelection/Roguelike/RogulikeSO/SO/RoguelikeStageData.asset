@@ -17,6 +17,5 @@ MonoBehaviour:
   stageDescription: 
   maps:
   - {fileID: 11400000, guid: adcd1d3004dbb484da4e85d52a21ebad, type: 2}
-  - {fileID: 11400000, guid: 11ac2cee26d81c149b4f726b3e7cfd62, type: 2}
   playerInitialHP: 20
   playerInitialMana: 1

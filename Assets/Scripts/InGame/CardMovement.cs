@@ -65,10 +65,13 @@ public class CardMovement : MonoBehaviour, IDragHandler, IBeginDragHandler, IEnd
         //右クリックはreturn
         if (eventData.button == PointerEventData.InputButton.Right) return;
 
+        // ここで早期returnしても、Unityはドラッグ自体を止めずOnDrag/OnDrop/OnEndDragを送ってくる。
+        // 前回のドラッグのisDraggableが残っていると、弾いたはずのカードが動いてしまうため先に戻す
+        // （ドロップ先でも IsPlayerActionLocked を見て弾くこと）。
+        isDraggable = false;
+
         if (!GameManager.instance.isPlayerTurn) return;
-        if (GameManager.instance.isSummoning) return;
-        if (GameManager.instance.isAttacking) return;
-        if (GameManager.instance.isEffectSelectPhase) return;
+        if (GameManager.instance.IsPlayerActionLocked) return;
         if (GameManager.instance.player.heroHp <= 0 || GameManager.instance.enemy.heroHp <= 0) return;
         if (GameManager.instance.GetFriendFieldCards(true).Length > 4 && GetComponent<CardController>().model.spells == SPELLS.NONE
             && !GetComponent<CardController>().model.isFieldCard) return;

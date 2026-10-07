@@ -123,6 +123,9 @@ public class CardClickManager : MonoBehaviour, IPointerClickHandler, IPointerEnt
                     droppedCard.model.spells.HasFlag(SPELLS.EFFECT_SELECTION_ENEMY) && !clickedCard.model.isPlayerCard && clickedCard.model.isFieldCard)
             {
                 //droppedCard.UseSpellTo(selectedCard);
+                // 選択フェーズが終わった後も効果が終わる（カードが破棄される）までは使用中として扱い、
+                // その間に攻撃させない（SpellDropManager.CastSpell()と同じ扱い）
+                GameManager.instance.castingSpell = droppedCard;
                 droppedCard.StartCoroutine(droppedCard.movement.UseSpellEffect(droppedCard));
                 GameManager.instance.ReduceManaCost(droppedCard.model.cost, droppedCard.model.isPlayerCard);
                 droppedCard.spellEffect(selectedCard, true);

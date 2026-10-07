@@ -35,46 +35,50 @@ public class SpellDropManager : MonoBehaviour, IDropHandler
                 spellCard.model.spells.HasFlag(SPELLS.RANDOM_ENEMY))
             {
                 //ランダム発動　移動アニメーション
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(WaitAndContinue(spellCard));
+                CastSpell(spellCard, WaitAndContinue(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_HERO) || spellCard.model.spells.HasFlag(SPELLS.HEAL_FRIEND_HERO))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(WaitSpell(spellCard));
+                CastSpell(spellCard, WaitSpell(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.DAMAGE_ENEMY_CARDS) || spellCard.model.spells.HasFlag(SPELLS.HEAL_FRIEND_CARDS))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(CardsEffect(spellCard));
+                CastSpell(spellCard, CardsEffect(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.REDUCE_HAND_COST) || spellCard.model.spells.HasFlag(SPELLS.INCREASE_ENEMY_COST))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(HandCardEffect(spellCard));
+                CastSpell(spellCard, HandCardEffect(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.DESTROY_ALL_FIELD_CARDS))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(AllDestroy(spellCard));
+                CastSpell(spellCard, AllDestroy(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.DISCARD_ALL_FRIEND_HAND) || spellCard.model.spells.HasFlag(SPELLS.DISCARD_ALL_ENEMY_HAND))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(DiscardAll(spellCard));
+                CastSpell(spellCard, DiscardAll(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.DISCARD_ENEMY_HAND) || spellCard.model.spells.HasFlag(SPELLS.DISCARD_FRIEND_HAND))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(DiscardRandom(spellCard));
+                CastSpell(spellCard, DiscardRandom(spellCard));
             }
             else if (spellCard.model.spells.HasFlag(SPELLS.DRAW_CARDS))
             {
-                StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
-                StartCoroutine(DrawCard(spellCard));
+                CastSpell(spellCard, DrawCard(spellCard));
             }
         }
 
+    }
+
+    /// <summary>
+    /// 対象選択のないスペルを発動する（左上への移動演出＋効果）。
+    /// 移動演出(isSummoning)が終わってから効果(isAttacking)が始まるまでの間は
+    /// どちらのフラグも立たず攻撃できてしまうため、カードが破棄されるまで使用中として扱う。
+    /// </summary>
+    void CastSpell(CardController spellCard, IEnumerator effect)
+    {
+        GameManager.instance.castingSpell = spellCard;
+        StartCoroutine(spellCard.movement.MoveLeftSpell(spellCard));
+        StartCoroutine(effect);
     }
 
     private IEnumerator DrawCard(CardController card)

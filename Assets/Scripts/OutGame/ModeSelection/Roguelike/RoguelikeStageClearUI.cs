@@ -1,11 +1,10 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 // ローグライクのステージを最後までクリアした際に表示される報酬パネル
 public class RoguelikeStageClearUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private Text goldText;
     [SerializeField] private Button closeButton;
 
     private void Start()
