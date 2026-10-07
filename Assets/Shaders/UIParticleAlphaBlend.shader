@@ -20,7 +20,7 @@ Shader "Custom/UIParticleAlphaBlend"
         // UIParticleAdditive との違いはブレンドのみ（Fade/Transparent系の元マテリアル用）
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite Off
-        Cull Back
+        Cull Off
         Lighting Off
 
         Pass

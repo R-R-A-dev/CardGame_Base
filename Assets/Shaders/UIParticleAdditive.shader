@@ -19,7 +19,7 @@ Shader "Custom/UIParticleAdditive"
 
         Blend SrcAlpha One
         ZWrite Off
-        Cull Back
+        Cull Off
         Lighting Off
 
         Pass

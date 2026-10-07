@@ -92,8 +92,8 @@ public class DeckAndStageSelectUI : MonoBehaviour
             DeckId = decidedDeckId,
             StageConfig = new StageConfig { StageId = selectedStageIndex }
         };
-        // Managerに渡し、生成されたゲーム状態を受け取る
-        RoguelikeManager.Instance.StartRoguelike(config);
+        // 暗転中にマップを開き、切り替わりの瞬間を見せない
+        SceneTransition.FadeAndRun(() => RoguelikeManager.Instance.StartRoguelike(config));
     }
 
     //デッキ編成

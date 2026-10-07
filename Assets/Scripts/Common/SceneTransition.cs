@@ -82,6 +82,25 @@ public class SceneTransition : MonoBehaviour
         Instance.StartTransition(() => SceneManager.LoadSceneAsync(sceneBuildIndex));
     }
 
+    /// <summary>
+    /// シーン遷移を伴わない画面切り替え用。暗転しきった時点で onDark を実行し、その後明るくする。
+    /// コンポーネントが存在しない場合は即座に onDark を実行する。
+    /// </summary>
+    public static void FadeAndRun(System.Action onDark)
+    {
+        if (Instance == null)
+        {
+            onDark?.Invoke();
+            return;
+        }
+
+        Instance.StartTransition(() =>
+        {
+            onDark?.Invoke();
+            return null;
+        });
+    }
+
     // ========================================
     // 遷移処理
     // ========================================
@@ -103,8 +122,9 @@ public class SceneTransition : MonoBehaviour
         canvasGroup.blocksRaycasts = true;
         yield return Fade(1f, fadeOutDuration);
 
+        // FadeAndRun の場合は読み込みを伴わないため null が返る
         AsyncOperation operation = loadScene();
-        while (!operation.isDone)
+        while (operation != null && !operation.isDone)
             yield return null;
 
         yield return Fade(0f, fadeInDuration);
