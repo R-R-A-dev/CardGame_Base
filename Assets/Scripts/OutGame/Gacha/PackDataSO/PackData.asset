@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcfb131198e00044db558e3348125f9c, type: 3}
+  m_Name: PackData
+  m_EditorClassIdentifier: 
+  packName: "\u30D1\u30C3\u30AF1"
+  packImage: {fileID: 0}
+  price: 1
+  description: 
+  isUnlockedByDefault: 1
+  unlockConditionType: 0
+  unlockConditionDescription: 
+  rarityDropRates:
+  - rarity: 0
+    dropRatePercent: 0
+  - rarity: 1
+    dropRatePercent: 50
+  - rarity: 2
+    dropRatePercent: 50
+  - rarity: 3
+    dropRatePercent: 0
+  cardPool:
+  - cardId: 1
+    rarity: 0
+  - cardId: 2
+    rarity: 2
+  - cardId: 3
+    rarity: 3
+  drawCount: 5

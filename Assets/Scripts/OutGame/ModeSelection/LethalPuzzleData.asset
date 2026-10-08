@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5779eb8de9c87b442b9e04adf5e1a112, type: 3}
+  m_Name: LethalPuzzleData
+  m_EditorClassIdentifier: 
+  puzzleName: 
+  puzzleId: 0
+  description: 
+  playerInitialHP: 20
+  enemyInitialHP: 10
+  playerInitialMana: 5
+  turnLimit: 1
+  playerInitialHand: 02000000
+  playerInitialField: 0200000002000000
+  enemyInitialField: 0200000002000000
+  playerDeck: 02000000
+  enemyDeck: 

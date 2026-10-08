@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d066d936dcae334b8205bbe81c25425, type: 3}
+  m_Name: NodeData 1
+  m_EditorClassIdentifier: 
+  nodeId: 
+  stageType: 3
+  modifiers: []
+  enemyData: {fileID: 11400000, guid: 8d05954e688785f48ae2bd7443dc0666, type: 2}
+  rewardData: {fileID: 0}
+  restData: {fileID: 0}
+  shopData: {fileID: 11400000, guid: 9bc1d5fe0ccb4a143a02ccf4aed796ea, type: 2}
+  treasureData: {fileID: 11400000, guid: dc74973d46f3d0f48bc5f8fff88ed93a, type: 2}
+  damageData: {fileID: 0}
+  cardLossData: {fileID: 0}

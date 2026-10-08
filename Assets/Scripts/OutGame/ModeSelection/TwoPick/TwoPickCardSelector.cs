@@ -1,0 +1,29 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TwoPickCardSelector
+{
+    private List<int> cardPool; // 使用可能なカード全部
+    private List<int> usedCards; // 今回のピックで出現したカード（重複判定用）
+
+    public TwoPickCardSelector()
+    {
+
+    }
+
+    public TwoPickCardSelector(TwoPickData data)
+    {
+        //cardPool = new List<int>(data.availableCards);
+        usedCards = new List<int>();
+    }
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+}

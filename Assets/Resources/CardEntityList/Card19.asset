@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d8095ab21d9ebd4bb013bd77a5fbc5f, type: 3}
+  m_Name: Card19
+  m_EditorClassIdentifier: 
+  no: 19
+  name: No.19
+  hp: 5
+  at: 3
+  cost: 1
+  effectDmg: 2
+  effectHeal: 1
+  price: 0
+  description: "\u653B\u6483\u6642\u306B\u30A2\u30BF\u30C3\u30AF\u5024\u5206HP\u304CUP\u3059\u308B"
+  summonAudio: {fileID: 0}
+  summonAbilityAudio: {fileID: 0}
+  attackAudio: {fileID: 0}
+  hitAudio: {fileID: 0}
+  destroyAudio: {fileID: 0}
+  summonEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
+  summonAbilityEffect: {fileID: 3817663088807389354, guid: b62515ee11412284f8a213b943f9aab1, type: 3}
+  attackEffect: {fileID: 3817663088807389354, guid: b62515ee11412284f8a213b943f9aab1, type: 3}
+  hitEffect: {fileID: 8884371268655795233, guid: 20fda529c996a334da7fd65b48ea40df, type: 3}
+  destroyEffect: {fileID: 2955623459812423941, guid: f5507a8c6a22c404ab324980c4e8a11b, type: 3}
+  attackTime: 30
+  icon: {fileID: -230757224, guid: 0c1e734fa85636743af3bc22c6d99ba8, type: 3}
+  attackType: 1
+  rare: 3
+  ability: 0
+  spell: 0
+  spells: 0
+  abilities: 4194304
+  targetCardID: 

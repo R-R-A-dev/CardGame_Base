@@ -1,0 +1,108 @@
+﻿using System.Collections.Generic;
+using DG.Tweening;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class DeckStatisticsUI : MonoBehaviour
+{
+    [Header("UI参照")]
+    [SerializeField] private TextMeshProUGUI pickCountText;
+    [SerializeField] private TextMeshProUGUI totalCountText;
+    [SerializeField] private TextMeshProUGUI unitCountText;
+    [SerializeField] private TextMeshProUGUI spellCountText;
+    [SerializeField] private TextMeshProUGUI[] costCountTexts;
+    [SerializeField] private RectTransform[] costBars;
+
+    [Header("演出")]
+    [Tooltip("animate指定時にコストの棒が伸びきるまでの時間")]
+    [SerializeField] private float costBarAnimationDuration = 0.35f;
+
+    public float CostBarAnimationDuration => costBarAnimationDuration;
+
+    /// <summary>
+    /// UI上の集計・統計情報を表示
+    /// </summary>
+    /// <param name="deckNum"></param>
+    /// <param name="animate">trueならコストの棒を即座に切り替えず、伸び縮みさせる</param>
+    public void RefreshStatistics(int deckNum, List<int> deck = null, List<CardEntity> twoPickData = null, bool animate = false)
+    {
+        // デッキ情報が渡されなかった場合、指定されたデッキ番号から取得(デッキの所持状況)
+        //TwoPickのデッキが渡された場合はそちらを優先
+        if (deck == null)
+            deck = GameDataHolder.Instance.EditingDeckCounts;
+
+        int totalCount = 0;
+        int unitCount = 0;
+        int spellCount = 0;
+        int[] costCounts = new int[10];
+
+        for (int i = 0; i < deck.Count; i++)
+        {
+            int count = deck[i];
+            if (count <= 0) continue;
+
+            // deckは添字方式（添字＋1＝カードNo）。LoadAllCardsの配列順はカードNo順では
+            // ないため、添字でCardEntity配列を引いてはいけない
+            CardEntity entity = CardDatabase.GetByNo(i + 1);
+            if (entity == null) continue;
+
+            totalCount += count;
+
+            if (entity.spells == SPELLS.NONE)
+                unitCount += count;
+            else
+                spellCount += count;
+
+            int cost = Mathf.Clamp(entity.cost, 1, 10);
+            costCounts[cost - 1] += count;
+        }
+        // pickCountTextは2Pick用で現状は集計していないため更新しない。
+        // 以前はコメントアウトされた行がif文の本体を奪い、pickCountTextが未設定だと
+        // 下のtotalCountText以降がまるごと実行されない状態になっていた
+        totalCountText.text = totalCount.ToString();
+        unitCountText.text = unitCount.ToString();
+        spellCountText.text = spellCount.ToString();
+
+        // コスト帯の最大枚数（ゲージの基準）
+        int maxCount = 1;
+        foreach (int c in costCounts)
+            if (c > maxCount) maxCount = c;
+
+        // --- ゲージ表示更新 ---
+        for (int i = 0; i < costBars.Length; i++)
+        {
+            int cardCount = costCounts[i];
+
+            // yスケールを0.1ずつ増加（1枚 = +0.1）
+            float newY = 0.1f * cardCount;
+
+            // 前回の伸び途中のトゥイーンが残っていると今回の値を上書きされるため止めておく
+            costBars[i].DOKill();
+
+            // RectTransformのscaleを変更
+            if (animate)
+            {
+                costBars[i].DOScaleY(newY, costBarAnimationDuration)
+                    .SetEase(Ease.OutCubic)
+                    .SetLink(costBars[i].gameObject);
+            }
+            else
+            {
+                costBars[i].localScale = new Vector3(
+                    costBars[i].localScale.x,
+                    newY,
+                    costBars[i].localScale.z
+                );
+            }
+
+            // 数字も表示（0でも表示）
+            if (costCountTexts != null && i < costCountTexts.Length)
+                costCountTexts[i].text = cardCount.ToString();
+        }
+    }
+    void Update()
+    {
+
+    }
+}
